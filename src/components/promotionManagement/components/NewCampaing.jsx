@@ -1,33 +1,89 @@
-import React, { useState } from "react";
+import { UploadOutlined } from "@ant-design/icons";
 import {
+  Button,
+  Checkbox,
+  DatePicker,
   Form,
   Input,
-  Button,
-  DatePicker,
-  InputNumber,
-  Upload,
   Select,
-  Checkbox,
+  Upload,
+  message,
 } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import { useState, useEffect } from "react";
+import dayjs from "dayjs";
+import { getImageUrl } from "../../common/imageUrl";
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
 const daysOptions = [
-  { label: "Mon", value: "Monday" },
-  { label: "Tue", value: "Tuesday" },
-  { label: "Wed", value: "Wednesday" },
-  { label: "Thu", value: "Thursday" },
-  { label: "Fri", value: "Friday" },
-  { label: "Sat", value: "Saturday" },
-  { label: "Sun", value: "Sunday" },
+  { label: "Mon", value: "mon" },
+  { label: "Tue", value: "tue" },
+  { label: "Wed", value: "wed" },
+  { label: "Thu", value: "thu" },
+  { label: "Fri", value: "fri" },
+  { label: "Sat", value: "sat" },
+  { label: "Sun", value: "sun" },
 ];
 
-const NewCampaign = ({ onSave, onCancel }) => {
+const NewCampaign = ({ onSave, onCancel, editData = null, isEdit = false }) => {
   const [form] = Form.useForm();
   const [thumbnail, setThumbnail] = useState("");
   const [uploadedImage, setUploadedImage] = useState([]);
+  const [checkAll, setCheckAll] = useState(false);
+
+  // Initialize form with editData if in edit mode
+  useEffect(() => {
+    if (isEdit && editData) {
+      // Handle availableDays or promotionDays
+      const rawDays =
+        editData.raw?.availableDays ||
+        editData.selectedDays ||
+        editData.promotionDays ||
+        [];
+
+      // Check if "all" is in the array or if all 7 days are present
+      const isAllDays =
+        (Array.isArray(rawDays) && rawDays.includes("all")) ||
+        (Array.isArray(rawDays) && rawDays.length === 7);
+
+      const initialDays = isAllDays
+        ? daysOptions.map((day) => day.value)
+        : rawDays;
+
+      setCheckAll(isAllDays || initialDays.length === daysOptions.length);
+
+      const dateRange =
+        editData.startDate && editData.endDate
+          ? [dayjs(editData.startDate), dayjs(editData.endDate)]
+          : null;
+
+      // Set existing image if available
+      if (editData.raw?.image) {
+        setUploadedImage([
+          {
+            uid: "-1",
+            name: "image.png",
+            status: "done",
+            url: getImageUrl(editData.raw.image),
+          },
+        ]);
+      }
+
+      form.setFieldsValue({
+        promotionName: editData.promotionName,
+        promotionType:
+          editData.raw?.promotionType || editData.promotionType?.toLowerCase(),
+        customerReach: editData.customerReach,
+        customerSegment:
+          editData.raw?.customerSegment ||
+          editData.customerSegment?.toLowerCase(),
+        discountPercentage: editData.discountPercentage,
+        dateRange: dateRange,
+        promotionDays: initialDays,
+      });
+    }
+  }, [isEdit, editData]);
 
   const handleThumbnailChange = ({ file }) => {
     if (file.status === "done" || file.originFileObj) {
@@ -38,8 +94,10 @@ const NewCampaign = ({ onSave, onCancel }) => {
   };
 
   const handleSubmit = (values) => {
+    console.log("Form values:", values);
+    console.log("Promotion Days:", values.promotionDays);
     const [startDate, endDate] = values.dateRange || [];
-    onSave({
+    const campaignData = {
       promotionName: values.promotionName,
       promotionType: values.promotionType,
       customerReach: values.customerReach,
@@ -49,9 +107,20 @@ const NewCampaign = ({ onSave, onCancel }) => {
       endDate: endDate ? endDate.format("YYYY-MM-DD") : null,
       thumbnail,
       promotionDays: values.promotionDays || [],
-    });
+      imageFile: uploadedImage[0]?.originFileObj || null,
+    };
+
+    console.log("Campaign Data:", campaignData);
+
+    // If editing, include the id
+    if (isEdit && editData) {
+      campaignData.id = editData.id;
+    }
+
+    onSave(campaignData);
     form.resetFields();
     setThumbnail("");
+    setUploadedImage([]);
   };
 
   // Image upload validation
@@ -64,13 +133,24 @@ const NewCampaign = ({ onSave, onCancel }) => {
   };
 
   const handleUploadChange = ({ fileList }) => {
-    setUploadedImage(fileList);
+    // Only keep the latest file (for replacement)
+    const newFileList = fileList.slice(-1);
+    setUploadedImage(newFileList);
+  };
+
+  const handleCheckAllChange = (e) => {
+    const allDays = daysOptions.map((day) => day.value);
+    const newCheckedDays = e.target.checked ? allDays : [];
+    setCheckAll(e.target.checked);
+    form.setFieldsValue({ promotionDays: newCheckedDays });
   };
 
   return (
     <div>
-      {/* <h2 className="text-lg font-bold mb-4">Add New Promotion</h2> */}
-      <Form layout="vertical" form={form} onFinish={handleSubmit} className="flex flex-col gap-4">
+      <h2 className="text-lg font-bold mb-4">
+        {isEdit ? "Edit Promotion" : "Add New Promotion"}
+      </h2>
+      <Form layout="vertical" form={form} onFinish={handleSubmit}>
         <div className="flex flex-row justify-between gap-4">
           <div className="w-full flex flex-col gap-4">
             <Form.Item
@@ -93,16 +173,16 @@ const NewCampaign = ({ onSave, onCancel }) => {
                 placeholder="Select Promotion Type"
                 className="mli-tall-select"
               >
-                <Option value="Seasonal">Seasonal</Option>
-                <Option value="Referral">Referral</Option>
-                <Option value="Flash Sale">Flash Sale</Option>
-                <Option value="Loyalty">Loyalty</Option>
+                <Option value="seasonal">Seasonal</Option>
+                <Option value="referral">Referral</Option>
+                <Option value="flash_sale">Flash Sale</Option>
+                <Option value="loyalty">Loyalty</Option>
               </Select>
             </Form.Item>
           </div>
 
           <div className="w-full flex flex-col gap-4">
-            <Form.Item
+            {/* <Form.Item
               label="Customer Reach"
               name="customerReach"
               rules={[{ required: true }]}
@@ -111,7 +191,7 @@ const NewCampaign = ({ onSave, onCancel }) => {
                 className="px-3 mli-tall-input"
                 placeholder="Enter Customer Reach"
               />
-            </Form.Item>
+            </Form.Item> */}
 
             <Form.Item
               name="customerSegment"
@@ -122,19 +202,27 @@ const NewCampaign = ({ onSave, onCancel }) => {
                 placeholder="Select Customer Segment"
                 className="mli-tall-select"
               >
-                <Select.Option value="New Customers">
-                  New Customers
+                <Select.Option value="new_customer">New Customer</Select.Option>
+                <Select.Option value="returning_customer">
+                  Returning Customer
                 </Select.Option>
-                <Select.Option value="Returning Customers">
-                  Returning Customers
+                <Select.Option value="loyal_customer">
+                  Loyal Customer
                 </Select.Option>
-                <Select.Option value="Loyal Customers">
-                  Loyal Customers
-                </Select.Option>
-                <Select.Option value="All Customers">
-                  All Customers
-                </Select.Option>
+                <Select.Option value="vip_customer">VIP Customer</Select.Option>
+                <Select.Option value="all_customer">All Customer</Select.Option>
               </Select>
+            </Form.Item>
+
+            <Form.Item
+              label="Date Range"
+              name="dateRange"
+              rules={[{ required: true }]}
+            >
+              <RangePicker
+                style={{ width: "100%" }}
+                className="px-3 mli-tall-picker"
+              />
             </Form.Item>
           </div>
 
@@ -149,23 +237,24 @@ const NewCampaign = ({ onSave, onCancel }) => {
                 placeholder="Enter Discount Percentage"
               />
             </Form.Item>
-
-            <Form.Item
-              label="Date Range"
-              name="dateRange"
-              rules={[{ required: true }]}
-            >
-              <RangePicker
-                style={{ width: "100%" }}
-                className="px-3 mli-tall-picker"
-              />
-            </Form.Item>
           </div>
         </div>
 
-        {/* <div className="w-full mb-4">
+        <div className="w-full mb-4 mt-4">
+          <div className="mb-2">
+            <label className="text-sm font-medium">Select Promotion Days</label>
+            <span className="text-red-500 ml-1">*</span>
+          </div>
+          <div className="mb-2">
+            <Checkbox
+              onChange={handleCheckAllChange}
+              checked={checkAll}
+              className="font-semibold"
+            >
+              All days
+            </Checkbox>
+          </div>
           <Form.Item
-            label="Select Promotion Days"
             name="promotionDays"
             rules={[
               { required: true, message: "Please select at least one day" },
@@ -173,9 +262,13 @@ const NewCampaign = ({ onSave, onCancel }) => {
           >
             <Checkbox.Group options={daysOptions} className="flex gap-2" />
           </Form.Item>
-        </div> */}
+        </div>
 
-        <Form.Item name="image" label="Upload Image (JPG/PNG only)">
+        <Form.Item
+          name="image"
+          label="Upload Image (JPG/PNG only)"
+          className="mt-6"
+        >
           <Upload
             listType="picture"
             fileList={uploadedImage}
@@ -197,15 +290,15 @@ const NewCampaign = ({ onSave, onCancel }) => {
               return isJpgOrPng && isLt2M;
             }}
             onChange={handleUploadChange}
-            onRemove={(file) => {
-              setUploadedImage((prev) =>
-                prev.filter((f) => f.uid !== file.uid)
-              );
+            onRemove={() => {
+              setUploadedImage([]);
             }}
             maxCount={1}
             accept=".jpg,.jpeg,.png" // Restrict file picker to JPG/PNG
           >
-            <Button icon={<UploadOutlined />}>Click to Upload</Button>
+            <Button icon={<UploadOutlined />}>
+              {uploadedImage.length > 0 ? "Replace Image" : "Click to Upload"}
+            </Button>
           </Upload>
           <p className="text-sm text-gray-500 mt-1">
             Allowed file types: JPG, PNG. Maximum file size: 2MB.
@@ -215,7 +308,7 @@ const NewCampaign = ({ onSave, onCancel }) => {
         <div className="flex justify-end gap-2">
           <Button onClick={onCancel}>Cancel</Button>
           <Button type="primary" htmlType="submit" className="bg-primary">
-            Save
+            {isEdit ? "Update" : "Save"}
           </Button>
         </div>
       </Form>

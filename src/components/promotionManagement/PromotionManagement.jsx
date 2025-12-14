@@ -1,124 +1,299 @@
-import { useState } from "react";
-import {
-  Table,
-  Button,
-  Switch,
-  Form,
-  Input,
-  Tooltip,
-  Modal,
-  DatePicker, // ✅ use AntD DatePicker
-} from "antd";
+"use client";
+import { useMemo, useState, useEffect } from "react";
+import { Button, Switch, Tooltip, Modal, Tag } from "antd";
 import { FaEdit } from "react-icons/fa";
-import { IoEyeSharp, IoArrowBack } from "react-icons/io5";
+import { AiOutlineEye } from "react-icons/ai";
+import { MdDelete } from "react-icons/md";
 import Swal from "sweetalert2";
 import NewCampaign from "../promotionManagement/components/NewCampaing.jsx";
-import dayjs from "dayjs"; // ✅ AntD v5 uses Dayjs
+import NotificationsModal from "../promotionManagement/components/NotificationsModal.jsx";
+import DetailsModal from "../promotionManagement/components/DetailsModal.jsx";
+import CustomTable from "../../components/common/CustomTable.jsx";
+import { useSearchParams } from "react-router-dom";
+import {
+  useGetPromoDetailsQuery,
+  useTogglePromoStatusMutation,
+  useUpdatePromotionMutation,
+  useCreatePromotionMutation,
+  useDeletePromotionMutation,
+} from "../../redux/apiSlices/promoSlice.js";
 
-const components = {
-  header: {
-    row: (props) => (
-      <tr
-        {...props}
-        style={{
-          backgroundColor: "#f0f5f9",
-          height: "50px",
-          color: "secondary",
-          fontSize: "18px",
-          textAlign: "center",
-          padding: "12px",
-        }}
-      />
-    ),
-    cell: (props) => (
-      <th
-        {...props}
-        style={{
-          color: "secondary",
-          fontWeight: "bold",
-          fontSize: "18px",
-          textAlign: "center",
-          padding: "12px",
-        }}
-      />
-    ),
-  },
+const CUSTOMER_SEGMENT_MAP = {
+  vip_customer: "VIP Customers",
+  new_customer: "New Customers",
+  returning_customer: "Returning Customers",
+  loyal_customer: "Loyal Customers",
+  all_customer: "All Customers",
+};
+
+const PROMOTION_TYPE_MAP = {
+  seasonal: "Seasonal",
+  referral: "Referral",
+  flash_sale: "Flash Sale",
+  loyalty: "Loyalty",
+};
+
+const getCustomerSegmentLabel = (value) => {
+  return CUSTOMER_SEGMENT_MAP[value] || value;
+};
+
+const getPromotionTypeLabel = (value) => {
+  return PROMOTION_TYPE_MAP[value] || value;
 };
 
 const PromotionManagement = () => {
-  const [data, setData] = useState([
-    {
-      id: 1,
-      promotionName: "Spring Sale",
-      promotionType: "Discount",
-      customerReach: 1000,
-      customerSegment: "New Customers",
-      discountPercentage: 20,
-      startDate: "2023-11-21",
-      endDate: "2023-12-31",
-      status: "Active",
-    },
-    {
-      id: 2,
-      promotionName: "Summer Offer",
-      promotionType: "Cashback",
-      customerReach: 500,
-      customerSegment: "Returning Customers",
-      discountPercentage: 15,
-      startDate: "2023-06-01",
-      endDate: "2023-06-30",
-      status: "Inactive",
-    },
-  ]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchText, setSearchText] = useState("");
+  const [page, setPage] = useState(() => {
+    const urlPage = searchParams.get("page");
+    return urlPage ? parseInt(urlPage, 10) : 1;
+  });
+  const [limit, setLimit] = useState(() => {
+    const urlLimit = searchParams.get("limit");
+    return urlLimit ? parseInt(urlLimit, 10) : 10;
+  });
 
-  const [selectedRecord, setSelectedRecord] = useState(null);
+  // Sync page and limit changes to URL
+  useEffect(() => {
+    setSearchParams({ page, limit });
+  }, [page, limit, setSearchParams]);
+
+  const queryParams = [
+    { name: "page", value: page },
+    { name: "limit", value: limit },
+  ];
+  if (searchText.trim()) {
+    queryParams.push({ name: "searchTerm", value: searchText.trim() });
+  }
+
+  const {
+    data: response,
+    isLoading,
+    isFetching,
+    error,
+  } = useGetPromoDetailsQuery(queryParams);
+
+  const [togglePromoStatus] = useTogglePromoStatusMutation();
+  const [updatePromotion] = useUpdatePromotionMutation();
+  const [createPromotion] = useCreatePromotionMutation();
+  const [deletePromotion] = useDeletePromotionMutation();
+
+  console.log(response);
+
+  const tableData = useMemo(() => {
+    const items = response?.data || [];
+    return items.map((item, index) => ({
+      key: item._id,
+      id: index + 1 + (page - 1) * limit,
+      promotionName: item.name,
+      promotionType: item.promotionType,
+      customerSegment: item.customerSegment,
+      discountPercentage: item.discountPercentage,
+      startDate: item.startDate,
+      endDate: item.endDate,
+      selectedDays:
+        item.availableDays && item.availableDays[0] === "all"
+          ? ["sun", "mon", "tue", "wed", "thu", "fri", "sat"]
+          : item.availableDays || item.promotionDays || [],
+      status: item.status === "active" ? "Active" : "Inactive",
+      raw: item,
+    }));
+  }, [response, page, limit]);
+
+  const paginationData = {
+    pageSize: limit,
+    total: response?.pagination?.total || 0,
+    current: page,
+  };
+
+  const handlePaginationChange = (newPage, newPageSize) => {
+    setPage(newPage);
+    if (newPageSize !== limit) {
+      setLimit(newPageSize);
+    }
+  };
+
   const [isNewCampaignModalVisible, setIsNewCampaignModalVisible] =
     useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [isNotifyModalVisible, setIsNotifyModalVisible] = useState(false);
+  const [isDetailsModalVisible, setIsDetailsModalVisible] = useState(false);
+  const [editingCampaign, setEditingCampaign] = useState(null);
+  const [selectedRecord, setSelectedRecord] = useState(null);
 
-  const handleAddCampaign = (newCampaign) => {
-    setData((prev) => [
-      ...prev,
-      { id: prev.length + 1, status: "Active", ...newCampaign },
-    ]);
-    setIsNewCampaignModalVisible(false);
-    Swal.fire({
-      icon: "success",
-      title: "Campaign Added!",
-      text: "Your new campaign has been added successfully.",
-      timer: 1500,
-      showConfirmButton: false,
-    });
+  const handleAddCampaign = async (newCampaign) => {
+    try {
+      const formData = new FormData();
+
+      // Check if all days are selected
+      const promotionDays = newCampaign.promotionDays || [];
+      const isAllDays = promotionDays.length === 7;
+
+      // Create the data object matching the required structure
+      const dataObj = {
+        name: newCampaign.promotionName,
+        discountPercentage: Number(newCampaign.discountPercentage),
+        promotionType: newCampaign.promotionType?.toLowerCase() || "seasonal",
+        customerSegment:
+          newCampaign.customerSegment?.toLowerCase().replace(/\s+/g, "_") ||
+          "all_customer",
+        startDate: newCampaign.startDate
+          ? new Date(newCampaign.startDate).toISOString()
+          : null,
+        endDate: newCampaign.endDate
+          ? new Date(
+              new Date(newCampaign.endDate).setHours(23, 59, 59, 999)
+            ).toISOString()
+          : null,
+        availableDays: isAllDays ? ["all"] : promotionDays,
+      };
+
+      // Append data as JSON string
+      formData.append("data", JSON.stringify(dataObj));
+
+      // Append image if exists
+      if (newCampaign.imageFile) {
+        formData.append("image", newCampaign.imageFile);
+      }
+
+      await createPromotion(formData).unwrap();
+
+      setIsNewCampaignModalVisible(false);
+      Swal.fire({
+        icon: "success",
+        title: "Campaign Added!",
+        text: "Your new campaign has been added successfully.",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: error?.data?.message || "Failed to create campaign.",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+    }
   };
 
-  const handleEditSave = (values) => {
-    // ✅ Convert Dayjs from DatePicker back to "YYYY-MM-DD" strings (matches existing data shape)
-    const toISO = (v) => (dayjs.isDayjs(v) ? v.format("YYYY-MM-DD") : v);
-    const payload = {
-      ...values,
-      startDate: toISO(values.startDate),
-      endDate: toISO(values.endDate),
-    };
+  const handleEditSave = async (updatedCampaign) => {
+    try {
+      console.log("Updated Campaign:", updatedCampaign);
+      const formData = new FormData();
 
-    setData((prev) =>
-      prev.map((item) =>
-        item.id === selectedRecord.id ? { ...item, ...payload } : item
-      )
-    );
-    setIsEditModalVisible(false);
-    setSelectedRecord(null);
-    Swal.fire({
-      icon: "success",
-      title: "Updated!",
-      text: "Your campaign has been updated successfully.",
-      timer: 1500,
-      showConfirmButton: false,
-    });
+      // Check if all days are selected
+      const promotionDays = updatedCampaign.promotionDays || [];
+      console.log("Promotion Days Array:", promotionDays);
+      const isAllDays = promotionDays.length === 7;
+
+      // Create the data object matching the required structure
+      const dataObj = {
+        name: updatedCampaign.promotionName,
+        discountPercentage: Number(updatedCampaign.discountPercentage),
+        promotionType:
+          updatedCampaign.promotionType?.toLowerCase() || "seasonal",
+        customerSegment:
+          updatedCampaign.customerSegment?.toLowerCase().replace(/\s+/g, "_") ||
+          "all_customer",
+        startDate: updatedCampaign.startDate
+          ? new Date(updatedCampaign.startDate).toISOString()
+          : null,
+        endDate: updatedCampaign.endDate
+          ? new Date(
+              new Date(updatedCampaign.endDate).setHours(23, 59, 59, 999)
+            ).toISOString()
+          : null,
+        availableDays: isAllDays ? ["all"] : promotionDays,
+      };
+
+      console.log("Data Object to send:", dataObj);
+
+      // Append data as JSON string
+      formData.append("data", JSON.stringify(dataObj));
+
+      // Append image if exists
+      if (updatedCampaign.imageFile) {
+        formData.append("image", updatedCampaign.imageFile);
+      }
+
+      await updatePromotion({
+        id: editingCampaign.raw._id,
+        formData,
+      }).unwrap();
+
+      setIsEditModalVisible(false);
+      setEditingCampaign(null);
+      Swal.fire({
+        icon: "success",
+        title: "Updated!",
+        text: "Your campaign has been updated successfully.",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: error?.data?.message || "Failed to update campaign.",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+    }
   };
 
   const handleEditCancel = () => {
     setIsEditModalVisible(false);
+    setEditingCampaign(null);
+  };
+
+  const handleEditClick = (record) => {
+    setEditingCampaign(record);
+    setIsEditModalVisible(true);
+  };
+
+  const handleViewClick = (record) => {
+    setSelectedRecord(record);
+    setIsDetailsModalVisible(true);
+  };
+
+  const handleDetailsCancel = () => {
+    setIsDetailsModalVisible(false);
     setSelectedRecord(null);
+  };
+
+  const handleDeleteClick = async (record) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: `You are about to delete "${record.promotionName}". This action cannot be undone.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deletePromotion(record.raw._id).unwrap();
+        Swal.fire({
+          title: "Deleted!",
+          text: "Promotion has been deleted successfully.",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      } catch (error) {
+        Swal.fire({
+          title: "Error!",
+          text: error?.data?.message || "Failed to delete promotion.",
+          icon: "error",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      }
+    }
   };
 
   const columns = [
@@ -134,18 +309,16 @@ const PromotionManagement = () => {
       dataIndex: "promotionType",
       key: "promotionType",
       align: "center",
-    },
-    {
-      title: "Customer Reach",
-      dataIndex: "customerReach",
-      key: "customerReach",
-      align: "center",
+      render: (type) => <Tag color="blue">{getPromotionTypeLabel(type)}</Tag>,
     },
     {
       title: "Customer Segment",
       dataIndex: "customerSegment",
       key: "customerSegment",
       align: "center",
+      render: (segment) => (
+        <Tag color="purple">{getCustomerSegmentLabel(segment)}</Tag>
+      ),
     },
     {
       title: "Discount Percentage",
@@ -168,16 +341,53 @@ const PromotionManagement = () => {
           <div className="flex flex-col items-start justify-center gap-1">
             <p>
               <span className="font-bold">Start Date: </span>
-              <span className="border border-primary px-[5px] py-[1px] rounded-sm">
+              <span className="border border-primary px-[5px] py-[1px] rounded-[4px]">
                 {start}
               </span>
             </p>
             <p>
               <span className="font-bold">End Date: </span>
-              <span className="border border-primary px-[5px] py-[1px] rounded-sm">
+              <span className="border border-primary px-[5px] py-[1px] rounded-[4px]">
                 {end}
               </span>
             </p>
+          </div>
+        );
+      },
+    },
+    {
+      title: "Days",
+      dataIndex: "selectedDays",
+      key: "selectedDays",
+      align: "center",
+      render: (days) => {
+        // Check if days array contains "all" or has all 7 days
+        const isAllDays = days && (days.includes("all") || days.length === 7);
+
+        if (isAllDays) {
+          return (
+            <div className="flex justify-center">
+              <span className="border border-primary px-3 py-1 rounded-[4px] text-xs font-semibold bg-primary/10">
+                All Days
+              </span>
+            </div>
+          );
+        }
+
+        return (
+          <div className="flex flex-wrap justify-center gap-1 max-w-[200px]">
+            {days && days.length > 0 ? (
+              days.map((day, index) => (
+                <span
+                  key={index}
+                  className="border border-primary px-2 py-0 rounded-[4px] text-xs"
+                >
+                  {day.charAt(0).toUpperCase() + day.slice(1)}
+                </span>
+              ))
+            ) : (
+              <span className="text-gray-400">-</span>
+            )}
           </div>
         );
       },
@@ -187,29 +397,32 @@ const PromotionManagement = () => {
       title: "Action",
       key: "action",
       align: "center",
+      width: 140,
       render: (_, record) => (
         <div className="py-[10px] px-[10px] border border-primary rounded-md">
-          <div
-            className="flex gap-2 justify-between align-middle"
-            style={{ alignItems: "center" }}
-          >
-            <Tooltip title="View Details">
+          <div className="flex gap-2 justify-between align-middle">
+            <Tooltip title="View">
               <button
-                onClick={() => setSelectedRecord(record)}
-                className="text-primary hover:text-green-700 text-xl"
+                onClick={() => handleViewClick(record)}
+                className="text-primary hover:text-blue-700 text-[17px]"
               >
-                <IoEyeSharp />
+                <AiOutlineEye />
               </button>
             </Tooltip>
             <Tooltip title="Edit">
               <button
-                onClick={() => {
-                  setSelectedRecord(record);
-                  setIsEditModalVisible(true);
-                }}
+                onClick={() => handleEditClick(record)}
                 className="text-primary hover:text-green-700 text-[17px]"
               >
                 <FaEdit />
+              </button>
+            </Tooltip>
+            <Tooltip title="Delete">
+              <button
+                onClick={() => handleDeleteClick(record)}
+                className="text-red-500 hover:text-red-700 text-[17px]"
+              >
+                <MdDelete />
               </button>
             </Tooltip>
             <Switch
@@ -219,8 +432,8 @@ const PromotionManagement = () => {
                 backgroundColor:
                   record.status === "Active" ? "#3fae6a" : "gray",
               }}
-              onChange={(checked) => {
-                Swal.fire({
+              onChange={async (checked) => {
+                const result = await Swal.fire({
                   title: "Are you sure?",
                   text: `You are about to change status to ${
                     checked ? "Active" : "Inactive"
@@ -230,15 +443,13 @@ const PromotionManagement = () => {
                   confirmButtonColor: "#3085d6",
                   cancelButtonColor: "#d33",
                   confirmButtonText: "Yes, change it!",
-                }).then((result) => {
-                  if (result.isConfirmed) {
-                    setData((prev) =>
-                      prev.map((item) =>
-                        item.id === record.id
-                          ? { ...item, status: checked ? "Active" : "Inactive" }
-                          : item
-                      )
-                    );
+                });
+
+                if (result.isConfirmed) {
+                  try {
+                    const response = await togglePromoStatus(
+                      record.raw._id
+                    ).unwrap();
                     Swal.fire({
                       title: "Updated!",
                       text: `Status has been changed to ${
@@ -248,8 +459,16 @@ const PromotionManagement = () => {
                       timer: 1500,
                       showConfirmButton: false,
                     });
+                  } catch (error) {
+                    Swal.fire({
+                      title: "Error!",
+                      text: error?.data?.message || "Failed to update status.",
+                      icon: "error",
+                      timer: 2000,
+                      showConfirmButton: false,
+                    });
                   }
-                });
+                }
               }}
             />
           </div>
@@ -258,196 +477,63 @@ const PromotionManagement = () => {
     },
   ];
 
-  const columns2 = [
-    { title: "SL", dataIndex: "id", key: "id", align: "center" },
-    {
-      title: "Promotion Name",
-      dataIndex: "promotionName",
-      key: "promotionName",
-      align: "center",
-    },
-    {
-      title: "Promotion Type",
-      dataIndex: "promotionType",
-      key: "promotionType",
-      align: "center",
-    },
-    {
-      title: "Customer Reach",
-      dataIndex: "customerReach",
-      key: "customerReach",
-      align: "center",
-    },
-    {
-      title: "Customer Segment",
-      dataIndex: "customerSegment",
-      key: "customerSegment",
-      align: "center",
-    },
-    {
-      title: "Discount Percentage",
-      dataIndex: "discountPercentage",
-      key: "discountPercentage",
-      align: "center",
-    },
-    { title: "Status", dataIndex: "status", key: "status", align: "center" },
-  ];
-
-  // Full-page view
-  if (selectedRecord && !isEditModalVisible) {
-    return (
-      <div className="">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center mb-4 gap-6">
-            <Button
-              icon={<IoArrowBack />}
-              onClick={() => setSelectedRecord(null)}
-              className="mb-4"
-            ></Button>
-            <div>
-              <h1 className="text-[24px] font-bold">Promotion Details</h1>
-              <p className="text-[16px] font-normal mt-2">
-                View and manage all the details of your active promotions.
-              </p>
-            </div>
-          </div>
-          <Button
-            onClick={() => setSelectedRecord(null)}
-            type="primary"
-            className="bg-primary !text-white hover:!text-secondary hover:!bg-white hover:!border-primary px-[30px] py-[25px] rounded-full text-[18px] font-bold"
-          >
-            Export
-          </Button>
-        </div>
-
-        <div className="overflow-x-auto">
-          <Table
-            dataSource={data}
-            columns={columns2}
-            pagination={{ pageSize: 10 }}
-            bordered={false}
-            size="small"
-            rowClassName="custom-row"
-            components={components}
-            className="custom-table"
-            scroll={{ x: "max-content" }}
-          />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="">
-      <div className="flex justify-between items-end flex-col md:flex-row gap-4 md:items-end mb-4">
+      <div className="flex justify-between items-end flex-col md:flex-row gap-4 mb-4">
         <div>
           <h1 className="text-[24px] font-bold">Promotions List</h1>
           <p className="text-[16px] font-normal mt-2">
-            View and manage all your active promotions in one place.
+            View and manage all your active campaigns in one place.
           </p>
         </div>
-        <Button
-          className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary text-[17px] font-bold"
-          onClick={() => setIsNewCampaignModalVisible(true)}
-        >
-          New Promotion
-        </Button>
+        <div className="flex gap-4 flex-col md:flex-row">
+          {/* <Button
+            className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary text-[17px] font-bold"
+            onClick={() => setIsNotifyModalVisible(true)}
+          >
+            Notification Management
+          </Button> */}
+          <Button
+            className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary text-[17px] font-bold"
+            onClick={() => setIsNewCampaignModalVisible(true)}
+          >
+            New Promotion
+          </Button>
+        </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <Table
-          dataSource={data}
-          columns={columns}
-          pagination={{ pageSize: 10 }}
-          bordered={false}
-          size="small"
-          rowClassName="custom-row"
-          components={components}
-          className="custom-table"
-          scroll={{ x: "max-content" }}
-        />
-      </div>
+      <CustomTable
+        data={tableData}
+        columns={columns}
+        isLoading={isLoading}
+        isFetching={isFetching}
+        pagination={paginationData}
+        onPaginationChange={handlePaginationChange}
+        rowKey="key"
+      />
 
       {/* Edit Campaign Modal */}
       <Modal
-        title="Edit Promotion"
+        title="Edit Campaign"
         visible={isEditModalVisible}
         onCancel={handleEditCancel}
         footer={null}
-        width={600}
+        width={1000}
         closable={true}
       >
-        {selectedRecord && (
-          <Form
-            layout="vertical"
-            // ✅ Convert string dates to Dayjs for DatePicker initial values
-            initialValues={{
-              ...selectedRecord,
-              startDate: selectedRecord.startDate
-                ? dayjs(selectedRecord.startDate)
-                : null,
-              endDate: selectedRecord.endDate
-                ? dayjs(selectedRecord.endDate)
-                : null,
-            }}
-            onFinish={handleEditSave}
-            className="flex flex-col gap-4"
-          >
-            <Form.Item
-              name="promotionName"
-              label="Promotion Name"
-              rules={[{ required: true, message: "Please enter name" }]}
-            >
-              <Input className="mli-tall-input" />
-            </Form.Item>
-            <Form.Item name="promotionType" label="Promotion Type">
-              <Input className="mli-tall-input" />
-            </Form.Item>
-            <Form.Item name="customerReach" label="Customer Reach">
-              <Input type="number" className="mli-tall-input" />
-            </Form.Item>
-            <Form.Item name="customerSegment" label="Customer Segment">
-              <Input className="mli-tall-input" />
-            </Form.Item>
-            <Form.Item name="discountPercentage" label="Discount Percentage">
-              <Input type="number" className="mli-tall-input" />
-            </Form.Item>
-
-            {/* ✅ Updated to AntD DatePicker like your reference */}
-            <Form.Item name="startDate" label="Start Date">
-              <DatePicker
-                className="mli-tall-picker"
-                style={{ width: "100%" }}
-                format="YYYY-MM-DD"
-              />
-            </Form.Item>
-            <Form.Item name="endDate" label="End Date">
-              <DatePicker
-                className="mli-tall-picker"
-                style={{ width: "100%" }}
-                format="YYYY-MM-DD"
-              />
-            </Form.Item>
-
-            <div className="flex gap-2 mt-4">
-              <Button
-                type="default"
-                className="flex-1"
-                onClick={handleEditCancel}
-              >
-                Cancel
-              </Button>
-              <Button type="primary" htmlType="submit" className="flex-1">
-                Save Changes
-              </Button>
-            </div>
-          </Form>
+        {editingCampaign && (
+          <NewCampaign
+            onSave={handleEditSave}
+            onCancel={handleEditCancel}
+            editData={editingCampaign}
+            isEdit={true}
+          />
         )}
       </Modal>
 
       {/* New Campaign Modal */}
       <Modal
-        title="Add New Promotion"
+        title="New Campaign"
         visible={isNewCampaignModalVisible}
         onCancel={() => setIsNewCampaignModalVisible(false)}
         footer={null}
@@ -459,6 +545,19 @@ const PromotionManagement = () => {
           onCancel={() => setIsNewCampaignModalVisible(false)}
         />
       </Modal>
+
+      {/* Notification Modal */}
+      <NotificationsModal
+        visible={isNotifyModalVisible}
+        onCancel={() => setIsNotifyModalVisible(false)}
+      />
+
+      {/* Details Modal */}
+      <DetailsModal
+        visible={isDetailsModalVisible}
+        onCancel={handleDetailsCancel}
+        record={selectedRecord}
+      />
     </div>
   );
 };
