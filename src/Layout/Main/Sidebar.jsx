@@ -163,7 +163,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
           key: "/terms-and-conditions",
           label: (
             <Link to="/terms-and-conditions">
-              {collapsed ? "" : "Terms And Condition"}
+              {collapsed ? "" : "Terms And Conditions"}
             </Link>
           ),
         },
