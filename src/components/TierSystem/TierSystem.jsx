@@ -278,7 +278,10 @@ export default function TierSystem() {
                 <div key={log._id} className="py-2 border-b border-gray-100 last:border-b-0">
                   <p className="text-gray-800">{log.details}</p>
                   <p className="text-sm text-gray-600">
-                    {log.user} - {formatTimestamp(log.timestamp)}
+                    {log.user} 
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {formatTimestamp(log.timestamp)}
                   </p>
                 </div>
               ))}

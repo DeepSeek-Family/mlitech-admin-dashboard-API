@@ -1,4 +1,5 @@
 import { DatePicker, Form, Input, Modal, Select } from "antd";
+import { useGetPackagesQuery } from "../../../redux/apiSlices/packageSlice";
 
 const AddEditModal = ({
   visible,
@@ -13,6 +14,11 @@ const AddEditModal = ({
     setIsAddModalVisible(false);
     setIsEditModalVisible(false);
   };
+const {data:subscribers} =useGetPackagesQuery();
+const packages = subscribers?.data || [];
+console.log("packages", packages);
+
+
 
   return (
     <Modal
@@ -115,9 +121,11 @@ const AddEditModal = ({
                 placeholder="Select subscription type"
                 className="mli-tall-select"
               >
-                <Select.Option value="basic">Basic</Select.Option>
-                <Select.Option value="premium">Premium</Select.Option>
-                <Select.Option value="enterprise">Enterprise</Select.Option>
+                {packages.map((pkg) => (
+                  <Select.Option key={pkg._id} value={pkg.title}>
+                    {pkg.title}
+                  </Select.Option>
+                ))}
               </Select>
             </Form.Item>
 

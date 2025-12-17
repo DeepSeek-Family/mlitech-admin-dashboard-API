@@ -52,7 +52,7 @@ const MerchantManagement = () => {
       key: item._id,
       recordId: item._id,
       sl: index + 1 + (page - 1) * limit,
-      merchantCardId: item.merchantCardId || "-",
+      merchantCardId: item.customUserId || "-",
       businessName: item.businessName || "-",
       phone: item.phone || "-",
       email: item.email || "-",
