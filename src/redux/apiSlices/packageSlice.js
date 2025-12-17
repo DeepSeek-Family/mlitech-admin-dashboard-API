@@ -48,7 +48,7 @@ export const PackagesApi = api.injectEndpoints({
     // ---------------------------------------
     togglePackageStatus: builder.mutation({
       query: (id) => ({
-        url: `/package/${id}/toggle`,
+        url: `/package/toggle/${id}`,
         method: "PATCH",
       }),
       invalidatesTags: ["Package"],

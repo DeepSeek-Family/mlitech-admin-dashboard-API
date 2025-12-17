@@ -199,9 +199,9 @@ const PackagesPlans = () => {
   return (
     <div className="pt-1 px-4">
       <div className="flex flex-col justify-center items-center mb-8">
-        <p className="bg-primary px-[12px] py-[2px] text-white rounded-3xl mb-2">
+        {/* <p className="bg-primary px-[12px] py-[2px] text-white rounded-3xl mb-2">
           Pricing Plan
-        </p>
+        </p> */}
         <h2 className="text-[28px] font-semibold text-secondary">
           Plans for all sizes
         </h2>
@@ -218,7 +218,7 @@ const PackagesPlans = () => {
         </Button>
       </div>
       <div className="flex justify-center">
-        <div className="w-3/4 mb-6">
+        <div className="w-4/5 mb-6">
           {packages.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
               <p className="text-lg">No packages available.</p>
@@ -238,6 +238,7 @@ const PackagesPlans = () => {
                     )} transition-transform duration-300`}
                   >
                     <div className="flex justify-end mb-2">
+
                       <div className="flex gap-2">
                         <Button
                           icon={<EditOutlined />}
@@ -247,26 +248,26 @@ const PackagesPlans = () => {
                       </div>
                     </div>
 
-                    <div className="flex flex-col justify-center items-center mb-4">
+                    <div className="flex flex-col justify-center items-center mb-2">
                       <img
                         src={SubscriptionHeadingIcon}
                         alt="Subscription Icon"
                         className="w-[40px] h-[40px] mb-4"
                       />
-                      <h3 className="text-[20px] font-semibold text-primary mb-[8px]">
+                      <h3 className="text-[20px] font-semibold text-primary ">
                         {pkg.title}
                       </h3>
-                      <div className="mb-2">
+                      <div className="">
                         <span className="text-secondary font-semibold text-[38px]">
-                          ${pkg.price}/mth
-                        </span>
+                          ${pkg.price}
+                        </span> / mth
                       </div>
                       <p className="text-[16px] font-normal text-center text-[#667085]">
                         {pkg.description}
                       </p>
                     </div>
 
-                    <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="bg-gray-50 p-4 rounded-lg h-[250px] overflow-y-auto">
                       <List
                         size="small"
                         dataSource={pkg.features}
@@ -282,10 +283,10 @@ const PackagesPlans = () => {
                     </div>
 
                     <Button
-                      className={`w-full mt-12 border ${
+                      className={`w-full mt-12 border h-10 ${
                         pkg.active
-                          ? "border-primary hover:!bg-primary hover:!text-white"
-                          : "border-gray-400 text-gray-400 hover:!bg-gray-400 hover:!text-white"
+                          ? "bg-primary text-white hover:!bg-primary hover:!text-white"
+                          : "bg-red-500 text-white hover:!bg-gray-400 hover:!text-white"
                       }`}
                       onClick={() => togglePackageStatus(pkg.id)}
                     >
