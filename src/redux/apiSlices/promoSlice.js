@@ -14,7 +14,7 @@ export const customerApi = api.injectEndpoints({
           });
         }
         return {
-          url: `/promo-merchant/merchants?${params.toString()}`,
+          url: `/admin-promo?${params.toString()}`,
           method: "GET",
         };
       },
@@ -27,7 +27,7 @@ export const customerApi = api.injectEndpoints({
     // ---------------------------------------
     togglePromoStatus: builder.mutation({
       query: (id) => ({
-        url: `/promo-merchant/toggle/${id}`,
+        url: `/promo/toggle/${id}`,
         method: "PATCH",
       }),
       invalidatesTags: ["Promo"],
@@ -38,7 +38,7 @@ export const customerApi = api.injectEndpoints({
     // ---------------------------------------
     updatePromotion: builder.mutation({
       query: ({ id, formData }) => ({
-        url: `/promo-merchant/${id}`,
+        url: `/admin-promo/${id}`,
         method: "PATCH",
         body: formData,
       }),
@@ -50,7 +50,7 @@ export const customerApi = api.injectEndpoints({
     // ---------------------------------------
     createPromotion: builder.mutation({
       query: (formData) => ({
-        url: `/promo-merchant`,
+        url: `/admin-promo`,
         method: "POST",
         body: formData,
       }),
@@ -62,7 +62,7 @@ export const customerApi = api.injectEndpoints({
     // ---------------------------------------
     deletePromotion: builder.mutation({
       query: (id) => ({
-        url: `/promo-merchant/${id}`,
+        url: `/admin-promo/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Promo"],
