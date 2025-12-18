@@ -4,7 +4,6 @@ import { useGetNotificationsQuery, useReadNotificationMutation } from "../../red
 import { useProfileQuery } from "../../redux/apiSlices/authSlice";
 import toast from 'react-hot-toast';
 // import socketService from '../../services/socketService';
-import { getImageUrl } from "../../components/common/imageUrl";
 // import socketService from '../../components/common/socketService';
 import notificationImg from "../../assets/notification.png";
 import socketService from '../../components/common/socketService';
@@ -17,31 +16,17 @@ const Notifications = () => {
     console.log(userData);
     const { data: notificationsData, isLoading, refetch } = useGetNotificationsQuery([
         { name: 'page', value: page },
-        { name: 'limit', value: limit }
+        { name: 'limit', value: limit },
+        ...(userData?._id ? [{ name: 'userId', value: userData._id }] : [])
     ]);
     
     const [readNotification] = useReadNotificationMutation();
 
-    // Socket connection setup
     useEffect(() => {
         if (userData?._id) {
             socketService.connect(userData._id);
-
-            const notificationEvent = `newNotification::${userData._id}`;
-            
-            const handleNewNotification = (data) => {
-                console.log("New notification received:", data);
-                // toast.success(data.title || "New notification received");
-                refetch();
-            };
-
-            socketService.on(notificationEvent, handleNewNotification);
-
-            return () => {
-                socketService.off(notificationEvent, handleNewNotification);
-            };
         }
-    }, [userData?._id, refetch]);
+    }, [userData?._id]);
 
     const handleReadAll = async () => {
         try {
