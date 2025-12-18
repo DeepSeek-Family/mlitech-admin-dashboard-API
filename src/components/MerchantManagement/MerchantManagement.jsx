@@ -9,6 +9,7 @@ import {
   useDeleteMerchantMutation,
   useUpdateMerchantApprovalStatusMutation,
   useUpdateMerchantStatusMutation,
+  useCreateMerchantMutation,
 } from "../../redux/apiSlices/merchantSlice";
 import MerchantTableColumn from "./components/MerchantTableColumn";
 
@@ -36,6 +37,8 @@ const MerchantManagement = () => {
     isFetching,
     error,
   } = useGetMerchantProfileQuery(queryParams);
+  const [createMerchant, { isLoading: isCreating }] =
+    useCreateMerchantMutation();
 
   const [deleteMerchant, { isLoading: isDeleting }] =
     useDeleteMerchantMutation();

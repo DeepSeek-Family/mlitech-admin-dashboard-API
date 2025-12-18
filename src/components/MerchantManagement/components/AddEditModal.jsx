@@ -1,5 +1,6 @@
 import { DatePicker, Form, Input, Modal, Select } from "antd";
 import { useGetPackagesQuery } from "../../../redux/apiSlices/packageSlice";
+import { useGetTierQuery } from "../../../redux/apiSlices/PointTierSlice";
 
 const AddEditModal = ({
   visible,
@@ -16,7 +17,9 @@ const AddEditModal = ({
   };
 const {data:subscribers} =useGetPackagesQuery();
 const packages = subscribers?.data || [];
-console.log("packages", packages);
+const  {data:tier}=useGetTierQuery()
+const tiersList = tier?.data || [];
+console.log("tierList", tiersList);
 
 
 
@@ -163,9 +166,11 @@ console.log("packages", packages);
               rules={[{ required: true, message: "Please select tier" }]}
             >
               <Select placeholder="Select tier" className="mli-tall-select">
-                <Select.Option value="gold">Gold</Select.Option>
-                <Select.Option value="silver">Silver</Select.Option>
-                <Select.Option value="bronze">Bronze</Select.Option>
+                {tiersList.map((tier) => (
+                  <Select.Option key={tier._id} value={tier.title}>
+                    {tier.name}
+                  </Select.Option>
+                ))}
               </Select>
             </Form.Item>
           </div>

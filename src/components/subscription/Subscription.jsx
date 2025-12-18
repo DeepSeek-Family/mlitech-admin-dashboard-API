@@ -267,7 +267,7 @@ const PackagesPlans = () => {
                       </p>
                     </div>
 
-                    <div className="bg-gray-50 p-4 rounded-lg h-[250px] overflow-y-auto">
+                    <div className="bg-gray-50 p-4 rounded-lg ">
                       <List
                         size="small"
                         dataSource={pkg.features}
