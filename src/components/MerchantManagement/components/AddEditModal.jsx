@@ -1,4 +1,6 @@
 import { DatePicker, Form, Input, Modal, Select } from "antd";
+import { useGetPackagesQuery } from "../../../redux/apiSlices/packageSlice";
+import { useGetTierQuery } from "../../../redux/apiSlices/PointTierSlice";
 
 const AddEditModal = ({
   visible,
@@ -13,6 +15,13 @@ const AddEditModal = ({
     setIsAddModalVisible(false);
     setIsEditModalVisible(false);
   };
+const {data:subscribers} =useGetPackagesQuery();
+const packages = subscribers?.data || [];
+const  {data:tier}=useGetTierQuery()
+const tiersList = tier?.data || [];
+console.log("tierList", tiersList);
+
+
 
   return (
     <Modal
@@ -115,9 +124,11 @@ const AddEditModal = ({
                 placeholder="Select subscription type"
                 className="mli-tall-select"
               >
-                <Select.Option value="basic">Basic</Select.Option>
-                <Select.Option value="premium">Premium</Select.Option>
-                <Select.Option value="enterprise">Enterprise</Select.Option>
+                {packages.map((pkg) => (
+                  <Select.Option key={pkg._id} value={pkg.title}>
+                    {pkg.title}
+                  </Select.Option>
+                ))}
               </Select>
             </Form.Item>
 
@@ -155,9 +166,11 @@ const AddEditModal = ({
               rules={[{ required: true, message: "Please select tier" }]}
             >
               <Select placeholder="Select tier" className="mli-tall-select">
-                <Select.Option value="gold">Gold</Select.Option>
-                <Select.Option value="silver">Silver</Select.Option>
-                <Select.Option value="bronze">Bronze</Select.Option>
+                {tiersList.map((tier) => (
+                  <Select.Option key={tier._id} value={tier.title}>
+                    {tier.name}
+                  </Select.Option>
+                ))}
               </Select>
             </Form.Item>
           </div>

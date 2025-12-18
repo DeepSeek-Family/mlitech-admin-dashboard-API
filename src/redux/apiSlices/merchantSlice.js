@@ -21,6 +21,14 @@ export const merchantApi = api.injectEndpoints({
       transformResponse: (response) => response,
       providesTags: ["Merchant"],
     }),
+    createMerchant: builder.mutation({
+      query: (data) => ({
+        url: "/admin/merchants",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Merchant"],
+    }),
     // ---------------------------------------
     // DELETE merchant
     // ---------------------------------------
@@ -58,6 +66,7 @@ export const merchantApi = api.injectEndpoints({
 
 export const {
   useGetMerchantProfileQuery,
+  useCreateMerchantMutation,
   useDeleteMerchantMutation,
   useUpdateMerchantApprovalStatusMutation,
   useUpdateMerchantStatusMutation,

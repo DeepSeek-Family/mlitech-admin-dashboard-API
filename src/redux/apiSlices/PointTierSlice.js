@@ -56,6 +56,27 @@ export const merchantApi = api.injectEndpoints({
       }),
       invalidatesTags: ["Tier"],
     }),
+
+
+    // ---------------------------------------
+    // GET all audit logs
+    // ---------------------------------------
+    getAllAuditLog: builder.query({
+      query: (args) => {
+        const params = new URLSearchParams();
+        if (args) {
+          args.forEach((arg) => {
+            params.append(arg.name, arg.value);
+          });
+        }
+        return {
+          url: `/audit/audit-logs?${params.toString()}`,
+          method: "GET",
+        };
+      },
+      transformResponse: (response) => response,
+      providesTags: ["AuditLog"],
+    }),
   }),
 });
 
@@ -64,4 +85,5 @@ export const {
   useAddTierMutation,
   useUpdateTierMutation,
   useDeleteTierMutation,
+  useGetAllAuditLogQuery,
 } = merchantApi;

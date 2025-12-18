@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Button } from "antd";
+import { Button, Pagination } from "antd";
 import Swal from "sweetalert2";
 import { Form } from "antd";
 import EditTierModal from "./modal/EditTierModal.jsx";
@@ -8,6 +8,7 @@ import {
   useAddTierMutation,
   useUpdateTierMutation,
   useDeleteTierMutation,
+  useGetAllAuditLogQuery,
 } from "../../redux/apiSlices/PointTierSlice";
 
 export default function TierSystem() {
@@ -17,6 +18,15 @@ export default function TierSystem() {
   const [searchText, setSearchText] = useState("");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [auditLogPage, setAuditLogPage] = useState(1);
+  const [auditLogLimit, setAuditLogLimit] = useState(10);
+  
+  // Fetch audit logs with pagination
+  const auditLogQueryParams = [
+    { name: "page", value: auditLogPage },
+    { name: "limit", value: auditLogLimit },
+  ];
+  const { data: auditLogsResponse, isLoading: isLoadingLogs } = useGetAllAuditLogQuery(auditLogQueryParams);
 
   const queryParams = [
     { name: "page", value: page },
@@ -66,16 +76,29 @@ export default function TierSystem() {
     setTiers(tierData);
   }, [tierData]);
 
+  // Format timestamp for display
+  const formatTimestamp = (timestamp) => {
+    const date = new Date(timestamp);
+    return date.toLocaleString('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
   // Open Set Rules/Edit Modal
   const showRulesModal = (tier) => {
     if (tier) {
       setEditingTier(tier);
       setIsAddMode(false);
-      form.setFieldsValue(tier); // fill with existing tier
+      form.setFieldsValue(tier);
     } else {
       setEditingTier(null);
       setIsAddMode(true);
-      form.resetFields(); // blank form
+      form.resetFields();
     }
     setIsRulesModalVisible(true);
   };
@@ -240,16 +263,48 @@ export default function TierSystem() {
         )}
       </div>
 
-      {/* Change Log */}
+      {/* Change Log - Dynamic Data */}
       <div className="px-8 py-8">
         <div className="px-6 py-4 rounded-lg border border-primary bg-white flex flex-col gap-2 mt-2">
-          <h2 className="font-bold text-[24px] text-secondary">
+          <h2 className="font-bold text-[24px] text-secondary mb-2">
             Tier System Change Log
           </h2>
-          <p>Added Gold Tier with 10000 points threshold.</p>
-          <p>admin@merchant.com - 2024-06-15 10:30 AM</p>
-          <p>Updated Silver Tier point multiplier to 1.5x.</p>
-          <p>admin@merchant.com - 2024-06-10 02:00 PM</p>
+          
+          {isLoadingLogs ? (
+            <p className="text-gray-500">Loading audit logs...</p>
+          ) : auditLogsResponse?.data?.data && auditLogsResponse.data.data.length > 0 ? (
+            <>
+              {auditLogsResponse.data.data.map((log) => (
+                <div key={log._id} className="py-2 border-b border-gray-100 last:border-b-0">
+                  <p className="text-gray-800">{log.details}</p>
+                  <p className="text-sm text-gray-600">
+                    {log.user} 
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {formatTimestamp(log.timestamp)}
+                  </p>
+                </div>
+              ))}
+              
+              {/* Pagination */}
+              <div className="flex justify-center mt-4">
+                <Pagination
+                  current={auditLogPage}
+                  total={auditLogsResponse?.data?.meta?.total || 0}
+                  pageSize={auditLogLimit}
+                  onChange={(page, pageSize) => {
+                    setAuditLogPage(page);
+                    setAuditLogLimit(pageSize);
+                  }}
+                  // showSizeChanger
+                  // showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} logs`}
+                  // pageSizeOptions={['5', '10', '20', '50']}
+                />
+              </div>
+            </>
+          ) : (
+            <p className="text-gray-500">No audit logs available</p>
+          )}
         </div>
       </div>
 
