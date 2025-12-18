@@ -23,7 +23,7 @@ export const merchantApi = api.injectEndpoints({
     }),
     createMerchant: builder.mutation({
       query: (data) => ({
-        url: "/admin/merchants",
+        url: "/usermanagement/merchant",
         method: "POST",
         body: data,
       }),

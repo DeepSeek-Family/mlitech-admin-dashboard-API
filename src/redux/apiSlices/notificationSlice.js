@@ -1,34 +1,35 @@
 import { api } from "../api/baseApi";
 
-const notificationSlice = api.injectEndpoints({
+
+const notificationApi = api.injectEndpoints({
   endpoints: (builder) => ({
-    notification: builder.query({
-      query: () => {
+    getNotifications: builder.query({
+      query: (args) => {
+        const params = new URLSearchParams();
+        if (args && args.length > 0) {
+          args.forEach((arg) => {
+            params.append(arg.name, arg.value);
+          });
+        }
         return {
           url: `/notifications`,
           method: "GET",
-          headers: {
-            Authorization: `Bearer ${JSON.parse(
-              localStorage.getItem("token")
-            )}`,
-          },
+          params
         };
       },
+      providesTags: ["Notifications"],
     }),
-    read: builder.mutation({
-      query: () => {
-        return {
-          url: `/notifications`,
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${JSON.parse(
-              localStorage.getItem("token")
-            )}`,
-          },
-        };
-      },
+    readNotification: builder.mutation({
+      query: () => ({
+        url: `/notifications/read`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["Notifications"],
     }),
   }),
 });
 
-export const { useNotificationQuery, useReadMutation } = notificationSlice;
+export const { 
+  useGetNotificationsQuery, 
+  useReadNotificationMutation 
+} = notificationApi;
