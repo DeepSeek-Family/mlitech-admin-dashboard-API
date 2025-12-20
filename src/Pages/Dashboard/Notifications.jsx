@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ConfigProvider, Pagination, Spin } from 'antd';
 import { useGetNotificationsQuery, useReadNotificationMutation } from "../../redux/apiSlices/notificationSlice";
 import { useProfileQuery } from "../../redux/apiSlices/authSlice";
 import toast from 'react-hot-toast';
-// import socketService from '../../services/socketService';
-// import socketService from '../../components/common/socketService';
 import notificationImg from "../../assets/notification.png";
 import socketService from '../../components/common/socketService';
 
@@ -13,7 +11,6 @@ const Notifications = () => {
     const [limit] = useState(10);
     
     const { data: userData } = useProfileQuery();
-    console.log(userData);
     const { data: notificationsData, isLoading, refetch } = useGetNotificationsQuery([
         { name: 'page', value: page },
         { name: 'limit', value: limit },
@@ -22,11 +19,28 @@ const Notifications = () => {
     
     const [readNotification] = useReadNotificationMutation();
 
+    // Handle new notification from socket
+    const handleNewNotification = useCallback((notification) => {
+        console.log("🔔 New notification received:", notification);
+        toast.success(notification?.title || "New notification received!");
+        // Refetch notifications to update the UI
+        refetch();
+    }, [refetch]);
+
     useEffect(() => {
         if (userData?._id) {
+            // Connect to socket
             socketService.connect(userData._id);
+            
+            // Subscribe to new notifications
+            socketService.subscribeToUserNotifications(handleNewNotification);
         }
-    }, [userData?._id]);
+
+        // Cleanup on unmount
+        return () => {
+            socketService.unsubscribeFromUserNotifications(handleNewNotification);
+        };
+    }, [userData?._id, handleNewNotification]);
 
     const handleReadAll = async () => {
         try {

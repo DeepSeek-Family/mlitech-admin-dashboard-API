@@ -1,15 +1,42 @@
 import { Badge, Button, Dropdown, Menu, Modal } from "antd";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { FaRegBell } from "react-icons/fa6";
 import { Menu as MenuIcon } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { getImageUrl } from "../../components/common/imageUrl";
 import { useUser } from "../../provider/User";
+import { useGetUnreadCountQuery } from "../../redux/apiSlices/notificationSlice";
+import socketService from "../../components/common/socketService";
 
 const Header = ({ toggleSidebar, isMobile }) => {
   const { user } = useUser();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const navigate = useNavigate();
+  
+  // Get unread notification count
+  const { data: notificationData, refetch: refetchNotifications } = useGetUnreadCountQuery();
+  const unreadCount = notificationData?.data?.unreadCount || 0;
+
+  // Handle new notification from socket
+  const handleNewNotification = useCallback(() => {
+    console.log("🔔 Header: New notification received, refetching count...");
+    refetchNotifications();
+  }, [refetchNotifications]);
+
+  useEffect(() => {
+    if (user?._id) {
+      // Connect to socket
+      socketService.connect(user._id);
+      
+      // Subscribe to new notifications
+      socketService.subscribeToUserNotifications(handleNewNotification);
+    }
+
+    // Cleanup on unmount
+    return () => {
+      socketService.unsubscribeFromUserNotifications(handleNewNotification);
+    };
+  }, [user?._id, handleNewNotification]);
 
   const showLogoutConfirm = () => {
     setIsLogoutModalOpen(true);
@@ -81,7 +108,7 @@ const Header = ({ toggleSidebar, isMobile }) => {
 
         {/* Notification Icon */}
         <Link to="/notification" className="h-fit mt-[10px]">
-          <Badge count={5} backgroundColor="#3FC7EE">
+          <Badge count={unreadCount} overflowCount={99} color="#3FC7EE">
             <FaRegBell color="#3FAE6A" size={24} />
           </Badge>
         </Link>

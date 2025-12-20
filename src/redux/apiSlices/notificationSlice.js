@@ -19,6 +19,14 @@ const notificationApi = api.injectEndpoints({
       },
       providesTags: ["Notifications"],
     }),
+    getUnreadCount: builder.query({
+      query: () => ({
+        url: `/notifications`,
+        method: "GET",
+        params: { limit: 1 }
+      }),
+      providesTags: ["Notifications"],
+    }),
     readNotification: builder.mutation({
       query: () => ({
         url: `/notifications/read`,
@@ -31,5 +39,8 @@ const notificationApi = api.injectEndpoints({
 
 export const { 
   useGetNotificationsQuery, 
+  useGetUnreadCountQuery,
   useReadNotificationMutation 
 } = notificationApi;
+
+export { notificationApi };
