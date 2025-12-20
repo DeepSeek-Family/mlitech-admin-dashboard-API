@@ -1,7 +1,8 @@
 import { Button, DatePicker, Table } from "antd";
 import "antd/dist/reset.css";
 import dayjs from "dayjs";
-import { useState } from "react";
+import { useMemo, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 
 // Sample data for revenue per user with added date field
 const data = [
@@ -11,7 +12,7 @@ const data = [
     customers: "Alice",
     transactions: 120,
     totalRevenue: 3000.5,
-    date: "2025-01-01", // Added date for filtering
+    date: "2025-01-01",
   },
   {
     sl: 2,
@@ -19,7 +20,7 @@ const data = [
     customers: "Jhon",
     transactions: 95,
     totalRevenue: 2200.0,
-    date: "2025-02-01", // Added date for filtering
+    date: "2025-02-01",
   },
   {
     sl: 3,
@@ -27,19 +28,12 @@ const data = [
     customers: "Doe",
     transactions: 150,
     totalRevenue: 5000.0,
-    date: "2025-03-01", // Added date for filtering
+    date: "2025-03-01",
   },
 ];
 
 // Table columns
 const columns = [
-  // {
-  //   title: "SL",
-  //   dataIndex: "sl",
-  //   key: "sl",
-  //   align: "center",
-  //   render: (_, __, index) => index + 1,
-  // },
   {
     title: "Customer ID",
     dataIndex: "customerId",
@@ -74,34 +68,41 @@ const columns = [
 ];
 
 export default function RevenuePerUser() {
-  const [filteredData, setFilteredData] = useState(data);
-  const [fromDate, setFromDate] = useState(null);
-  const [toDate, setToDate] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Read values from URL params
+  const fromDate = searchParams.get("rpu_fromDate") || "";
+  const toDate = searchParams.get("rpu_toDate") || "";
+  const currentPage = parseInt(searchParams.get("rpu_page") || "1", 10);
 
-  const handleDateChange = () => {
+  // Helper function to update URL params
+  const updateSearchParam = useCallback((key, value) => {
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev);
+      if (value && value !== "") {
+        newParams.set(key, value);
+      } else {
+        newParams.delete(key);
+      }
+      return newParams;
+    });
+  }, [setSearchParams]);
+
+  // Filter data based on URL params
+  const filteredData = useMemo(() => {
     let filtered = data;
     if (fromDate) {
       filtered = filtered.filter((item) =>
-        dayjs(item.date).isSameOrAfter(fromDate, "day")
+        dayjs(item.date).isSameOrAfter(dayjs(fromDate), "day")
       );
     }
     if (toDate) {
       filtered = filtered.filter((item) =>
-        dayjs(item.date).isSameOrBefore(toDate, "day")
+        dayjs(item.date).isSameOrBefore(dayjs(toDate), "day")
       );
     }
-    setFilteredData(filtered);
-  };
-
-  const handleFromDateChange = (date) => {
-    setFromDate(date);
-    handleDateChange(); // Trigger the date filter when "From" date changes
-  };
-
-  const handleToDateChange = (date) => {
-    setToDate(date);
-    handleDateChange(); // Trigger the date filter when "To" date changes
-  };
+    return filtered;
+  }, [fromDate, toDate]);
 
   return (
     <div style={{ width: "100%" }}>
@@ -111,14 +112,14 @@ export default function RevenuePerUser() {
           <div>
             <DatePicker
               value={fromDate ? dayjs(fromDate) : null}
-              onChange={handleFromDateChange}
+              onChange={(date) => updateSearchParam("rpu_fromDate", date ? dayjs(date).format("YYYY-MM-DD") : "")}
               style={{ marginLeft: "auto", marginRight: "20px" }}
               placeholder="From Date"
               format="YYYY-MM-DD"
             />
             <DatePicker
               value={toDate ? dayjs(toDate) : null}
-              onChange={handleToDateChange}
+              onChange={(date) => updateSearchParam("rpu_toDate", date ? dayjs(date).format("YYYY-MM-DD") : "")}
               style={{ marginRight: "20px" }}
               placeholder="To Date"
               format="YYYY-MM-DD"
@@ -139,7 +140,11 @@ export default function RevenuePerUser() {
           ...row,
           key: index,
         }))}
-        pagination={{ pageSize: 6 }}
+        pagination={{ 
+          current: currentPage,
+          pageSize: 6,
+          onChange: (page) => updateSearchParam("rpu_page", page > 1 ? page.toString() : "")
+        }}
       />
     </div>
   );

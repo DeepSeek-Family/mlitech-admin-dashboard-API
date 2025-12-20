@@ -1,7 +1,8 @@
 import { Button, DatePicker, Table } from "antd";
 import "antd/dist/reset.css";
 import dayjs from "dayjs";
-import { useState } from "react";
+import { useMemo, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 
 // Sample data for points redeemed
 const data = [
@@ -12,7 +13,7 @@ const data = [
     customerId: "C001",
     redemptions: 15,
     totalPointsRedeemed: 3200,
-    date: "2025-01-01", // Add date to the data
+    date: "2025-01-01",
   },
   {
     sl: 2,
@@ -21,7 +22,7 @@ const data = [
     customerId: "C002",
     redemptions: 10,
     totalPointsRedeemed: 2500,
-    date: "2025-02-01", // Add date to the data
+    date: "2025-02-01",
   },
   {
     sl: 3,
@@ -30,27 +31,19 @@ const data = [
     customerId: "C003",
     redemptions: 20,
     totalPointsRedeemed: 4500,
-    date: "2025-03-01", // Add date to the data
+    date: "2025-03-01",
   },
 ];
 
 // Table columns
 const columns = [
-  // {
-  //   title: "SL",
-  //   dataIndex: "sl",
-  //   key: "sl",
-  //   align: "center",
-  //   render: (_, __, index) => index + 1,
-  // },
-    { title: "Period", dataIndex: "period", key: "period", align: "center" },
+  { title: "Period", dataIndex: "period", key: "period", align: "center" },
   {
     title: "Customer ID",
     dataIndex: "customerId",
     key: "customerId",
     align: "center",
   },
-
   {
     title: "Customer Name",
     dataIndex: "customerName",
@@ -68,7 +61,7 @@ const columns = [
     dataIndex: "totalPointsRedeemed",
     key: "totalPointsRedeemed",
     align: "center",
-    render: (value) => value.toLocaleString(), // Format as a number with commas
+    render: (value) => value.toLocaleString(),
   },
   {
     title: "Date",
@@ -79,34 +72,41 @@ const columns = [
 ];
 
 export default function PointsRedeemed() {
-  const [filteredData, setFilteredData] = useState(data);
-  const [fromDate, setFromDate] = useState(null);
-  const [toDate, setToDate] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Read values from URL params
+  const fromDate = searchParams.get("pr_fromDate") || "";
+  const toDate = searchParams.get("pr_toDate") || "";
+  const currentPage = parseInt(searchParams.get("pr_page") || "1", 10);
 
-  const handleDateChange = () => {
+  // Helper function to update URL params
+  const updateSearchParam = useCallback((key, value) => {
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev);
+      if (value && value !== "") {
+        newParams.set(key, value);
+      } else {
+        newParams.delete(key);
+      }
+      return newParams;
+    });
+  }, [setSearchParams]);
+
+  // Filter data based on URL params
+  const filteredData = useMemo(() => {
     let filtered = data;
     if (fromDate) {
       filtered = filtered.filter((item) =>
-        dayjs(item.date).isSameOrAfter(fromDate, "day")
+        dayjs(item.date).isSameOrAfter(dayjs(fromDate), "day")
       );
     }
     if (toDate) {
       filtered = filtered.filter((item) =>
-        dayjs(item.date).isSameOrBefore(toDate, "day")
+        dayjs(item.date).isSameOrBefore(dayjs(toDate), "day")
       );
     }
-    setFilteredData(filtered);
-  };
-
-  const handleFromDateChange = (date) => {
-    setFromDate(date);
-    handleDateChange(); // Trigger the date filter when "From" date changes
-  };
-
-  const handleToDateChange = (date) => {
-    setToDate(date);
-    handleDateChange(); // Trigger the date filter when "To" date changes
-  };
+    return filtered;
+  }, [fromDate, toDate]);
 
   return (
     <div style={{ width: "100%" }}>
@@ -116,14 +116,14 @@ export default function PointsRedeemed() {
           <div>
             <DatePicker
               value={fromDate ? dayjs(fromDate) : null}
-              onChange={handleFromDateChange}
+              onChange={(date) => updateSearchParam("pr_fromDate", date ? dayjs(date).format("YYYY-MM-DD") : "")}
               style={{ marginLeft: "auto", marginRight: "20px" }}
               placeholder="From Date"
               format="YYYY-MM-DD"
             />
             <DatePicker
               value={toDate ? dayjs(toDate) : null}
-              onChange={handleToDateChange}
+              onChange={(date) => updateSearchParam("pr_toDate", date ? dayjs(date).format("YYYY-MM-DD") : "")}
               style={{ marginRight: "20px" }}
               placeholder="To Date"
               format="YYYY-MM-DD"
@@ -144,7 +144,11 @@ export default function PointsRedeemed() {
           ...row,
           key: index,
         }))}
-        pagination={{ pageSize: 6 }}
+        pagination={{ 
+          current: currentPage,
+          pageSize: 6,
+          onChange: (page) => updateSearchParam("pr_page", page > 1 ? page.toString() : "")
+        }}
       />
     </div>
   );

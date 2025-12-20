@@ -20,7 +20,7 @@ const MerchantTableColumn = ({
   const columnsWithActions = [
     { title: "SL", dataIndex: "sl", key: "sl", align: "center" },
     {
-      title: "Merchant Card ID",
+      title: "Merchant ID",
       dataIndex: "merchantCardId",
       key: "merchantCardId",
       align: "center",

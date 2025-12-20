@@ -69,6 +69,7 @@ const MerchantManagement = () => {
       status: item.status === "active" ? "Active" : "Inactive",
       ratings: item.ratings || 0,
       approveStatus: item.approveStatus || "pending",
+      address: item.address || "-",
       raw: item,
     }));
   }, [response, page, limit]);
@@ -101,7 +102,7 @@ const MerchantManagement = () => {
       .then(async (values) => {
         const newMerchant = {
           salesRep: values.salesRep,
-          address: values.city,
+          address: values.address,
           businessName: values.businessName,
           subscription: values.subscription,
           lastPaymentDate: toISODate(values.lastPaymentDate),
