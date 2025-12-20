@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import JoditEditor from "jodit-react";
 import { Button, Input, message, Select } from "antd";
 import { Row, Col } from "antd";
+import { useCreatePushNotificationMutation } from "../../redux/apiSlices/pushNotification";
 
 const { Option } = Select;
 
@@ -9,65 +10,72 @@ const PushNotifications = () => {
   const editor = useRef(null);
 
   // States
-  const [segment, setSegment] = useState("");
   const [title, setTitle] = useState("");
   const [bodyContent, setBodyContent] = useState("");
-  const [sendTo, setSendTo] = useState(""); // New state for Send To
-  const [location, setLocation] = useState(""); // New state for Location
-  const [tier, setTier] = useState(""); // New state for Tier
-  const [subscriptionType, setSubscriptionType] = useState(""); // New state for Subscription Type
-  const [status, setStatus] = useState(""); // New state for Status
+  const [sendTo, setSendTo] = useState("ALL"); // Default to ALL
+  const [location, setLocation] = useState("Chittagong"); // Default value
+  const [tier, setTier] = useState("PLATINUM"); // Default value
+  const [subscriptionType, setSubscriptionType] = useState("ACTIVE"); // Default value
+  const [status, setStatus] = useState("ACTIVE"); // Default value
+  const [createPushNotification, { isLoading }] = useCreatePushNotificationMutation();
 
-  const handleSend = () => {
-    if (
-      !segment.trim() ||
-      !sendTo.trim() ||
-      !location.trim() ||
-      !tier.trim() ||
-      !subscriptionType.trim() ||
-      !status.trim()
-    ) {
-      message.error("Please fill in all fields before sending.");
-      return;
-    }
+  const handleSend = async () => {
     if (!title.trim() || !bodyContent.trim()) {
       message.error("Please fill in both title and body before sending.");
       return;
     }
-    message.success("Push Notification sent successfully!");
-    console.log("Notification Data:", {
-      sendTo,
-      segment,
-      title,
-      bodyContent,
-      location,
-      tier,
-      subscriptionType,
-      status,
-    });
 
-    // Reset fields after sending
-    setSegment("");
-    setTitle("");
-    setBodyContent("");
-    setSendTo("");
-    setLocation("");
-    setTier("");
-    setSubscriptionType("");
-    setStatus("");
+    try {
+      let payload;
+      
+      if (sendTo === "ALL") {
+        payload = {
+          sendType: "ALL",
+          title: title,
+          body: bodyContent,
+        };
+      } else {
+        payload = {
+          sendType: "SPECIFIC",
+          title: title,
+          body: bodyContent,
+          location: location,
+          tier: tier,
+          subscriptionType: subscriptionType,
+          status: status,
+        };
+      }
+
+      await createPushNotification(payload).unwrap();
+      message.success("Push Notification sent successfully!");
+      
+      // Reset fields after sending
+      setTitle("");
+      setBodyContent("");
+      setSendTo("ALL");
+      setLocation("Chittagong");
+      setTier("PLATINUM");
+      setSubscriptionType("ACTIVE");
+      setStatus("ACTIVE");
+    } catch (error) {
+      message.error("Failed to send push notification. Please try again.");
+      console.error("Error sending notification:", error);
+    }
   };
 
   const handleCancel = () => {
-    setSegment("");
     setTitle("");
     setBodyContent("");
-    setSendTo("");
-    setLocation("");
-    setTier("");
-    setSubscriptionType("");
-    setStatus("");
+    setSendTo("ALL");
+    setLocation("Chittagong");
+    setTier("PLATINUM");
+    setSubscriptionType("ACTIVE");
+    setStatus("ACTIVE");
     message.info("Notification draft cleared.");
   };
+
+  // Check if fields should be disabled
+  const isFieldsDisabled = sendTo === "ALL";
 
   return (
     <div className="border rounded-lg px-12 py-8 bg-white">
@@ -89,8 +97,8 @@ const PushNotifications = () => {
                 style={{ width: "100%" }}
                 className="mli-tall-select"
               >
-                <Option value="all">All</Option>
-                <Option value="specific">Specific Users</Option>
+                <Option value="ALL">All</Option>
+                <Option value="SPECIFIC">Specific Users</Option>
               </Select>
             </div>
           </Col>
@@ -105,10 +113,12 @@ const PushNotifications = () => {
                 onChange={(value) => setLocation(value)}
                 style={{ width: "100%" }}
                 className="mli-tall-select"
+                disabled={isFieldsDisabled}
               >
-                <Option value="ny">New York</Option>
-                <Option value="ca">California</Option>
-                <Option value="tx">Texas</Option>
+                <Option value="Chittagong">Chittagong</Option>
+                <Option value="Dhaka">Dhaka</Option>
+                <Option value="Sylhet">Sylhet</Option>
+                <Option value="Khulna">Khulna</Option>
               </Select>
             </div>
           </Col>
@@ -123,10 +133,11 @@ const PushNotifications = () => {
                 onChange={(value) => setTier(value)}
                 style={{ width: "100%" }}
                 className="mli-tall-select"
+                disabled={isFieldsDisabled}
               >
-                <Option value="gold">Gold</Option>
-                <Option value="silver">Silver</Option>
-                <Option value="platinum">Platinum</Option>
+                <Option value="PLATINUM">Platinum</Option>
+                <Option value="GOLD">Gold</Option>
+                <Option value="SILVER">Silver</Option>
               </Select>
             </div>
           </Col>
@@ -143,10 +154,10 @@ const PushNotifications = () => {
                 onChange={(value) => setSubscriptionType(value)}
                 style={{ width: "100%" }}
                 className="mli-tall-select"
+                disabled={isFieldsDisabled}
               >
-                <Option value="basic">Basic</Option>
-                <Option value="premium">Premium</Option>
-                <Option value="enterprise">Enterprise</Option>
+                <Option value="ACTIVE">Active</Option>
+                <Option value="INACTIVE">Inactive</Option>
               </Select>
             </div>
           </Col>
@@ -161,9 +172,10 @@ const PushNotifications = () => {
                 onChange={(value) => setStatus(value)}
                 style={{ width: "100%" }}
                 className="mli-tall-select"
+                disabled={isFieldsDisabled}
               >
-                <Option value="active">Active</Option>
-                <Option value="inactive">Inactive</Option>
+                <Option value="ACTIVE">Active</Option>
+                <Option value="INACTIVE">Inactive</Option>
               </Select>
             </div>
           </Col>
@@ -193,63 +205,50 @@ const PushNotifications = () => {
 
       {/* Action Buttons */}
       <div className="flex justify-end gap-4">
-        <Button onClick={handleCancel} className="px-12 py-5">
+        <Button onClick={handleCancel} className="px-12 py-5" disabled={isLoading}>
           Cancel
         </Button>
         <Button
           onClick={handleSend}
           className="bg-primary text-white px-12 py-5"
+          loading={isLoading}
         >
           Send
         </Button>
       </div>
 
       {/* Preview */}
-      {(segment ||
-        title ||
-        bodyContent ||
-        sendTo ||
-        location ||
-        tier ||
-        subscriptionType ||
-        status) && (
+      {(title || bodyContent || sendTo !== "ALL") && (
         <div className="saved-content mt-6 border p-6 rounded-lg bg-white">
           <h3 className="text-lg font-semibold mb-4">Preview</h3>
-          {segment && (
-            <p className="text-md font-medium mb-2">
-              <strong>Segment:</strong>{" "}
-              {segment
-                .replace("_", " ")
-                .replace(/\b\w/g, (c) => c.toUpperCase())}
-            </p>
-          )}
           {sendTo && (
             <p className="text-md font-medium mb-2">
-              <strong>Send To:</strong>{" "}
-              {sendTo
-                .replace("_", " ")
-                .replace(/\b\w/g, (c) => c.toUpperCase())}
+              <strong>Send To:</strong> {sendTo}
             </p>
           )}
-          {location && (
-            <p className="text-md font-medium mb-2">
-              <strong>Location:</strong> {location}
-            </p>
-          )}
-          {tier && (
-            <p className="text-md font-medium mb-2">
-              <strong>Tier:</strong> {tier}
-            </p>
-          )}
-          {subscriptionType && (
-            <p className="text-md font-medium mb-2">
-              <strong>Subscription Type:</strong> {subscriptionType}
-            </p>
-          )}
-          {status && (
-            <p className="text-md font-medium mb-2">
-              <strong>Status:</strong> {status}
-            </p>
+          {sendTo === "SPECIFIC" && (
+            <>
+              {location && (
+                <p className="text-md font-medium mb-2">
+                  <strong>Location:</strong> {location}
+                </p>
+              )}
+              {tier && (
+                <p className="text-md font-medium mb-2">
+                  <strong>Tier:</strong> {tier}
+                </p>
+              )}
+              {subscriptionType && (
+                <p className="text-md font-medium mb-2">
+                  <strong>Subscription Type:</strong> {subscriptionType}
+                </p>
+              )}
+              {status && (
+                <p className="text-md font-medium mb-2">
+                  <strong>Status:</strong> {status}
+                </p>
+              )}
+            </>
           )}
           {title && <h4 className="text-md font-bold mb-2">{title}</h4>}
           {bodyContent && (

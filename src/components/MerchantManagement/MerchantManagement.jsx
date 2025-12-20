@@ -98,28 +98,30 @@ const MerchantManagement = () => {
   const handleAddMerchant = () => {
     form
       .validateFields()
-      .then((values) => {
+      .then(async (values) => {
         const newMerchant = {
-          id: data.length + 1,
-          MarchantID: values.merchantName,
-          email: values.email,
-          subscriptionType: values.subscriptionType,
+          salesRep: values.salesRep,
+          address: values.city,
+          businessName: values.businessName,
+          subscription: values.subscription,
           lastPaymentDate: toISODate(values.lastPaymentDate),
           expiryDate: toISODate(values.expiryDate),
+          email: values.email,
+          firstName: values.firstName,
+          phone: values.phone,
           tier: values.tier,
-          sales: values.sales || "$0",
-          status: values.status || "Pending",
-          image: "https://i.ibb.co/8gh3mqPR/Ellipse-48-1.jpg",
-          name: values.name || "—",
-          businessName: values.businessName || "—",
-          phone: values.phone || "—",
-          location: values.address || "—",
-          feedback: 0,
+          password: values.password,
         };
-        setData((prev) => [...prev, newMerchant]);
-        setIsAddModalVisible(false);
-        form.resetFields();
-        message.success("New merchant added successfully!");
+
+        try {
+          await createMerchant(newMerchant).unwrap();
+          message.success("New merchant added successfully!");
+          setIsAddModalVisible(false);
+          form.resetFields();
+        } catch (error) {
+          console.error("Create merchant failed", error);
+          message.error(error?.data?.message || "Failed to add merchant");
+        }
       })
       .catch((info) => {
         console.log("Validate Failed:", info);
@@ -131,21 +133,11 @@ const MerchantManagement = () => {
     form
       .validateFields()
       .then((values) => {
-        const updated = {
-          ...selectedRecord,
-          MarchantID: values.merchantName,
-          email: values.email,
-          subscriptionType: values.subscriptionType,
-          lastPaymentDate: toISODate(values.lastPaymentDate),
-          expiryDate: toISODate(values.expiryDate),
-          tier: values.tier,
-        };
-        setData((prev) =>
-          prev.map((item) => (item.id === selectedRecord.id ? updated : item))
-        );
+        // Note: Update mutation is not implemented yet, just logging for now
+        console.log("Update values:", values);
+        message.info("Update function is not connected to backend yet.");
         setIsEditModalVisible(false);
         form.resetFields();
-        message.success("Merchant updated successfully!");
       })
       .catch((info) => {
         console.log("Validate Failed:", info);
@@ -156,25 +148,26 @@ const MerchantManagement = () => {
   const showAddOrEditModal = (record = null) => {
     if (record) {
       setSelectedRecord(record);
-      setIsViewModalVisible(false); // ✅ ensure the View modal is closed when editing
+      setIsViewModalVisible(false);
+      
+      const raw = record.raw || {};
+      
       form.setFieldsValue({
-        merchantName: record.MarchantID,
-        email: record.email,
-        subscriptionType: record.subscriptionType,
-        lastPaymentDate: record.lastPaymentDate
-          ? dayjs(record.lastPaymentDate)
-          : null,
-        expiryDate: record.expiryDate ? dayjs(record.expiryDate) : null,
-        tier: record.tier,
-        name: record.name,
+        salesRep: record.salesRep || raw.salesRep,
+        address: record.location || raw.city || raw.address,
         businessName: record.businessName,
+        subscription: raw.subscription || raw.subscriptionType,
+        lastPaymentDate: raw.lastPaymentDate ? dayjs(raw.lastPaymentDate) : null,
+        expiryDate: raw.expiryDate ? dayjs(raw.expiryDate) : null,
+        email: record.email,
+        firstName: raw.firstName || raw.name,
         phone: record.phone,
-        location: record.location,
+        tier: raw.tier,
       });
       setIsEditModalVisible(true);
     } else {
       setSelectedRecord(null);
-      setIsViewModalVisible(false); // optional: keep view closed when adding
+      setIsViewModalVisible(false);
       form.resetFields();
       setIsAddModalVisible(true);
     }

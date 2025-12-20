@@ -37,12 +37,25 @@ console.log("tierList", tiersList);
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div className="flex flex-col gap-4">
             <Form.Item
-              name="name"
+              name="salesRep"
               label="Sales Rep"
               rules={[{ required: true, message: "Please enter Sales Rep" }]}
             >
               <Input
                 placeholder="Enter sales rep name"
+                className="mli-tall-input"
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="firstName"
+              label="First Name"
+              rules={[
+                { required: true, message: "Please enter First Name" },
+              ]}
+            >
+              <Input
+                placeholder="Enter First Name"
                 className="mli-tall-input"
               />
             </Form.Item>
@@ -56,19 +69,6 @@ console.log("tierList", tiersList);
             >
               <Input
                 placeholder="Enter business name"
-                className="mli-tall-input"
-              />
-            </Form.Item>
-
-            <Form.Item
-              name="merchantName"
-              label="Merchant Card ID"
-              rules={[
-                { required: true, message: "Please enter Merchant Card ID" },
-              ]}
-            >
-              <Input
-                placeholder="Enter Merchant Card ID"
                 className="mli-tall-input"
               />
             </Form.Item>
@@ -100,28 +100,32 @@ console.log("tierList", tiersList);
 
           <div className="flex flex-col gap-4">
             <Form.Item
-              name="location"
-              label="Location"
-              rules={[{ required: true, message: "Please select location" }]}
+              name="city"
+              label="City"
+              rules={[{ required: true, message: "Please select city" }]}
             >
-              <Select placeholder="Select location" className="mli-tall-select">
-                <Select.Option value="New York">New York</Select.Option>
-                <Select.Option value="California">California</Select.Option>
-                <Select.Option value="Texas">Texas</Select.Option>
-                <Select.Option value="Florida">Florida</Select.Option>
+              <Select placeholder="Select city" className="mli-tall-select">
+                <Select.Option value="Dhaka">Dhaka</Select.Option>
+                <Select.Option value="Chittagong">Chittagong</Select.Option>
+                <Select.Option value="Sylhet">Sylhet</Select.Option>
+                <Select.Option value="Khulna">Khulna</Select.Option>
+                <Select.Option value="Rajshahi">Rajshahi</Select.Option>
+                <Select.Option value="Barisal">Barisal</Select.Option>
+                <Select.Option value="Rangpur">Rangpur</Select.Option>
+                <Select.Option value="Mymensingh">Mymensingh</Select.Option>
                 <Select.Option value="Other">Other</Select.Option>
               </Select>
             </Form.Item>
 
             <Form.Item
-              name="subscriptionType"
-              label="Subscription Type"
+              name="subscription"
+              label="Subscription"
               rules={[
-                { required: true, message: "Please select subscription type" },
+                { required: true, message: "Please select subscription" },
               ]}
             >
               <Select
-                placeholder="Select subscription type"
+                placeholder="Select subscription"
                 className="mli-tall-select"
               >
                 {packages.map((pkg) => (
@@ -172,6 +176,17 @@ console.log("tierList", tiersList);
                   </Select.Option>
                 ))}
               </Select>
+            </Form.Item>
+
+            <Form.Item
+              name="password"
+              label="Password"
+              rules={[{ required: !selectedRecord, message: "Please enter password" }]}
+            >
+              <Input.Password
+                placeholder="Enter password"
+                className="mli-tall-input"
+              />
             </Form.Item>
           </div>
         </div>
