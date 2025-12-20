@@ -134,8 +134,8 @@ const Notifications = () => {
                         theme={{
                             components: {
                                 Pagination: {
-                                    itemActiveBg: "#CDA861",
-                                    borderRadius: "100%"
+                                    itemActiveBg: "#3fae6a",
+                                    borderRadius: "20%"
                                 }
                             },
                             token: {
