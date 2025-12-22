@@ -38,10 +38,32 @@ const reportAnalyticsApi = api.injectEndpoints({
       },
       providesTags: ["ReportAnalytics"],
     }),
+
+    exportChartData: builder.query({
+      query: (args) => {
+        const params = new URLSearchParams();
+        if (args && args.length > 0) {
+          args.forEach((arg) => {
+            if (arg.value !== undefined && arg.value !== null && arg.value !== "") {
+              params.append(arg.name, arg.value);
+            }
+          });
+        }
+        return {
+          url: `/report-analytics/merchants/export`,
+          method: "GET",
+          params,
+          responseHandler: (response) => response.blob(),
+        };
+      },
+      providesTags: ["ReportAnalytics"],
+    }),
   }),
 });
 
 export const { 
   useMerchantReportAnalyticsQuery, 
-  useCustomerReportAnalyticsQuery 
+  useCustomerReportAnalyticsQuery,
+  useExportChartDataQuery,
+  useLazyExportChartDataQuery
 } = reportAnalyticsApi;

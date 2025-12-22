@@ -1,4 +1,14 @@
-import { Button, Col, DatePicker, Form, Input, Row, Select, Table, Spin } from "antd";
+import {
+  Button,
+  Col,
+  DatePicker,
+  Form,
+  Input,
+  Row,
+  Select,
+  Table,
+  Spin,
+} from "antd";
 import "antd/dist/reset.css";
 import dayjs from "dayjs";
 import { useMemo, useCallback } from "react";
@@ -17,7 +27,10 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { useMerchantReportAnalyticsQuery } from "../../../redux/apiSlices/reportAnalyticsApi";
+import {
+  useLazyExportChartDataQuery,
+  useMerchantReportAnalyticsQuery,
+} from "../../../redux/apiSlices/reportAnalyticsApi";
 
 const { Option } = Select;
 
@@ -58,7 +71,7 @@ const metricOptions = ["Revenue", "Users", "Points Redeemed"];
 
 export default function MonthlyStatsChartMerchant() {
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   // Default dates: current year start and end
   const currentYear = new Date().getFullYear();
   const defaultStartDate = `${currentYear}-01-01`;
@@ -69,33 +82,44 @@ export default function MonthlyStatsChartMerchant() {
   const toDate = searchParams.get("m_endDate") || defaultEndDate;
   const merchantName = searchParams.get("m_merchantName") || "";
   const location = searchParams.get("m_location") || "";
-  const selectedSubscription = searchParams.get("m_subscription") || "All Statuses";
+  const selectedSubscription =
+    searchParams.get("m_subscription") || "All Statuses";
   const selectedPayment = searchParams.get("m_payment") || "All Payments";
   const selectedMetric = searchParams.get("m_metric") || "all";
   const chartType = searchParams.get("m_chartType") || "Bar";
   const currentPage = parseInt(searchParams.get("m_page") || "1", 10);
 
   // Helper function to update URL params
-  const updateSearchParam = useCallback((key, value) => {
-    setSearchParams((prev) => {
-      const newParams = new URLSearchParams(prev);
-      if (value && value !== "" && value !== "All Statuses" && value !== "All Payments" && value !== "all" && value !== "Bar") {
-        newParams.set(key, value);
-      } else if (key === "m_startDate" && value !== defaultStartDate) {
-        newParams.set(key, value);
-      } else if (key === "m_endDate" && value !== defaultEndDate) {
-        newParams.set(key, value);
-      } else {
-        newParams.delete(key);
-      }
-      return newParams;
-    });
-  }, [setSearchParams, defaultStartDate, defaultEndDate]);
+  const updateSearchParam = useCallback(
+    (key, value) => {
+      setSearchParams((prev) => {
+        const newParams = new URLSearchParams(prev);
+        if (
+          value &&
+          value !== "" &&
+          value !== "All Statuses" &&
+          value !== "All Payments" &&
+          value !== "all" &&
+          value !== "Bar"
+        ) {
+          newParams.set(key, value);
+        } else if (key === "m_startDate" && value !== defaultStartDate) {
+          newParams.set(key, value);
+        } else if (key === "m_endDate" && value !== defaultEndDate) {
+          newParams.set(key, value);
+        } else {
+          newParams.delete(key);
+        }
+        return newParams;
+      });
+    },
+    [setSearchParams, defaultStartDate, defaultEndDate]
+  );
 
   // Build query params for API
   const queryParams = useMemo(() => {
     const params = [];
-    
+
     if (fromDate) {
       params.push({ name: "startDate", value: fromDate });
     }
@@ -117,21 +141,38 @@ export default function MonthlyStatsChartMerchant() {
     if (currentPage > 1) {
       params.push({ name: "page", value: currentPage });
     }
-    
+
     return params;
-  }, [fromDate, toDate, merchantName, location, selectedSubscription, selectedPayment, currentPage]);
+  }, [
+    fromDate,
+    toDate,
+    merchantName,
+    location,
+    selectedSubscription,
+    selectedPayment,
+    currentPage,
+  ]);
 
   // Fetch data from API
-  const { data: apiResponse, isLoading, isFetching } = useMerchantReportAnalyticsQuery(queryParams);
+  const {
+    data: apiResponse,
+    isLoading,
+    isFetching,
+  } = useMerchantReportAnalyticsQuery(queryParams);
+  
+  // Lazy query for export (only triggers on button click)
+  const [triggerExport, { isLoading: isExportLoading }] = useLazyExportChartDataQuery();
 
   // Transform API data for table
   const tableData = useMemo(() => {
     if (!apiResponse?.data?.records) return [];
-    
+
     return apiResponse.data.records.map((record, index) => ({
       key: index,
       sl: index + 1,
-      date: record.joiningDate ? dayjs(record.joiningDate).format("YYYY-MM-DD") : "",
+      date: record.joiningDate
+        ? dayjs(record.joiningDate).format("YYYY-MM-DD")
+        : "",
       merchantId: record._id || "",
       MerchantName: record.merchantName || "",
       Location: record.location || "",
@@ -147,7 +188,7 @@ export default function MonthlyStatsChartMerchant() {
   // Transform monthly data for chart
   const chartData = useMemo(() => {
     if (!apiResponse?.data?.monthlyData) return [];
-    
+
     return apiResponse.data.monthlyData.map((item) => ({
       date: `${item.monthName} ${item.year}`,
       Revenue: item.totalRevenue || 0,
@@ -168,7 +209,8 @@ export default function MonthlyStatsChartMerchant() {
     return {
       Revenue: Math.max(...chartData.map((d) => d.Revenue)) || 100,
       Users: Math.max(...chartData.map((d) => d.Users)) || 100,
-      "Points Redeemed": Math.max(...chartData.map((d) => d["Points Redeemed"])) || 100,
+      "Points Redeemed":
+        Math.max(...chartData.map((d) => d["Points Redeemed"])) || 100,
     };
   }, [chartData]);
 
@@ -185,11 +227,11 @@ export default function MonthlyStatsChartMerchant() {
     const depth = 10;
     const maxValue = maxValues[dataKey] || 100;
     const currentValue = payload?.[dataKey] || 0;
-    
+
     if (!currentValue || !height || height <= 0) {
       return null;
     }
-    
+
     const scale = maxValue / currentValue;
     const watermarkHeight = height * scale;
     const watermarkY = y - (watermarkHeight - height);
@@ -213,9 +255,9 @@ export default function MonthlyStatsChartMerchant() {
           <polygon
             points={`${x + width},${watermarkY} ${x + width + depth},${
               watermarkY - depth
-            } ${x + width + depth},${watermarkY + watermarkHeight} ${x + width},${
-              watermarkY + watermarkHeight
-            }`}
+            } ${x + width + depth},${watermarkY + watermarkHeight} ${
+              x + width
+            },${watermarkY + watermarkHeight}`}
             fill={fill}
           />
         </g>
@@ -243,6 +285,30 @@ export default function MonthlyStatsChartMerchant() {
         />
       </g>
     );
+  };
+  const handleExportChartData = async () => {
+    try {
+      const result = await triggerExport(queryParams);
+      
+      if (result.data) {
+        // Create a blob URL and trigger download
+        const blob = result.data;
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        
+        // Generate filename with current date
+        const dateStr = new Date().toISOString().split("T")[0];
+        link.download = `merchant-report-${dateStr}.xlsx`;
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error("Export failed:", error);
+    }
   };
 
   const columns = [
@@ -328,7 +394,12 @@ export default function MonthlyStatsChartMerchant() {
               <Form.Item label="Start Date" style={{ marginBottom: "0.5rem" }}>
                 <DatePicker
                   value={fromDate ? dayjs(fromDate) : null}
-                  onChange={(date) => updateSearchParam("m_startDate", date ? dayjs(date).format("YYYY-MM-DD") : "")}
+                  onChange={(date) =>
+                    updateSearchParam(
+                      "m_startDate",
+                      date ? dayjs(date).format("YYYY-MM-DD") : ""
+                    )
+                  }
                   style={{ width: "100%" }}
                   placeholder="Start Date"
                   className="mli-tall-picker"
@@ -340,7 +411,12 @@ export default function MonthlyStatsChartMerchant() {
               <Form.Item label="End Date" style={{ marginBottom: "0.5rem" }}>
                 <DatePicker
                   value={toDate ? dayjs(toDate) : null}
-                  onChange={(date) => updateSearchParam("m_endDate", date ? dayjs(date).format("YYYY-MM-DD") : "")}
+                  onChange={(date) =>
+                    updateSearchParam(
+                      "m_endDate",
+                      date ? dayjs(date).format("YYYY-MM-DD") : ""
+                    )
+                  }
                   style={{ width: "100%" }}
                   placeholder="End Date"
                   className="mli-tall-picker"
@@ -355,7 +431,9 @@ export default function MonthlyStatsChartMerchant() {
               >
                 <Input
                   value={merchantName}
-                  onChange={(e) => updateSearchParam("m_merchantName", e.target.value)}
+                  onChange={(e) =>
+                    updateSearchParam("m_merchantName", e.target.value)
+                  }
                   style={{ width: "100%", height: "40px" }}
                   placeholder="Enter Merchant Name"
                   allowClear
@@ -367,7 +445,9 @@ export default function MonthlyStatsChartMerchant() {
               <Form.Item label="Location" style={{ marginBottom: "0.5rem" }}>
                 <Input
                   value={location}
-                  onChange={(e) => updateSearchParam("m_location", e.target.value)}
+                  onChange={(e) =>
+                    updateSearchParam("m_location", e.target.value)
+                  }
                   style={{ width: "100%", height: "40px" }}
                   placeholder="Enter Location"
                   allowClear
@@ -383,7 +463,9 @@ export default function MonthlyStatsChartMerchant() {
                 <Select
                   value={selectedSubscription}
                   style={{ width: "100%" }}
-                  onChange={(value) => updateSearchParam("m_subscription", value)}
+                  onChange={(value) =>
+                    updateSearchParam("m_subscription", value)
+                  }
                   className="mli-tall-select"
                 >
                   {subscriptionOptions.map((option) => (
@@ -466,7 +548,12 @@ export default function MonthlyStatsChartMerchant() {
                   >
                     Clear Selection
                   </Button>
-                  <Button className="bg-primary px-6 py-[19px] rounded-md text-white hover:text-secondary text-[14px] font-bold">
+                  <Button 
+                    onClick={handleExportChartData}
+                    loading={isExportLoading}
+                    disabled={isExportLoading}
+                    className="bg-primary px-6 py-[19px] rounded-md text-white hover:text-secondary text-[14px] font-bold"
+                  >
                     Export Report
                   </Button>
                 </div>
@@ -482,7 +569,14 @@ export default function MonthlyStatsChartMerchant() {
         style={{ width: "100%", height: 400, marginTop: "40px" }}
       >
         {isLoading || isFetching ? (
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%",
+            }}
+          >
             <Spin size="large" />
           </div>
         ) : (
@@ -601,7 +695,12 @@ export default function MonthlyStatsChartMerchant() {
       <div style={{ marginTop: "50px" }}>
         <div className="flex justify-between items-end mb-4">
           <h1 className="text-[22px] font-bold">Data Table</h1>
-          <Button className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary text-[17px] font-bold">
+          <Button 
+            className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary text-[17px] font-bold"
+            onClick={handleExportChartData}
+            loading={isExportLoading}
+            disabled={isExportLoading}
+          >
             Export Report
           </Button>
         </div>
@@ -614,17 +713,20 @@ export default function MonthlyStatsChartMerchant() {
           loading={isLoading || isFetching}
           columns={columns.filter(
             (col) =>
-              selectedMetric === "all" || 
-              !["Revenue", "Users", "Points Redeemed"].includes(col.dataIndex) ||
+              selectedMetric === "all" ||
+              !["Revenue", "Users", "Points Redeemed"].includes(
+                col.dataIndex
+              ) ||
               col.dataIndex === selectedMetric
           )}
           dataSource={tableData}
-          pagination={{ 
+          pagination={{
             current: currentPage,
             pageSize: 6,
             total: apiResponse?.pagination?.total || 0,
             showTotal: (total) => `Total ${total} records`,
-            onChange: (page) => updateSearchParam("m_page", page > 1 ? page.toString() : "")
+            onChange: (page) =>
+              updateSearchParam("m_page", page > 1 ? page.toString() : ""),
           }}
         />
       </div>
