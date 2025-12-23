@@ -1,5 +1,6 @@
 import React from "react";
 import { Tabs } from "antd";
+import { useSearchParams } from "react-router-dom";
 import MerchantReportingAnalytics from "./Tab/MerchantReportingAnalytics";
 import CustomerReportingAnalytics from "./Tab/CustomerReportingAnalytics";
 import AccountingReports from "./Tab/AccountingReports";
@@ -7,10 +8,24 @@ import AccountingReports from "./Tab/AccountingReports";
 const { TabPane } = Tabs;
 
 export default function ReportingAnalyticsPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Get active tab from URL or default to "1"
+  const activeTab = searchParams.get("tab") || "1";
+  
+  const handleTabChange = (key) => {
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev);
+      newParams.set("tab", key);
+      return newParams;
+    });
+  };
+
   return (
     <div style={{ width: "100%" }}>
       <Tabs
-        defaultActiveKey="1"
+        activeKey={activeTab}
+        onChange={handleTabChange}
         tabBarStyle={{
           borderBottom: "none", // Remove the border
         }}

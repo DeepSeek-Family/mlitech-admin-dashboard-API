@@ -1,7 +1,8 @@
 import { Button, DatePicker, Table } from "antd";
 import "antd/dist/reset.css";
 import dayjs from "dayjs";
-import { useState } from "react";
+import { useMemo, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 
 // Sample data for cash receivable
 const data = [
@@ -36,13 +37,6 @@ const data = [
 
 // Table columns
 const columns = [
-  // {
-  //   title: "SL",
-  //   dataIndex: "sl",
-  //   key: "sl",
-  //   align: "center",
-  //   render: (_, __, index) => index + 1,
-  // },
   {
     title: "Customer ID",
     dataIndex: "merchantId",
@@ -78,37 +72,41 @@ const columns = [
 ];
 
 export default function CashReceivable() {
-  const [filteredData, setFilteredData] = useState(data);
-  const [fromDate, setFromDate] = useState(null);
-  const [toDate, setToDate] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Read values from URL params
+  const fromDate = searchParams.get("cr_fromDate") || "";
+  const toDate = searchParams.get("cr_toDate") || "";
+  const currentPage = parseInt(searchParams.get("cr_page") || "1", 10);
 
-  const handleDateChange = () => {
+  // Helper function to update URL params
+  const updateSearchParam = useCallback((key, value) => {
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev);
+      if (value && value !== "") {
+        newParams.set(key, value);
+      } else {
+        newParams.delete(key);
+      }
+      return newParams;
+    });
+  }, [setSearchParams]);
+
+  // Filter data based on URL params
+  const filteredData = useMemo(() => {
     let filtered = data;
     if (fromDate) {
       filtered = filtered.filter((item) =>
-        dayjs(item.date).isSameOrAfter(fromDate, "day")
+        dayjs(item.date).isSameOrAfter(dayjs(fromDate), "day")
       );
     }
     if (toDate) {
       filtered = filtered.filter((item) =>
-        dayjs(item.date).isSameOrBefore(toDate, "day")
+        dayjs(item.date).isSameOrBefore(dayjs(toDate), "day")
       );
     }
-    setFilteredData(filtered);
-  };
-
-  const handleFromDateChange = (date) => {
-    setFromDate(date);
-    handleDateChange(); // Trigger the date filter when "From" date changes
-  };
-
-  const handleToDateChange = (date) => {
-    setToDate(date);
-    handleDateChange(); // Trigger the date filter when "To" date changes
-  };
-
-  // Debug log to inspect filtered data at runtime
-  console.log("CashReceivable filteredData:", filteredData);
+    return filtered;
+  }, [fromDate, toDate]);
 
   return (
     <div style={{ width: "100%" }}>
@@ -118,14 +116,14 @@ export default function CashReceivable() {
           <div>
             <DatePicker
               value={fromDate ? dayjs(fromDate) : null}
-              onChange={handleFromDateChange}
+              onChange={(date) => updateSearchParam("cr_fromDate", date ? dayjs(date).format("YYYY-MM-DD") : "")}
               style={{ marginLeft: "auto", marginRight: "20px" }}
               placeholder="From Date"
               format="YYYY-MM-DD"
             />
             <DatePicker
               value={toDate ? dayjs(toDate) : null}
-              onChange={handleToDateChange}
+              onChange={(date) => updateSearchParam("cr_toDate", date ? dayjs(date).format("YYYY-MM-DD") : "")}
               style={{ marginRight: "20px" }}
               placeholder="To Date"
               format="YYYY-MM-DD"
@@ -146,7 +144,11 @@ export default function CashReceivable() {
           ...row,
           key: index,
         }))}
-        pagination={{ pageSize: 6 }}
+        pagination={{ 
+          current: currentPage,
+          pageSize: 6,
+          onChange: (page) => updateSearchParam("cr_page", page > 1 ? page.toString() : "")
+        }}
       />
     </div>
   );

@@ -1,7 +1,8 @@
 import { Button, Col, DatePicker, Form, Input, Row, Select, Table, Spin } from "antd";
 import "antd/dist/reset.css";
 import dayjs from "dayjs";
-import { useMemo, useState } from "react";
+import { useMemo, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   Area,
   AreaChart,
@@ -57,30 +58,51 @@ const metricOptions = ["Revenue", "Users", "Points Redeemed"];
 const pointsFilterOptions = ["All", "Points Redeemed", "Points Accumulated"];
 
 export default function MonthlyStatsChartCustomer() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  
   // Default dates: current year start and end
   const currentYear = new Date().getFullYear();
-  const defaultStartDate = dayjs(`${currentYear}-01-01`);
-  const defaultEndDate = dayjs(`${currentYear}-12-31`);
+  const defaultStartDate = `${currentYear}-01-01`;
+  const defaultEndDate = `${currentYear}-12-31`;
 
-  const [fromDate, setFromDate] = useState(defaultStartDate);
-  const [toDate, setToDate] = useState(defaultEndDate);
-  const [customerName, setCustomerName] = useState("");
-  const [location, setLocation] = useState("");
-  const [selectedSubscription, setSelectedSubscription] = useState("All Statuses");
-  const [selectedPayment, setSelectedPayment] = useState("All Payments");
-  const [selectedMetric, setSelectedMetric] = useState("all");
-  const [selectedPointsFilter, setSelectedPointsFilter] = useState("All");
-  const [chartType, setChartType] = useState("Bar");
+  // Read values from URL params with defaults
+  const fromDate = searchParams.get("c_startDate") || defaultStartDate;
+  const toDate = searchParams.get("c_endDate") || defaultEndDate;
+  const customerName = searchParams.get("c_customerName") || "";
+  const location = searchParams.get("c_location") || "";
+  const selectedSubscription = searchParams.get("c_subscription") || "All Statuses";
+  const selectedPayment = searchParams.get("c_payment") || "All Payments";
+  const selectedMetric = searchParams.get("c_metric") || "all";
+  const selectedPointsFilter = searchParams.get("c_pointsFilter") || "All";
+  const chartType = searchParams.get("c_chartType") || "Bar";
+  const currentPage = parseInt(searchParams.get("c_page") || "1", 10);
+
+  // Helper function to update URL params
+  const updateSearchParam = useCallback((key, value) => {
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev);
+      if (value && value !== "" && value !== "All Statuses" && value !== "All Payments" && value !== "all" && value !== "All" && value !== "Bar") {
+        newParams.set(key, value);
+      } else if (key === "c_startDate" && value !== defaultStartDate) {
+        newParams.set(key, value);
+      } else if (key === "c_endDate" && value !== defaultEndDate) {
+        newParams.set(key, value);
+      } else {
+        newParams.delete(key);
+      }
+      return newParams;
+    });
+  }, [setSearchParams, defaultStartDate, defaultEndDate]);
 
   // Build query params for API
   const queryParams = useMemo(() => {
     const params = [];
     
     if (fromDate) {
-      params.push({ name: "startDate", value: dayjs(fromDate).format("YYYY-MM-DD") });
+      params.push({ name: "startDate", value: fromDate });
     }
     if (toDate) {
-      params.push({ name: "endDate", value: dayjs(toDate).format("YYYY-MM-DD") });
+      params.push({ name: "endDate", value: toDate });
     }
     if (customerName && customerName.trim() !== "") {
       params.push({ name: "customerName", value: customerName.trim() });
@@ -94,9 +116,12 @@ export default function MonthlyStatsChartCustomer() {
     if (selectedPayment && selectedPayment !== "All Payments") {
       params.push({ name: "paymentStatus", value: selectedPayment });
     }
+    if (currentPage > 1) {
+      params.push({ name: "page", value: currentPage });
+    }
     
     return params;
-  }, [fromDate, toDate, customerName, location, selectedSubscription, selectedPayment]);
+  }, [fromDate, toDate, customerName, location, selectedSubscription, selectedPayment, currentPage]);
 
   // Fetch data from API
   const { data: apiResponse, isLoading, isFetching } = useCustomerReportAnalyticsQuery(queryParams);
@@ -282,15 +307,21 @@ export default function MonthlyStatsChartCustomer() {
 
   // Handle clear selection
   const handleClearSelection = () => {
-    setFromDate(defaultStartDate);
-    setToDate(defaultEndDate);
-    setCustomerName("");
-    setLocation("");
-    setSelectedSubscription("All Statuses");
-    setSelectedPayment("All Payments");
-    setSelectedMetric("all");
-    setSelectedPointsFilter("All");
-    setChartType("Bar");
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev);
+      // Remove all customer-related params
+      newParams.delete("c_startDate");
+      newParams.delete("c_endDate");
+      newParams.delete("c_customerName");
+      newParams.delete("c_location");
+      newParams.delete("c_subscription");
+      newParams.delete("c_payment");
+      newParams.delete("c_metric");
+      newParams.delete("c_pointsFilter");
+      newParams.delete("c_chartType");
+      newParams.delete("c_page");
+      return newParams;
+    });
   };
 
   return (
@@ -303,7 +334,7 @@ export default function MonthlyStatsChartCustomer() {
               <Form.Item label="Start Date" style={{ marginBottom: "0.5rem" }}>
                 <DatePicker
                   value={fromDate ? dayjs(fromDate) : null}
-                  onChange={(date) => setFromDate(date)}
+                  onChange={(date) => updateSearchParam("c_startDate", date ? dayjs(date).format("YYYY-MM-DD") : "")}
                   style={{ width: "100%" }}
                   placeholder="Start Date"
                   className="mli-tall-picker"
@@ -315,7 +346,7 @@ export default function MonthlyStatsChartCustomer() {
               <Form.Item label="End Date" style={{ marginBottom: "0.5rem" }}>
                 <DatePicker
                   value={toDate ? dayjs(toDate) : null}
-                  onChange={(date) => setToDate(date)}
+                  onChange={(date) => updateSearchParam("c_endDate", date ? dayjs(date).format("YYYY-MM-DD") : "")}
                   style={{ width: "100%" }}
                   placeholder="End Date"
                   className="mli-tall-picker"
@@ -330,7 +361,7 @@ export default function MonthlyStatsChartCustomer() {
               >
                 <Input
                   value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
+                  onChange={(e) => updateSearchParam("c_customerName", e.target.value)}
                   style={{ width: "100%", height: "40px" }}
                   placeholder="Enter Customer Name"
                   allowClear
@@ -342,7 +373,7 @@ export default function MonthlyStatsChartCustomer() {
               <Form.Item label="Location" style={{ marginBottom: "0.5rem" }}>
                 <Input
                   value={location}
-                  onChange={(e) => setLocation(e.target.value)}
+                  onChange={(e) => updateSearchParam("c_location", e.target.value)}
                   style={{ width: "100%", height: "40px" }}
                   placeholder="Enter Location"
                   allowClear
@@ -358,7 +389,7 @@ export default function MonthlyStatsChartCustomer() {
                 <Select
                   value={selectedSubscription}
                   style={{ width: "100%" }}
-                  onChange={setSelectedSubscription}
+                  onChange={(value) => updateSearchParam("c_subscription", value)}
                   className="mli-tall-select"
                 >
                   {subscriptionOptions.map((option) => (
@@ -381,7 +412,7 @@ export default function MonthlyStatsChartCustomer() {
                 <Select
                   value={selectedPayment}
                   style={{ width: "100%" }}
-                  onChange={setSelectedPayment}
+                  onChange={(value) => updateSearchParam("c_payment", value)}
                   className="mli-tall-select"
                 >
                   {paymentOptions.map((option) => (
@@ -401,7 +432,7 @@ export default function MonthlyStatsChartCustomer() {
                 <Select
                   value={chartType}
                   style={{ width: "100%" }}
-                  onChange={setChartType}
+                  onChange={(value) => updateSearchParam("c_chartType", value)}
                   className="mli-tall-select"
                 >
                   <Option value="Bar">Bar Chart</Option>
@@ -419,7 +450,7 @@ export default function MonthlyStatsChartCustomer() {
                 <Select
                   value={selectedMetric}
                   style={{ width: "100%" }}
-                  onChange={setSelectedMetric}
+                  onChange={(value) => updateSearchParam("c_metric", value)}
                   className="mli-tall-select"
                 >
                   <Option value="all">All Metrics</Option>
@@ -440,7 +471,7 @@ export default function MonthlyStatsChartCustomer() {
                 <Select
                   value={selectedPointsFilter}
                   style={{ width: "100%" }}
-                  onChange={setSelectedPointsFilter}
+                  onChange={(value) => updateSearchParam("c_pointsFilter", value)}
                   className="mli-tall-select"
                 >
                   {pointsFilterOptions.map((option) => (
@@ -640,9 +671,11 @@ export default function MonthlyStatsChartCustomer() {
           })}
           dataSource={tableData}
           pagination={{ 
+            current: currentPage,
             pageSize: 6,
             total: apiResponse?.pagination?.total || 0,
-            showTotal: (total) => `Total ${total} records`
+            showTotal: (total) => `Total ${total} records`,
+            onChange: (page) => updateSearchParam("c_page", page > 1 ? page.toString() : "")
           }}
         />
       </div>
