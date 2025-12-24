@@ -59,9 +59,9 @@ const TermsAndConditions = () => {
         <h2 className="text-xl font-bold">Terms & Conditions</h2>
         <Button
           onClick={showModal}
-          className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary text-[17px] font-bold"
+          className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary hover:bg-primary text-[17px] font-bold"
         >
-          Update Terms & Conditions
+          Edit Terms & Conditions
         </Button>
       </div>
 
@@ -82,7 +82,7 @@ const TermsAndConditions = () => {
           <Button
             key="cancel"
             onClick={handleCancel}
-            className="bg-red-500 text-white mr-2 py-5"
+            className="bg-red-500 text-white mr-2 h-10"
           >
             Cancel
           </Button>,
@@ -90,7 +90,7 @@ const TermsAndConditions = () => {
             key="submit"
             onClick={handleOk}
             disabled={isUpdating}
-            className="bg-secondary text-white"
+            className="bg-primary h-10 text-white"
           >
             {isUpdating ? "Updating..." : "Update Terms & Conditions"}
           </Button>,

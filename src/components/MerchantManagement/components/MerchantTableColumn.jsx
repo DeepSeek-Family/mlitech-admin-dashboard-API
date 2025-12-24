@@ -103,7 +103,7 @@ const MerchantTableColumn = ({
             <div className="flex gap-2 justify-center items-center py-[7px] px-[15px]">
               <button
                 onClick={() => onApprove(record.recordId || record.id)}
-                className="bg-green-500 text-white px-3 py-1 rounded-md hover:opacity-90"
+                className="bg-primary text-white px-3 py-1 rounded-md hover:opacity-90"
               >
                 Add
               </button>
