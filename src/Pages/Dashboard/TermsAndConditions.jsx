@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import JoditEditor from "jodit-react";
 import { Button, message, Modal, Tabs } from "antd";
+import { useSearchParams } from "react-router-dom";
 import {
   useGetMerchantTermsAndConditionsQuery,
   useGetCustomerTermsAndConditionsQuery,
@@ -11,7 +12,10 @@ const { TabPane } = Tabs;
 
 const TermsAndConditions = () => {
   const editor = useRef(null);
-  const [activeTab, setActiveTab] = useState("customer");
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Get active tab from URL or default to "customer"
+  const activeTab = searchParams.get("tab") || "customer";
 
   // Fetch data for both merchant and customer
   const {
@@ -86,7 +90,11 @@ const TermsAndConditions = () => {
   };
 
   const handleTabChange = (key) => {
-    setActiveTab(key);
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev);
+      newParams.set("tab", key);
+      return newParams;
+    });
   };
 
   const currentContent =
