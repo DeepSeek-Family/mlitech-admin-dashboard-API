@@ -1,35 +1,61 @@
 import { useState, useRef, useEffect } from "react";
 import JoditEditor from "jodit-react";
-import { Button, message, Modal } from "antd";
+import { Button, message, Modal, Tabs } from "antd";
+import { useSearchParams } from "react-router-dom";
 import {
-  useGetTermsAndConditionsQuery,
+  useGetMerchantTermsAndConditionsQuery,
+  useGetCustomerTermsAndConditionsQuery,
   useUpdateTermsAndConditionsMutation,
 } from "../../redux/apiSlices/termsAndConditionSlice";
 
+const { TabPane } = Tabs;
+
 const TermsAndConditions = () => {
   const editor = useRef(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Get active tab from URL or default to "customer"
+  const activeTab = searchParams.get("tab") || "customer";
+
+  // Fetch data for both merchant and customer
+  const {
+    data: merchantTermsData,
+    isLoading: isLoadingMerchant,
+    isError: isErrorMerchant,
+  } = useGetMerchantTermsAndConditionsQuery();
 
   const {
-    data: termsData,
-    isLoading,
-    isError,
-  } = useGetTermsAndConditionsQuery();
+    data: customerTermsData,
+    isLoading: isLoadingCustomer,
+    isError: isErrorCustomer,
+  } = useGetCustomerTermsAndConditionsQuery();
 
   const [updateTermsAndConditions, { isLoading: isUpdating }] =
     useUpdateTermsAndConditionsMutation();
 
   // Initialize content state from API data or default
-  const [termsContent, setTermsContent] = useState(
-    termsData?.data?.content ||
-      "<p>Your terms and conditions content goes here.</p>"
+  const [merchantContent, setMerchantContent] = useState(
+    merchantTermsData?.data?.content ||
+      "<p>Your merchant terms and conditions content goes here.</p>"
+  );
+
+  const [customerContent, setCustomerContent] = useState(
+    customerTermsData?.data?.content ||
+      "<p>Your customer terms and conditions content goes here.</p>"
   );
 
   // Update state when API data loads
   useEffect(() => {
-    if (termsData?.data?.content) {
-      setTermsContent(termsData.data.content);
+    if (merchantTermsData?.data?.content) {
+      setMerchantContent(merchantTermsData.data.content);
     }
-  }, [termsData?.data?.content]);
+  }, [merchantTermsData?.data?.content]);
+
+  useEffect(() => {
+    if (customerTermsData?.data?.content) {
+      setCustomerContent(customerTermsData.data.content);
+    }
+  }, [customerTermsData?.data?.content]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -39,8 +65,18 @@ const TermsAndConditions = () => {
 
   const handleOk = async () => {
     try {
+      const type =
+        activeTab === "merchant"
+          ? "merchant-terms-and-conditions"
+          : "customer-terms-and-conditions";
+      const content =
+        activeTab === "merchant" ? merchantContent : customerContent;
+
       // Send update request to API
-      await updateTermsAndConditions({ content: termsContent }).unwrap();
+      await updateTermsAndConditions({
+        type,
+        content,
+      }).unwrap();
       setIsModalOpen(false);
       message.success("Terms & Conditions updated successfully!");
     } catch (error) {
@@ -52,6 +88,20 @@ const TermsAndConditions = () => {
   const handleCancel = () => {
     setIsModalOpen(false);
   };
+
+  const handleTabChange = (key) => {
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev);
+      newParams.set("tab", key);
+      return newParams;
+    });
+  };
+
+  const currentContent =
+    activeTab === "merchant" ? merchantContent : customerContent;
+  const isLoading =
+    activeTab === "merchant" ? isLoadingMerchant : isLoadingCustomer;
+  const isError = activeTab === "merchant" ? isErrorMerchant : isErrorCustomer;
 
   return (
     <div className="">
@@ -65,15 +115,54 @@ const TermsAndConditions = () => {
         </Button>
       </div>
 
-      <div className="saved-content mt-6 border p-6 rounded-lg bg-white">
-        <div
-          dangerouslySetInnerHTML={{ __html: termsContent }}
-          className="prose max-w-none"
-        />
-      </div>
+      <Tabs
+        activeKey={activeTab}
+        onChange={handleTabChange}
+        className="mb-6"
+        items={[
+          {
+            key: "customer",
+            label: "Customer Terms & Conditions",
+            children: (
+              <div className="saved-content mt-6 border p-6 rounded-lg bg-white">
+                {isLoadingCustomer ? (
+                  <div>Loading...</div>
+                ) : isErrorCustomer ? (
+                  <div>Error loading customer terms and conditions.</div>
+                ) : (
+                  <div
+                    dangerouslySetInnerHTML={{ __html: customerContent }}
+                    className="prose max-w-none"
+                  />
+                )}
+              </div>
+            ),
+          },
+          {
+            key: "merchant",
+            label: "Merchant Terms & Conditions",
+            children: (
+              <div className="saved-content mt-6 border p-6 rounded-lg bg-white">
+                {isLoadingMerchant ? (
+                  <div>Loading...</div>
+                ) : isErrorMerchant ? (
+                  <div>Error loading merchant terms and conditions.</div>
+                ) : (
+                  <div
+                    dangerouslySetInnerHTML={{ __html: merchantContent }}
+                    className="prose max-w-none"
+                  />
+                )}
+              </div>
+            ),
+          },
+        ]}
+      />
 
       <Modal
-        title="Update Terms & Conditions"
+        title={`Update ${
+          activeTab === "merchant" ? "Merchant" : "Customer"
+        } Terms & Conditions`}
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
@@ -100,9 +189,13 @@ const TermsAndConditions = () => {
           <div className="mb-6">
             <JoditEditor
               ref={editor}
-              value={termsContent}
+              value={currentContent}
               onChange={(newContent) => {
-                setTermsContent(newContent);
+                if (activeTab === "merchant") {
+                  setMerchantContent(newContent);
+                } else {
+                  setCustomerContent(newContent);
+                }
               }}
             />
           </div>

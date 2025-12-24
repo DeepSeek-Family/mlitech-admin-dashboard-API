@@ -3,23 +3,26 @@ import { api } from "../api/baseApi";
 export const termsAndConditionApi = api.injectEndpoints({
   endpoints: (builder) => ({
     // ---------------------------------------
-    // GET terms and conditions
+    // GET merchant terms and conditions
     // ---------------------------------------
-    getTermsAndConditions: builder.query({
-      query: (args) => {
-        const params = new URLSearchParams();
-        if (args) {
-          args.forEach((arg) => {
-            params.append(arg.name, arg.value);
-          });
-        }
-        return {
-          url: `/rule/terms-and-conditions?${params.toString()}`,
-          method: "GET",
-        };
-      },
+    getMerchantTermsAndConditions: builder.query({
+      query: () => ({
+        url: `/disclaimers/merchant-terms-and-conditions`,
+        method: "GET",
+      }),
       transformResponse: (response) => response,
-      providesTags: ["TermsAndConditions"],
+      providesTags: ["MerchantTermsAndConditions"],
+    }),
+    // ---------------------------------------
+    // GET customer terms and conditions
+    // ---------------------------------------
+    getCustomerTermsAndConditions: builder.query({
+      query: () => ({
+        url: `/disclaimers/customer-terms-and-conditions`,
+        method: "GET",
+      }),
+      transformResponse: (response) => response,
+      providesTags: ["CustomerTermsAndConditions"],
     }),
     // ---------------------------------------
     // UPDATE terms and conditions
@@ -30,12 +33,20 @@ export const termsAndConditionApi = api.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["TermsAndConditions"],
+      invalidatesTags: (result, error, arg) => {
+        if (arg.type === "merchant-terms-and-conditions") {
+          return ["MerchantTermsAndConditions"];
+        } else if (arg.type === "customer-terms-and-conditions") {
+          return ["CustomerTermsAndConditions"];
+        }
+        return ["MerchantTermsAndConditions", "CustomerTermsAndConditions"];
+      },
     }),
   }),
 });
 
 export const {
-  useGetTermsAndConditionsQuery,
+  useGetMerchantTermsAndConditionsQuery,
+  useGetCustomerTermsAndConditionsQuery,
   useUpdateTermsAndConditionsMutation,
 } = termsAndConditionApi;
