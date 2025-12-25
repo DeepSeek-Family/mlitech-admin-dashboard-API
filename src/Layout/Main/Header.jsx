@@ -3,26 +3,44 @@ import { useState, useEffect, useCallback } from "react";
 import { FaRegBell } from "react-icons/fa6";
 import { Menu as MenuIcon } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { getImageUrl } from "../../components/common/imageUrl";
 import { useUser } from "../../provider/User";
-import { useGetUnreadCountQuery } from "../../redux/apiSlices/notificationSlice";
+import {
+  useGetUnreadCountQuery,
+  notificationApi,
+} from "../../redux/apiSlices/notificationSlice";
 import socketService from "../../components/common/socketService";
 
 const Header = ({ toggleSidebar, isMobile }) => {
   const { user } = useUser();
+  const dispatch = useDispatch();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const navigate = useNavigate();
 
   // Get unread notification count
-  const { data: notificationData, refetch: refetchNotifications } =
-    useGetUnreadCountQuery();
+  const {
+    data: notificationData,
+    refetch: refetchNotifications,
+    isFetching,
+  } = useGetUnreadCountQuery();
   const unreadCount = notificationData?.data?.unreadCount || 0;
 
   // Handle new notification from socket
   const handleNewNotification = useCallback(() => {
     console.log("🔔 Header: New notification received, refetching count...");
-    refetchNotifications();
-  }, [refetchNotifications]);
+
+    // Invalidate the Notifications tag to trigger automatic refetch
+    dispatch(notificationApi.util.invalidateTags(["Notifications"]));
+
+    // Also try to refetch if the query is already active
+    if (!isFetching) {
+      refetchNotifications().catch((error) => {
+        // Silently handle if query hasn't started yet
+        console.log("Query not ready for refetch:", error);
+      });
+    }
+  }, [dispatch, refetchNotifications, isFetching]);
 
   useEffect(() => {
     if (user?._id) {

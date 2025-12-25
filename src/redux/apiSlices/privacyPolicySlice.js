@@ -3,36 +3,50 @@ import { api } from "../api/baseApi";
 export const privacyPolicyApi = api.injectEndpoints({
   endpoints: (builder) => ({
     // ---------------------------------------
-    // GET privacy policy
+    // GET merchant privacy policy
     // ---------------------------------------
-    getPrivacyPolicy: builder.query({
-      query: (args) => {
-        const params = new URLSearchParams();
-        if (args) {
-          args.forEach((arg) => {
-            params.append(arg.name, arg.value);
-          });
-        }
-        return {
-          url: `/rule/privacy-policy?${params.toString()}`,
-          method: "GET",
-        };
-      },
+    getMerchantPrivacyPolicy: builder.query({
+      query: () => ({
+        url: `/disclaimers/merchant-privacy-policy`,
+        method: "GET",
+      }),
       transformResponse: (response) => response,
-      providesTags: ["PrivacyPolicy"],
+      providesTags: ["MerchantPrivacyPolicy"],
+    }),
+    // ---------------------------------------
+    // GET customer privacy policy
+    // ---------------------------------------
+    getCustomerPrivacyPolicy: builder.query({
+      query: () => ({
+        url: `/disclaimers/customer-privacy-policy`,
+        method: "GET",
+      }),
+      transformResponse: (response) => response,
+      providesTags: ["CustomerPrivacyPolicy"],
     }),
     // ---------------------------------------
     // UPDATE privacy policy
     // ---------------------------------------
     updatePrivacyPolicy: builder.mutation({
       query: (body) => ({
-        url: `/rule/privacy-policy`,
+        url: `/disclaimers`,
         method: "POST",
         body,
       }),
-      invalidatesTags: ["PrivacyPolicy"],
+      invalidatesTags: (result, error, arg) => {
+        if (arg.type === "merchant-privacy-policy") {
+          return ["MerchantPrivacyPolicy"];
+        } else if (arg.type === "customer-privacy-policy") {
+          return ["CustomerPrivacyPolicy"];
+        }
+        return ["MerchantPrivacyPolicy", "CustomerPrivacyPolicy"];
+      },
     }),
   }),
 });
 
-export const { useGetPrivacyPolicyQuery, useUpdatePrivacyPolicyMutation } = privacyPolicyApi;
+export const {
+  useGetMerchantPrivacyPolicyQuery,
+  useGetCustomerPrivacyPolicyQuery,
+  useUpdatePrivacyPolicyMutation,
+} = privacyPolicyApi;

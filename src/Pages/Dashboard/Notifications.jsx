@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { ConfigProvider, Pagination, Spin } from 'antd';
 import { useGetNotificationsQuery, useReadNotificationMutation } from "../../redux/apiSlices/notificationSlice";
 import { useProfileQuery } from "../../redux/apiSlices/authSlice";
+import { useDispatch } from 'react-redux';
+import { notificationApi } from "../../redux/apiSlices/notificationSlice";
 import toast from 'react-hot-toast';
 import notificationImg from "../../assets/notification.png";
 import socketService from '../../components/common/socketService';
@@ -9,13 +11,18 @@ import socketService from '../../components/common/socketService';
 const Notifications = () => {
     const [page, setPage] = useState(1);
     const [limit] = useState(10);
+    const dispatch = useDispatch();
     
     const { data: userData } = useProfileQuery();
-    const { data: notificationsData, isLoading, refetch } = useGetNotificationsQuery([
+    
+    // Use skip to ensure query only runs when userData is available
+    const { data: notificationsData, isLoading, refetch, isFetching } = useGetNotificationsQuery([
         { name: 'page', value: page },
         { name: 'limit', value: limit },
         ...(userData?._id ? [{ name: 'userId', value: userData._id }] : [])
-    ]);
+    ], {
+        skip: !userData?._id, // Skip query until userData is available
+    });
     
     const [readNotification] = useReadNotificationMutation();
 
@@ -23,9 +30,19 @@ const Notifications = () => {
     const handleNewNotification = useCallback((notification) => {
         console.log("🔔 New notification received:", notification);
         toast.success(notification?.title || "New notification received!");
-        // Refetch notifications to update the UI
-        refetch();
-    }, [refetch]);
+        
+        // Invalidate the Notifications tag to trigger automatic refetch
+        // This is safer than calling refetch() directly
+        dispatch(notificationApi.util.invalidateTags(['Notifications']));
+        
+        // Also try to refetch if the query is already active
+        if (!isFetching) {
+            refetch().catch((error) => {
+                // Silently handle if query hasn't started yet
+                console.log("Query not ready for refetch:", error);
+            });
+        }
+    }, [dispatch, refetch, isFetching]);
 
     useEffect(() => {
         if (userData?._id) {
@@ -47,7 +64,11 @@ const Notifications = () => {
             const response = await readNotification().unwrap();
             if (response.status || response.success) {
                 toast.success(response.message || "All notifications marked as read");
-                refetch();
+                // The mutation already invalidates tags, so refetch will happen automatically
+                // But we can also manually refetch if needed
+                if (!isFetching) {
+                    refetch().catch(() => {});
+                }
             }
         } catch (error) {
             toast.error(error?.data?.message || "Failed to mark notifications as read");

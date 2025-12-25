@@ -87,6 +87,7 @@ export const api = createApi({
     "SalesRep",
     "User",
     "AuditLog",
+    "Notifications"
   ],
   endpoints: () => ({}),
 });

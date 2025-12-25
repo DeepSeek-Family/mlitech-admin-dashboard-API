@@ -57,7 +57,10 @@ const Home = () => {
 
   // Show loading state
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (<div className="flex justify-center items-center h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+      {/* <p className="text-gray-600">Loading...</p> */}
+    </div>);
   }
 
   // Show error state
@@ -150,7 +153,7 @@ const Home = () => {
                 </h2>
                 <h3 className="text-secondary text-[24px] font-semibold flex items-center gap-3">
                   <SubscriptionManagement className="w-[20px] h-[20px] text-secondary" />
-                  ${response?.data?.subscriptionRevenue || 0}
+                  {response?.data?.subscriptionRevenue || 0}
                 </h3>
               </div>
             </div>

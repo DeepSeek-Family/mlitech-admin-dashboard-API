@@ -1,35 +1,61 @@
 import { useState, useRef, useEffect } from "react";
 import JoditEditor from "jodit-react";
-import { Button, message, Modal } from "antd";
+import { Button, message, Modal, Tabs } from "antd";
+import { useSearchParams } from "react-router-dom";
 import {
-  useGetPrivacyPolicyQuery,
+  useGetMerchantPrivacyPolicyQuery,
+  useGetCustomerPrivacyPolicyQuery,
   useUpdatePrivacyPolicyMutation,
 } from "../../redux/apiSlices/privacyPolicySlice";
 
+const { TabPane } = Tabs;
+
 const PrivacyPolicy = () => {
   const editor = useRef(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Get active tab from URL or default to "customer"
+  const activeTab = searchParams.get("tab") || "customer";
+
+  // Fetch data for both merchant and customer
+  const {
+    data: merchantPrivacyData,
+    isLoading: isLoadingMerchant,
+    isError: isErrorMerchant,
+  } = useGetMerchantPrivacyPolicyQuery();
 
   const {
-    data: privacyPolicyData,
-    isLoading,
-    isError,
-  } = useGetPrivacyPolicyQuery();
+    data: customerPrivacyData,
+    isLoading: isLoadingCustomer,
+    isError: isErrorCustomer,
+  } = useGetCustomerPrivacyPolicyQuery();
 
   const [updatePrivacyPolicy, { isLoading: isUpdating }] =
     useUpdatePrivacyPolicyMutation();
 
   // Initialize content state from API data or default
-  const [termsContent, setTermsContent] = useState(
-    privacyPolicyData?.data?.content ||
-      "<p>Your privacy policy content goes here.</p>"
+  const [merchantContent, setMerchantContent] = useState(
+    merchantPrivacyData?.data?.content ||
+      "<p>Your merchant privacy policy content goes here.</p>"
+  );
+
+  const [customerContent, setCustomerContent] = useState(
+    customerPrivacyData?.data?.content ||
+      "<p>Your customer privacy policy content goes here.</p>"
   );
 
   // Update state when API data loads
   useEffect(() => {
-    if (privacyPolicyData?.data?.content) {
-      setTermsContent(privacyPolicyData.data.content);
+    if (merchantPrivacyData?.data?.content) {
+      setMerchantContent(merchantPrivacyData.data.content);
     }
-  }, [privacyPolicyData?.data?.content]);
+  }, [merchantPrivacyData?.data?.content]);
+
+  useEffect(() => {
+    if (customerPrivacyData?.data?.content) {
+      setCustomerContent(customerPrivacyData.data.content);
+    }
+  }, [customerPrivacyData?.data?.content]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -39,8 +65,18 @@ const PrivacyPolicy = () => {
 
   const handleOk = async () => {
     try {
+      const type =
+        activeTab === "merchant"
+          ? "merchant-privacy-policy"
+          : "customer-privacy-policy";
+      const content =
+        activeTab === "merchant" ? merchantContent : customerContent;
+
       // Send update request to API
-      await updatePrivacyPolicy({ content: termsContent }).unwrap();
+      await updatePrivacyPolicy({
+        type,
+        content,
+      }).unwrap();
       setIsModalOpen(false);
       message.success("Privacy Policy updated successfully!");
     } catch (error) {
@@ -53,6 +89,20 @@ const PrivacyPolicy = () => {
     setIsModalOpen(false);
   };
 
+  const handleTabChange = (key) => {
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev);
+      newParams.set("tab", key);
+      return newParams;
+    });
+  };
+
+  const currentContent =
+    activeTab === "merchant" ? merchantContent : customerContent;
+  const isLoading =
+    activeTab === "merchant" ? isLoadingMerchant : isLoadingCustomer;
+  const isError = activeTab === "merchant" ? isErrorMerchant : isErrorCustomer;
+
   return (
     <div className="">
       <div className="flex justify-between items-end mb-6">
@@ -61,19 +111,58 @@ const PrivacyPolicy = () => {
           onClick={showModal}
           className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary text-[17px] font-bold"
         >
-          Update Privacy Policy
+          Edit Privacy Policy
         </Button>
       </div>
 
-      <div className="saved-content mt-6 border p-6 rounded-lg bg-white">
-        <div
-          dangerouslySetInnerHTML={{ __html: termsContent }}
-          className="prose max-w-none"
-        />
-      </div>
+      <Tabs
+        activeKey={activeTab}
+        onChange={handleTabChange}
+        className="mb-6"
+        items={[
+          {
+            key: "customer",
+            label: "Customer Privacy Policy",
+            children: (
+              <div className="saved-content mt-6 border p-6 rounded-lg bg-white">
+                {isLoadingCustomer ? (
+                  <div>Loading...</div>
+                ) : isErrorCustomer ? (
+                  <div>Error loading customer privacy policy.</div>
+                ) : (
+                  <div
+                    dangerouslySetInnerHTML={{ __html: customerContent }}
+                    className="prose max-w-none"
+                  />
+                )}
+              </div>
+            ),
+          },
+          {
+            key: "merchant",
+            label: "Merchant Privacy Policy",
+            children: (
+              <div className="saved-content mt-6 border p-6 rounded-lg bg-white">
+                {isLoadingMerchant ? (
+                  <div>Loading...</div>
+                ) : isErrorMerchant ? (
+                  <div>Error loading merchant privacy policy.</div>
+                ) : (
+                  <div
+                    dangerouslySetInnerHTML={{ __html: merchantContent }}
+                    className="prose max-w-none"
+                  />
+                )}
+              </div>
+            ),
+          },
+        ]}
+      />
 
       <Modal
-        title="Update Terms & Conditions"
+        title={`Update ${
+          activeTab === "merchant" ? "Merchant" : "Customer"
+        } Privacy Policy`}
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
@@ -82,7 +171,7 @@ const PrivacyPolicy = () => {
           <Button
             key="cancel"
             onClick={handleCancel}
-            className="bg-red-500 text-white mr-2 py-5"
+            className="bg-red-500 text-white mr-2 h-10"
           >
             Cancel
           </Button>,
@@ -90,7 +179,7 @@ const PrivacyPolicy = () => {
             key="submit"
             onClick={handleOk}
             disabled={isUpdating}
-            className="bg-secondary text-white"
+            className="bg-primary h-10 text-white"
           >
             {isUpdating ? "Updating..." : "Update Privacy Policy"}
           </Button>,
@@ -100,9 +189,13 @@ const PrivacyPolicy = () => {
           <div className="mb-6">
             <JoditEditor
               ref={editor}
-              value={termsContent}
+              value={currentContent}
               onChange={(newContent) => {
-                setTermsContent(newContent);
+                if (activeTab === "merchant") {
+                  setMerchantContent(newContent);
+                } else {
+                  setCustomerContent(newContent);
+                }
               }}
             />
           </div>
