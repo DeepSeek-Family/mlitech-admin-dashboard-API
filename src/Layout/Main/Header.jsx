@@ -12,9 +12,10 @@ const Header = ({ toggleSidebar, isMobile }) => {
   const { user } = useUser();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const navigate = useNavigate();
-  
+
   // Get unread notification count
-  const { data: notificationData, refetch: refetchNotifications } = useGetUnreadCountQuery();
+  const { data: notificationData, refetch: refetchNotifications } =
+    useGetUnreadCountQuery();
   const unreadCount = notificationData?.data?.unreadCount || 0;
 
   // Handle new notification from socket
@@ -27,7 +28,7 @@ const Header = ({ toggleSidebar, isMobile }) => {
     if (user?._id) {
       // Connect to socket
       socketService.connect(user._id);
-      
+
       // Subscribe to new notifications
       socketService.subscribeToUserNotifications(handleNewNotification);
     }
