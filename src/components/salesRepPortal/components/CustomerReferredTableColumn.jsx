@@ -68,7 +68,7 @@ const CustomerReferredTableColumn = ({
             </button>
           </Tooltip>
 
-          <Tooltip
+          {/* <Tooltip
             title={
               record.activateDate
                 ? `${
@@ -91,7 +91,7 @@ const CustomerReferredTableColumn = ({
               {record.status === "active" ? "Deactivate" : "Activate"}
               {record.activateDate && ` (${record.activateDate})`}
             </button>
-          </Tooltip>
+          </Tooltip> */}
 
           <Tooltip
             title={
@@ -103,7 +103,7 @@ const CustomerReferredTableColumn = ({
             <button
               className="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
               onClick={() => onGenerateToken(record)}
-              disabled={record.statusProgress < 2}
+              disabled={record.statusProgress < 1}
             >
               {record.generatedToken
                 ? `Token Generated (${record.tokenGeneratedDate})`

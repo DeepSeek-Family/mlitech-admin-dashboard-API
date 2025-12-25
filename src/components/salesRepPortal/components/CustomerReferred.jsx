@@ -8,6 +8,7 @@ import {
   useGetSalesRepDataQuery,
   useAcknowledgeSalesRepMutation,
   useGenerateSalesRepTokenMutation,
+  useUpdateUserStatusMutation,
 } from "../../../redux/apiSlices/salesRepSlice";
 
 const CustomerReferred = () => {
@@ -26,6 +27,8 @@ const CustomerReferred = () => {
     useAcknowledgeSalesRepMutation();
   const [generateSalesRepToken, { isLoading: isGeneratingToken }] =
     useGenerateSalesRepTokenMutation();
+  const [updateUserStatus, { isLoading: isUpdatingStatus }] =
+    useUpdateUserStatusMutation();
 
   // Normalize API data into table rows
   useEffect(() => {
@@ -172,8 +175,9 @@ const CustomerReferred = () => {
   };
 
   // Toggle user active/inactive
-  const handleToggleUserStatus = (record) => {
+  const handleToggleUserStatus = async (record) => {
     const isCurrentlyActive = record.status === "active";
+    const newStatus = isCurrentlyActive ? "inActive" : "active";
 
     Swal.fire({
       title: isCurrentlyActive
@@ -189,29 +193,44 @@ const CustomerReferred = () => {
       confirmButtonText: isCurrentlyActive
         ? "Yes, deactivate"
         : "Yes, activate",
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        setRows((prevData) =>
-          prevData.map((item) =>
-            item.recordId === record.recordId
-              ? {
-                  ...item,
-                  status: isCurrentlyActive ? "inactive" : "active",
-                  actionStatus: isCurrentlyActive ? "Inactive" : "Active",
-                  statusProgress: Math.max(item.statusProgress, 2),
-                  activateDate: new Date().toLocaleDateString(),
-                }
-              : item
-          )
-        );
+        try {
+          // Call API to update user status
+          await updateUserStatus({
+            id: record.customerId,
+            status: newStatus,
+          }).unwrap();
 
-        Swal.fire({
-          title: isCurrentlyActive ? "Deactivated!" : "Activated!",
-          text: `User has been set to ${
-            isCurrentlyActive ? "inactive" : "active"
-          }.`,
-          icon: "success",
-        });
+          // Update local state after successful API call
+          setRows((prevData) =>
+            prevData.map((item) =>
+              item.recordId === record.recordId
+                ? {
+                    ...item,
+                    status: newStatus === "active" ? "active" : "inactive",
+                    actionStatus: newStatus === "active" ? "Active" : "Inactive",
+                    statusProgress: newStatus === "active" ? Math.max(item.statusProgress, 1) : item.statusProgress,
+                    activateDate: new Date().toLocaleDateString(),
+                  }
+                : item
+            )
+          );
+
+          Swal.fire({
+            title: isCurrentlyActive ? "Deactivated!" : "Activated!",
+            text: `User has been set to ${
+              isCurrentlyActive ? "inactive" : "active"
+            }.`,
+            icon: "success",
+          });
+        } catch (error) {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: error?.data?.message || "Failed to update user status.",
+          });
+        }
       }
     });
   };

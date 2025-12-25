@@ -41,11 +41,24 @@ export const salesRepApi = api.injectEndpoints({
       }),
       invalidatesTags: ["SalesRep"],
     }),
+
+    // ---------------------------------------
+    // UPDATE USER STATUS - Activate/Deactivate user
+    // ---------------------------------------
+    updateUserStatus: builder.mutation({
+      query: ({ id, status }) => ({
+        url: `/admin/users/${id}/status`,
+        method: "PATCH",
+        body: { status },
+      }),
+      invalidatesTags: ["SalesRep"],
+    }),
   }),
 });
 
-export const { 
+export const {
   useGetSalesRepDataQuery,
   useAcknowledgeSalesRepMutation,
   useGenerateSalesRepTokenMutation,
+  useUpdateUserStatusMutation,
 } = salesRepApi;
