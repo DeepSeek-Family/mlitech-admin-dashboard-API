@@ -153,7 +153,7 @@ const LineChart = () => {
               typeof window !== "undefined" && window.innerWidth < 768
                 ? 10
                 : 32,
-            callback: (v) => `$${Number(v).toLocaleString()}K`,
+            callback: (v) => `${Number(v).toLocaleString()}`,
             font: {
               size:
                 typeof window !== "undefined" && window.innerWidth < 768

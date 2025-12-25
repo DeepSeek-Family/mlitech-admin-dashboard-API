@@ -153,7 +153,7 @@ const Home = () => {
                 </h2>
                 <h3 className="text-secondary text-[24px] font-semibold flex items-center gap-3">
                   <SubscriptionManagement className="w-[20px] h-[20px] text-secondary" />
-                  ${response?.data?.subscriptionRevenue || 0}
+                  {response?.data?.subscriptionRevenue || 0}
                 </h3>
               </div>
             </div>
