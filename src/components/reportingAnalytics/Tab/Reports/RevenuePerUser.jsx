@@ -15,7 +15,7 @@ const columns = [
     align: "center",
   },
   {
-    title: "Customers",
+    title: "Customer Name",
     dataIndex: "customers",
     key: "customers",
     align: "center",
@@ -102,7 +102,7 @@ export default function RevenuePerUser() {
       key: index,
       sl: index + 1 + (currentPage - 1) * 6,
       customerId: item.customUserId || item.customerId || item._id || "-",
-      customers: "-",
+      customers: item.customerName || "-",
       transactions: item.totalTransactions || 0,
       totalRevenue: item.totalRevenue || 0,
       date: item.date ? dayjs(item.date).format("YYYY-MM-DD") : "-",

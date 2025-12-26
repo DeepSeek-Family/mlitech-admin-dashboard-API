@@ -34,7 +34,23 @@ const accountingSlice = api.injectEndpoints({
       transformResponse: (response) => response,
       providesTags: ["RevenuePerUser"],
     }),
+    getPointsRedeemed: builder.query({
+      query: (args) => {
+        const params = new URLSearchParams();
+        if (args) {
+          args.forEach((arg) => {
+            params.append(arg.name, arg.value);
+          });
+        }
+        return {
+          url: `/report-analytics/accountings/point-redeemed?${params.toString()}`,
+          method: "GET",
+        };
+      },
+      transformResponse: (response) => response,
+      providesTags: ["PointsRedeemed"],
+    }),
   }),
 });
 
-export const { useGetCashCollectionQuery, useGetRevenuePerUserQuery } = accountingSlice;
+export const { useGetCashCollectionQuery, useGetRevenuePerUserQuery, useGetPointsRedeemedQuery } = accountingSlice;

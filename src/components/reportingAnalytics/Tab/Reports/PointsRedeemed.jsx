@@ -1,39 +1,10 @@
-import { Button, DatePicker, Table } from "antd";
+import { Button, DatePicker } from "antd";
 import "antd/dist/reset.css";
 import dayjs from "dayjs";
 import { useMemo, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-
-// Sample data for points redeemed
-const data = [
-  {
-    sl: 1,
-    customerName: "John Doe",
-    period: "2025-01",
-    customerId: "C001",
-    redemptions: 15,
-    totalPointsRedeemed: 3200,
-    date: "2025-01-01",
-  },
-  {
-    sl: 2,
-    customerName: "Jane Smith",
-    period: "2025-02",
-    customerId: "C002",
-    redemptions: 10,
-    totalPointsRedeemed: 2500,
-    date: "2025-02-01",
-  },
-  {
-    sl: 3,
-    customerName: "Mike Johnson",
-    period: "2025-03",
-    customerId: "C003",
-    redemptions: 20,
-    totalPointsRedeemed: 4500,
-    date: "2025-03-01",
-  },
-];
+import { useGetPointsRedeemedQuery } from "../../../../redux/apiSlices/accountingSlice";
+import CustomTable from "../../../common/CustomTable";
 
 // Table columns
 const columns = [
@@ -73,40 +44,72 @@ const columns = [
 
 export default function PointsRedeemed() {
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   // Read values from URL params
-  const fromDate = searchParams.get("pr_fromDate") || "";
-  const toDate = searchParams.get("pr_toDate") || "";
-  const currentPage = parseInt(searchParams.get("pr_page") || "1", 10);
+  const fromDate = searchParams.get("fromDate") || "";
+  const toDate = searchParams.get("toDate") || "";
+  const currentPage = parseInt(searchParams.get("page") || "1", 10);
 
-  // Helper function to update URL params
-  const updateSearchParam = useCallback((key, value) => {
-    setSearchParams((prev) => {
-      const newParams = new URLSearchParams(prev);
-      if (value && value !== "") {
-        newParams.set(key, value);
-      } else {
-        newParams.delete(key);
-      }
-      return newParams;
-    });
-  }, [setSearchParams]);
-
-  // Filter data based on URL params
-  const filteredData = useMemo(() => {
-    let filtered = data;
+  // Build query params for API
+  const queryParams = useMemo(() => {
+    const params = [];
     if (fromDate) {
-      filtered = filtered.filter((item) =>
-        dayjs(item.date).isSameOrAfter(dayjs(fromDate), "day")
-      );
+      params.push({ name: "startDate", value: fromDate });
     }
     if (toDate) {
-      filtered = filtered.filter((item) =>
-        dayjs(item.date).isSameOrBefore(dayjs(toDate), "day")
-      );
+      params.push({ name: "endDate", value: toDate });
     }
-    return filtered;
-  }, [fromDate, toDate]);
+    params.push({ name: "page", value: currentPage });
+    params.push({ name: "limit", value: 6 });
+    return params;
+  }, [fromDate, toDate, currentPage]);
+
+  // Fetch data from API
+  const {
+    data: apiResponse,
+    isLoading,
+    isFetching,
+  } = useGetPointsRedeemedQuery(queryParams);
+
+  // Debug: Log API response structure
+  console.log("PointsRedeemed API Response:", apiResponse);
+
+  // Helper function to update URL params
+  const updateSearchParam = useCallback(
+    (key, value) => {
+      setSearchParams((prev) => {
+        const newParams = new URLSearchParams(prev);
+        if (value && value !== "") {
+          newParams.set(key, value);
+        } else {
+          newParams.delete(key);
+        }
+        return newParams;
+      });
+    },
+    [setSearchParams]
+  );
+
+  // Transform API data for table
+  const filteredData = useMemo(() => {
+    // API response has nested data structure: apiResponse.data.data
+    if (!apiResponse?.data?.data) return [];
+
+    const dataArray = Array.isArray(apiResponse.data.data)
+      ? apiResponse.data.data
+      : [];
+
+    return dataArray.map((item, index) => ({
+      key: index,
+      sl: index + 1 + (currentPage - 1) * 6,
+      customerId: item.customerId || item._id || "-",
+      customerName: item.customerName || "-",
+      redemptions: item.redemptionCount || 0,
+      totalPointsRedeemed: item.totalPointsRedeemed || 0,
+      period: item.period || "-",
+      date: item.date ? dayjs(item.date).format("YYYY-MM-DD") : "-",
+    }));
+  }, [apiResponse, currentPage]);
 
   return (
     <div style={{ width: "100%" }}>
@@ -116,14 +119,24 @@ export default function PointsRedeemed() {
           <div>
             <DatePicker
               value={fromDate ? dayjs(fromDate) : null}
-              onChange={(date) => updateSearchParam("pr_fromDate", date ? dayjs(date).format("YYYY-MM-DD") : "")}
+              onChange={(date) =>
+                updateSearchParam(
+                  "fromDate",
+                  date ? dayjs(date).format("YYYY-MM-DD") : ""
+                )
+              }
               style={{ marginLeft: "auto", marginRight: "20px" }}
               placeholder="From Date"
               format="YYYY-MM-DD"
             />
             <DatePicker
               value={toDate ? dayjs(toDate) : null}
-              onChange={(date) => updateSearchParam("pr_toDate", date ? dayjs(date).format("YYYY-MM-DD") : "")}
+              onChange={(date) =>
+                updateSearchParam(
+                  "toDate",
+                  date ? dayjs(date).format("YYYY-MM-DD") : ""
+                )
+              }
               style={{ marginRight: "20px" }}
               placeholder="To Date"
               format="YYYY-MM-DD"
@@ -134,21 +147,20 @@ export default function PointsRedeemed() {
           </Button>
         </div>
       </div>
-      <Table
-        bordered={false}
-        size="small"
-        rowClassName="custom-row"
-        className="custom-table"
+      <CustomTable
+        data={filteredData}
         columns={columns}
-        dataSource={filteredData.map((row, index) => ({
-          ...row,
-          key: index,
-        }))}
-        pagination={{ 
+        isLoading={isLoading}
+        isFetching={isFetching}
+        pagination={{
           current: currentPage,
           pageSize: 6,
-          onChange: (page) => updateSearchParam("pr_page", page > 1 ? page.toString() : "")
+          total: apiResponse?.pagination?.total || 0,
         }}
+        onPaginationChange={(page) =>
+          updateSearchParam("page", page > 1 ? page.toString() : "")
+        }
+        rowKey="key"
       />
     </div>
   );
