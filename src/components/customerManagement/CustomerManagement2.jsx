@@ -1,4 +1,4 @@
-import { Button, Form, Input } from "antd";
+import { Button, Form, Input, message } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useMemo, useState } from "react";
 import Swal from "sweetalert2";
@@ -9,6 +9,7 @@ import {
   useGetCustomerProfileQuery,
   useDeleteCustomerMutation,
   useUpdateCustomerStatusMutation,
+  useLazyExportCustomersQuery,
 } from "../../redux/apiSlices/customerSlice";
 import CustomerTableColumn from "./components/CustomerTableColumn";
 
@@ -42,6 +43,35 @@ const CustomerManagement2 = () => {
 
   const [updateCustomerStatus, { isLoading: isUpdatingStatus }] =
     useUpdateCustomerStatusMutation();
+
+  const [triggerExport, { isLoading: isExportLoading }] =
+    useLazyExportCustomersQuery();
+
+  const handleExportCustomers = async () => {
+    try {
+      const result = await triggerExport([]);
+
+      if (result.data) {
+        // Create a blob URL and trigger download
+        const blob = result.data;
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+
+        // Generate filename with current date
+        const dateStr = new Date().toISOString().split("T")[0];
+        link.download = `customers-export-${dateStr}.xlsx`;
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error("Export failed:", error);
+      message.error("Failed to export customers");
+    }
+  };
 
   console.log(response);
 
@@ -265,7 +295,9 @@ const CustomerManagement2 = () => {
           />
           <Button
             className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary text-[17px] font-bold"
-            // onClick={exportToCSV}
+            onClick={handleExportCustomers}
+            loading={isExportLoading}
+            disabled={isExportLoading}
           >
             Export
           </Button>

@@ -42,7 +42,39 @@ export const customerApi = api.injectEndpoints({
       }),
       invalidatesTags: ["Customer"],
     }),
+    // ----------------------------------------
+    // EXPORT customers
+    // ----------------------------------------
+    exportCustomers: builder.query({
+      query: (args) => {
+        const params = new URLSearchParams();
+        if (args && args.length > 0) {
+          args.forEach((arg) => {
+            if (
+              arg.value !== undefined &&
+              arg.value !== null &&
+              arg.value !== ""
+            ) {
+              params.append(arg.name, arg.value);
+            }
+          });
+        }
+        return {
+          url: `/admin/customers/export`,
+          method: "GET",
+          params,
+          responseHandler: (response) => response.blob(),
+        };
+      },
+      providesTags: ["Customer"],
+    }),
   }),
 });
 
-export const { useGetCustomerProfileQuery, useDeleteCustomerMutation, useUpdateCustomerStatusMutation } = customerApi;
+export const {
+  useGetCustomerProfileQuery,
+  useDeleteCustomerMutation,
+  useUpdateCustomerStatusMutation,
+  useExportCustomersQuery,
+  useLazyExportCustomersQuery,
+} = customerApi;
