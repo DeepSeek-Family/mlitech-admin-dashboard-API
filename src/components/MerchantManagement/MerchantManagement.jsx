@@ -1,6 +1,7 @@
 import { Button, Form, Input, message } from "antd";
 import dayjs from "dayjs";
 import { useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import Swal from "sweetalert2";
 import AddEditModal from "./components/AddEditModal";
 import ViewModal from "./components/ViewModal";
@@ -20,9 +21,28 @@ const MerchantManagement = () => {
   const [isViewModalVisible, setIsViewModalVisible] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [form] = Form.useForm();
-  const [searchText, setSearchText] = useState("");
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Get values from URL params with defaults
+  const page = parseInt(searchParams.get("page") || "1", 10);
+  const limit = parseInt(searchParams.get("limit") || "10", 10);
+  const searchText = searchParams.get("searchTerm") || "";
+
+  // Helper function to update URL params
+  const updateSearchParam = (key, value) => {
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev);
+      if (value && value !== "") {
+        newParams.set(key, value);
+      } else {
+        newParams.delete(key);
+      }
+      // Always ensure page and limit are in URL
+      newParams.set("page", page.toString());
+      newParams.set("limit", limit.toString());
+      return newParams;
+    });
+  };
 
   const queryParams = [
     { name: "page", value: page },
@@ -111,10 +131,12 @@ const MerchantManagement = () => {
   };
 
   const handlePaginationChange = (newPage, newPageSize) => {
-    setPage(newPage);
-    if (newPageSize !== limit) {
-      setLimit(newPageSize);
-    }
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev);
+      newParams.set("page", newPage.toString());
+      newParams.set("limit", newPageSize.toString());
+      return newParams;
+    });
   };
 
   // View
@@ -288,7 +310,7 @@ const MerchantManagement = () => {
           <Input
             placeholder="Search by Customer ID, Name, Phone or Email, Location"
             value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
+            onChange={(e) => updateSearchParam("searchTerm", e.target.value)}
             className="w-96 h-10"
           />
           <Button
