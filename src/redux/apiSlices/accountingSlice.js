@@ -18,7 +18,23 @@ const accountingSlice = api.injectEndpoints({
       transformResponse: (response) => response,
       providesTags: ["CashCollection"],
     }),
+    getRevenuePerUser: builder.query({
+      query: (args) => {
+        const params = new URLSearchParams();
+        if (args) {
+          args.forEach((arg) => {
+            params.append(arg.name, arg.value);
+          });
+        }
+        return {
+          url: `/report-analytics/accountings/revenue-per-user?${params.toString()}`,
+          method: "GET",
+        };
+      },
+      transformResponse: (response) => response,
+      providesTags: ["RevenuePerUser"],
+    }),
   }),
 });
 
-export const { useGetCashCollectionQuery } = accountingSlice;
+export const { useGetCashCollectionQuery, useGetRevenuePerUserQuery } = accountingSlice;

@@ -1,36 +1,10 @@
-import { Button, DatePicker, Table } from "antd";
+import { Button, DatePicker } from "antd";
 import "antd/dist/reset.css";
 import dayjs from "dayjs";
 import { useMemo, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-
-// Sample data for revenue per user with added date field
-const data = [
-  {
-    sl: 1,
-    customerId: "C-2001",
-    customers: "Alice",
-    transactions: 120,
-    totalRevenue: 3000.5,
-    date: "2025-01-01",
-  },
-  {
-    sl: 2,
-    customerId: "C-2002",
-    customers: "Jhon",
-    transactions: 95,
-    totalRevenue: 2200.0,
-    date: "2025-02-01",
-  },
-  {
-    sl: 3,
-    customerId: "C-2003",
-    customers: "Doe",
-    transactions: 150,
-    totalRevenue: 5000.0,
-    date: "2025-03-01",
-  },
-];
+import { useGetRevenuePerUserQuery } from "../../../../redux/apiSlices/accountingSlice";
+import CustomTable from "../../../common/CustomTable";
 
 // Table columns
 const columns = [
@@ -69,40 +43,71 @@ const columns = [
 
 export default function RevenuePerUser() {
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   // Read values from URL params
-  const fromDate = searchParams.get("rpu_fromDate") || "";
-  const toDate = searchParams.get("rpu_toDate") || "";
-  const currentPage = parseInt(searchParams.get("rpu_page") || "1", 10);
+  const fromDate = searchParams.get("fromDate") || "";
+  const toDate = searchParams.get("toDate") || "";
+  const currentPage = parseInt(searchParams.get("page") || "1", 10);
 
-  // Helper function to update URL params
-  const updateSearchParam = useCallback((key, value) => {
-    setSearchParams((prev) => {
-      const newParams = new URLSearchParams(prev);
-      if (value && value !== "") {
-        newParams.set(key, value);
-      } else {
-        newParams.delete(key);
-      }
-      return newParams;
-    });
-  }, [setSearchParams]);
-
-  // Filter data based on URL params
-  const filteredData = useMemo(() => {
-    let filtered = data;
+  // Build query params for API
+  const queryParams = useMemo(() => {
+    const params = [];
     if (fromDate) {
-      filtered = filtered.filter((item) =>
-        dayjs(item.date).isSameOrAfter(dayjs(fromDate), "day")
-      );
+      params.push({ name: "startDate", value: fromDate });
     }
     if (toDate) {
-      filtered = filtered.filter((item) =>
-        dayjs(item.date).isSameOrBefore(dayjs(toDate), "day")
-      );
+      params.push({ name: "endDate", value: toDate });
     }
-    return filtered;
-  }, [fromDate, toDate]);
+    params.push({ name: "page", value: currentPage });
+    params.push({ name: "limit", value: 6 });
+    return params;
+  }, [fromDate, toDate, currentPage]);
+
+  // Fetch data from API
+  const {
+    data: apiResponse,
+    isLoading,
+    isFetching,
+  } = useGetRevenuePerUserQuery(queryParams);
+
+  // Debug: Log API response structure
+  console.log("RevenuePerUser API Response:", apiResponse);
+
+  // Helper function to update URL params
+  const updateSearchParam = useCallback(
+    (key, value) => {
+      setSearchParams((prev) => {
+        const newParams = new URLSearchParams(prev);
+        if (value && value !== "") {
+          newParams.set(key, value);
+        } else {
+          newParams.delete(key);
+        }
+        return newParams;
+      });
+    },
+    [setSearchParams]
+  );
+
+  // Transform API data for table
+  const filteredData = useMemo(() => {
+    // API response has nested data structure: apiResponse.data.data
+    if (!apiResponse?.data?.data) return [];
+
+    const dataArray = Array.isArray(apiResponse.data.data)
+      ? apiResponse.data.data
+      : [];
+
+    return dataArray.map((item, index) => ({
+      key: index,
+      sl: index + 1 + (currentPage - 1) * 6,
+      customerId: item.customUserId || item.customerId || item._id || "-",
+      customers: "-",
+      transactions: item.totalTransactions || 0,
+      totalRevenue: item.totalRevenue || 0,
+      date: item.date ? dayjs(item.date).format("YYYY-MM-DD") : "-",
+    }));
+  }, [apiResponse, currentPage]);
 
   return (
     <div style={{ width: "100%" }}>
@@ -112,14 +117,24 @@ export default function RevenuePerUser() {
           <div>
             <DatePicker
               value={fromDate ? dayjs(fromDate) : null}
-              onChange={(date) => updateSearchParam("rpu_fromDate", date ? dayjs(date).format("YYYY-MM-DD") : "")}
+              onChange={(date) =>
+                updateSearchParam(
+                  "fromDate",
+                  date ? dayjs(date).format("YYYY-MM-DD") : ""
+                )
+              }
               style={{ marginLeft: "auto", marginRight: "20px" }}
               placeholder="From Date"
               format="YYYY-MM-DD"
             />
             <DatePicker
               value={toDate ? dayjs(toDate) : null}
-              onChange={(date) => updateSearchParam("rpu_toDate", date ? dayjs(date).format("YYYY-MM-DD") : "")}
+              onChange={(date) =>
+                updateSearchParam(
+                  "toDate",
+                  date ? dayjs(date).format("YYYY-MM-DD") : ""
+                )
+              }
               style={{ marginRight: "20px" }}
               placeholder="To Date"
               format="YYYY-MM-DD"
@@ -130,21 +145,20 @@ export default function RevenuePerUser() {
           </Button>
         </div>
       </div>
-      <Table
-        bordered={false}
-        size="small"
-        rowClassName="custom-row"
-        className="custom-table"
+      <CustomTable
+        data={filteredData}
         columns={columns}
-        dataSource={filteredData.map((row, index) => ({
-          ...row,
-          key: index,
-        }))}
-        pagination={{ 
+        isLoading={isLoading}
+        isFetching={isFetching}
+        pagination={{
           current: currentPage,
           pageSize: 6,
-          onChange: (page) => updateSearchParam("rpu_page", page > 1 ? page.toString() : "")
+          total: apiResponse?.pagination?.total || 0,
         }}
+        onPaginationChange={(page) =>
+          updateSearchParam("page", page > 1 ? page.toString() : "")
+        }
+        rowKey="key"
       />
     </div>
   );
