@@ -1,36 +1,10 @@
-import { Button, DatePicker, Table } from "antd";
+import { Button, DatePicker } from "antd";
 import "antd/dist/reset.css";
 import dayjs from "dayjs";
 import { useMemo, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-
-// Sample data for cash receivable
-const data = [
-  {
-    sl: 1,
-    merchantId: 101,
-    salesRep: "John Doe",
-    pendingTransactions: 5,
-    totalReceivable: 1200.5,
-    date: "2025-01-01",
-  },
-  {
-    sl: 2,
-    merchantId: 102,
-    salesRep: "Jane Smith",
-    pendingTransactions: 3,
-    totalReceivable: 850.0,
-    date: "2025-02-01",
-  },
-  {
-    sl: 3,
-    merchantId: 103,
-    salesRep: "Alice Johnson",
-    pendingTransactions: 7,
-    totalReceivable: 1500.0,
-    date: "2025-03-01",
-  },
-];
+import { useGetCashCollectionQuery } from "../../../../redux/apiSlices/accountingSlice";
+import CustomTable from "../../../common/CustomTable";
 
 // Table columns
 const columns = [
@@ -40,7 +14,7 @@ const columns = [
     key: "merchantId",
     align: "center",
   },
-  
+
   {
     title: "Sales Rep",
     dataIndex: "salesRep",
@@ -70,40 +44,71 @@ const columns = [
 
 export default function CashCollections() {
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   // Read values from URL params
-  const fromDate = searchParams.get("cc_fromDate") || "";
-  const toDate = searchParams.get("cc_toDate") || "";
-  const currentPage = parseInt(searchParams.get("cc_page") || "1", 10);
+  const fromDate = searchParams.get("fromDate") || "";
+  const toDate = searchParams.get("toDate") || "";
+  const currentPage = parseInt(searchParams.get("page") || "1", 10);
 
-  // Helper function to update URL params
-  const updateSearchParam = useCallback((key, value) => {
-    setSearchParams((prev) => {
-      const newParams = new URLSearchParams(prev);
-      if (value && value !== "") {
-        newParams.set(key, value);
-      } else {
-        newParams.delete(key);
-      }
-      return newParams;
-    });
-  }, [setSearchParams]);
-
-  // Filter data based on URL params
-  const filteredData = useMemo(() => {
-    let filtered = data;
+  // Build query params for API
+  const queryParams = useMemo(() => {
+    const params = [];
     if (fromDate) {
-      filtered = filtered.filter((item) =>
-        dayjs(item.date).isSameOrAfter(dayjs(fromDate), "day")
-      );
+      params.push({ name: "fromDate", value: fromDate });
     }
     if (toDate) {
-      filtered = filtered.filter((item) =>
-        dayjs(item.date).isSameOrBefore(dayjs(toDate), "day")
-      );
+      params.push({ name: "toDate", value: toDate });
     }
-    return filtered;
-  }, [fromDate, toDate]);
+    params.push({ name: "page", value: currentPage });
+    params.push({ name: "limit", value: 6 });
+    return params;
+  }, [fromDate, toDate, currentPage]);
+
+  // Fetch data from API
+  const {
+    data: apiResponse,
+    isLoading,
+    isFetching,
+  } = useGetCashCollectionQuery(queryParams);
+
+  // Debug: Log API response structure
+  console.log("CashCollections API Response:", apiResponse);
+
+  // Helper function to update URL params
+  const updateSearchParam = useCallback(
+    (key, value) => {
+      setSearchParams((prev) => {
+        const newParams = new URLSearchParams(prev);
+        if (value && value !== "") {
+          newParams.set(key, value);
+        } else {
+          newParams.delete(key);
+        }
+        return newParams;
+      });
+    },
+    [setSearchParams]
+  );
+
+  // Transform API data for table
+  const filteredData = useMemo(() => {
+    // API response has nested data structure: apiResponse.data.data
+    if (!apiResponse?.data?.data) return [];
+
+    const dataArray = Array.isArray(apiResponse.data.data)
+      ? apiResponse.data.data
+      : [];
+
+    return dataArray.map((item, index) => ({
+      key: index,
+      sl: index + 1 + (currentPage - 1) * 6,
+      merchantId: item.customUserId || item.merchantId || item._id || "-",
+      salesRep: item.salesRep || "-",
+      pendingTransactions: item.totalTransactions || 0,
+      totalReceivable: item.totalReceived || 0,
+      date: item.date ? dayjs(item.date).format("YYYY-MM-DD") : "-",
+    }));
+  }, [apiResponse, currentPage]);
 
   return (
     <div style={{ width: "100%" }}>
@@ -113,14 +118,24 @@ export default function CashCollections() {
           <div>
             <DatePicker
               value={fromDate ? dayjs(fromDate) : null}
-              onChange={(date) => updateSearchParam("cc_fromDate", date ? dayjs(date).format("YYYY-MM-DD") : "")}
+              onChange={(date) =>
+                updateSearchParam(
+                  "fromDate",
+                  date ? dayjs(date).format("YYYY-MM-DD") : ""
+                )
+              }
               style={{ marginLeft: "auto", marginRight: "20px" }}
               placeholder="From Date"
               format="YYYY-MM-DD"
             />
             <DatePicker
               value={toDate ? dayjs(toDate) : null}
-              onChange={(date) => updateSearchParam("cc_toDate", date ? dayjs(date).format("YYYY-MM-DD") : "")}
+              onChange={(date) =>
+                updateSearchParam(
+                  "toDate",
+                  date ? dayjs(date).format("YYYY-MM-DD") : ""
+                )
+              }
               style={{ marginRight: "20px" }}
               placeholder="To Date"
               format="YYYY-MM-DD"
@@ -131,21 +146,20 @@ export default function CashCollections() {
           </Button>
         </div>
       </div>
-      <Table
-        bordered={false}
-        size="small"
-        rowClassName="custom-row"
-        className="custom-table"
+      <CustomTable
+        data={filteredData}
         columns={columns}
-        dataSource={filteredData.map((row, index) => ({
-          ...row,
-          key: index,
-        }))}
-        pagination={{ 
+        isLoading={isLoading}
+        isFetching={isFetching}
+        pagination={{
           current: currentPage,
           pageSize: 6,
-          onChange: (page) => updateSearchParam("cc_page", page > 1 ? page.toString() : "")
+          total: apiResponse?.pagination?.total || 0,
         }}
+        onPaginationChange={(page) =>
+          updateSearchParam("page", page > 1 ? page.toString() : "")
+        }
+        rowKey="key"
       />
     </div>
   );
