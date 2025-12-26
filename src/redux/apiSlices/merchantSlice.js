@@ -30,6 +30,21 @@ export const merchantApi = api.injectEndpoints({
       invalidatesTags: ["Merchant"],
     }),
     // ---------------------------------------
+    // UPDATE merchant
+    // ---------------------------------------
+    updateMerchant: builder.mutation({
+      query: ({ id, data }) => {
+        const formData = new FormData();
+        formData.append("data", JSON.stringify(data));
+        return {
+          url: `/admin/merchants/${id}`,
+          method: "PATCH",
+          body: formData,
+        };
+      },
+      invalidatesTags: ["Merchant"],
+    }),
+    // ---------------------------------------
     // DELETE merchant
     // ---------------------------------------
     deleteMerchant: builder.mutation({
@@ -93,6 +108,7 @@ export const merchantApi = api.injectEndpoints({
 export const {
   useGetMerchantProfileQuery,
   useCreateMerchantMutation,
+  useUpdateMerchantMutation,
   useDeleteMerchantMutation,
   useUpdateMerchantApprovalStatusMutation,
   useUpdateMerchantStatusMutation,

@@ -29,7 +29,7 @@ export const termsAndConditionApi = api.injectEndpoints({
     // ---------------------------------------
     updateTermsAndConditions: builder.mutation({
       query: (body) => ({
-        url: `/rule/terms-and-conditions`,
+        url: `/disclaimers`,
         method: "POST",
         body,
       }),

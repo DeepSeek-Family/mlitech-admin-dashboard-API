@@ -11,6 +11,7 @@ import {
   useUpdateMerchantApprovalStatusMutation,
   useUpdateMerchantStatusMutation,
   useCreateMerchantMutation,
+  useUpdateMerchantMutation,
   useLazyExportMerchantsQuery,
 } from "../../redux/apiSlices/merchantSlice";
 import MerchantTableColumn from "./components/MerchantTableColumn";
@@ -60,6 +61,9 @@ const MerchantManagement = () => {
   } = useGetMerchantProfileQuery(queryParams);
   const [createMerchant, { isLoading: isCreating }] =
     useCreateMerchantMutation();
+
+  const [updateMerchant, { isLoading: isUpdatingMerchant }] =
+    useUpdateMerchantMutation();
 
   const [deleteMerchant, { isLoading: isDeleting }] =
     useDeleteMerchantMutation();
@@ -185,12 +189,37 @@ const MerchantManagement = () => {
   const handleUpdateMerchant = () => {
     form
       .validateFields()
-      .then((values) => {
-        // Note: Update mutation is not implemented yet, just logging for now
-        console.log("Update values:", values);
-        message.info("Update function is not connected to backend yet.");
-        setIsEditModalVisible(false);
-        form.resetFields();
+      .then(async (values) => {
+        try {
+          // Prepare data for update
+          const updateData = {
+            salesRep: values.salesRep,
+            firstName: values.firstName,
+            businessName: values.businessName,
+            email: values.email,
+            phone: values.phone,
+            country: values.country,
+            city: values.city,
+            subscription: values.subscription,
+            lastPaymentDate: toISODate(values.lastPaymentDate),
+            expiryDate: toISODate(values.expiryDate),
+            tier: values.tier,
+            address: values.address,
+          };
+
+          await updateMerchant({
+            id: selectedRecord.recordId,
+            data: updateData,
+          }).unwrap();
+
+          message.success("Merchant updated successfully!");
+          setIsEditModalVisible(false);
+          form.resetFields();
+          setSelectedRecord(null);
+        } catch (error) {
+          console.error("Update merchant failed", error);
+          message.error(error?.data?.message || "Failed to update merchant");
+        }
       })
       .catch((info) => {
         console.log("Validate Failed:", info);
