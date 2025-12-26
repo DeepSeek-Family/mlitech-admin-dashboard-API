@@ -14,7 +14,7 @@ export const merchantApi = api.injectEndpoints({
           });
         }
         return {
-          url: `/tier?${params.toString()}`,
+          url: `/admin-tier?${params.toString()}`,
           method: "GET",
         };
       },
@@ -27,7 +27,7 @@ export const merchantApi = api.injectEndpoints({
     // ---------------------------------------
     addTier: builder.mutation({
       query: (body) => ({
-        url: `/tier`,
+        url: `/admin-tier`,
         method: "POST",
         body,
       }),
@@ -39,7 +39,7 @@ export const merchantApi = api.injectEndpoints({
     // ---------------------------------------
     updateTier: builder.mutation({
       query: ({ id, body }) => ({
-        url: `/tier/${id}`,
+        url: `/admin-tier/${id}`,
         method: "PATCH",
         body,
       }),
@@ -51,12 +51,11 @@ export const merchantApi = api.injectEndpoints({
     // ---------------------------------------
     deleteTier: builder.mutation({
       query: (id) => ({
-        url: `/tier/${id}`,
+        url: `/admin-tier/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Tier"],
     }),
-
 
     // ---------------------------------------
     // GET all audit logs
