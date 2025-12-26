@@ -10,6 +10,7 @@ import {
   useUpdateMerchantApprovalStatusMutation,
   useUpdateMerchantStatusMutation,
   useCreateMerchantMutation,
+  useLazyExportMerchantsQuery,
 } from "../../redux/apiSlices/merchantSlice";
 import MerchantTableColumn from "./components/MerchantTableColumn";
 
@@ -46,6 +47,35 @@ const MerchantManagement = () => {
     useUpdateMerchantApprovalStatusMutation();
   const [updateMerchantStatus, { isLoading: isUpdatingStatus }] =
     useUpdateMerchantStatusMutation();
+
+  const [triggerExport, { isLoading: isExportLoading }] =
+    useLazyExportMerchantsQuery();
+
+  const handleExportMerchants = async () => {
+    try {
+      const result = await triggerExport([]);
+
+      if (result.data) {
+        // Create a blob URL and trigger download
+        const blob = result.data;
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+
+        // Generate filename with current date
+        const dateStr = new Date().toISOString().split("T")[0];
+        link.download = `merchants-export-${dateStr}.xlsx`;
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error("Export failed:", error);
+      message.error("Failed to export merchants");
+    }
+  };
 
   console.log(response);
 
@@ -150,15 +180,17 @@ const MerchantManagement = () => {
     if (record) {
       setSelectedRecord(record);
       setIsViewModalVisible(false);
-      
+
       const raw = record.raw || {};
-      
+
       form.setFieldsValue({
         salesRep: record.salesRep || raw.salesRep,
         address: record.location || raw.city || raw.address,
         businessName: record.businessName,
         subscription: raw.subscription || raw.subscriptionType,
-        lastPaymentDate: raw.lastPaymentDate ? dayjs(raw.lastPaymentDate) : null,
+        lastPaymentDate: raw.lastPaymentDate
+          ? dayjs(raw.lastPaymentDate)
+          : null,
         expiryDate: raw.expiryDate ? dayjs(raw.expiryDate) : null,
         email: record.email,
         firstName: raw.firstName || raw.name,
@@ -265,7 +297,12 @@ const MerchantManagement = () => {
           >
             Add New Merchant
           </Button>
-          <Button className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary text-[17px] font-bold">
+          <Button
+            className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary text-[17px] font-bold"
+            onClick={handleExportMerchants}
+            loading={isExportLoading}
+            disabled={isExportLoading}
+          >
             Export
           </Button>
         </div>

@@ -61,6 +61,32 @@ export const merchantApi = api.injectEndpoints({
       }),
       invalidatesTags: ["Merchant"],
     }),
+    // ----------------------------------------
+    // EXPORT merchants
+    // ----------------------------------------
+    exportMerchants: builder.query({
+      query: (args) => {
+        const params = new URLSearchParams();
+        if (args && args.length > 0) {
+          args.forEach((arg) => {
+            if (
+              arg.value !== undefined &&
+              arg.value !== null &&
+              arg.value !== ""
+            ) {
+              params.append(arg.name, arg.value);
+            }
+          });
+        }
+        return {
+          url: `/admin/merchants/export`,
+          method: "GET",
+          params,
+          responseHandler: (response) => response.blob(),
+        };
+      },
+      providesTags: ["Merchant"],
+    }),
   }),
 });
 
@@ -70,4 +96,6 @@ export const {
   useDeleteMerchantMutation,
   useUpdateMerchantApprovalStatusMutation,
   useUpdateMerchantStatusMutation,
+  useExportMerchantsQuery,
+  useLazyExportMerchantsQuery,
 } = merchantApi;
