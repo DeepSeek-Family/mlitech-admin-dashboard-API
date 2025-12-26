@@ -68,7 +68,14 @@ const UserManagement = () => {
     current: page,
   };
 
-  const [roles] = useState(["ADMIN", "ADMIN_REP", "ADMIN_SEL"]);
+  const roleMapping = {
+    ADMIN: "Administrator",
+    ADMIN_REP: "Admin Representative",
+    ADMIN_SEL: "Admin Seller",
+    VIEW_ADMIN: "View Admin",
+  };
+
+  const [roles] = useState(Object.keys(roleMapping));
 
   const [isUserModalVisible, setIsUserModalVisible] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
@@ -252,6 +259,7 @@ const UserManagement = () => {
         onSubmit={handleSubmitUser}
         editingUser={editingUser}
         roles={roles}
+        roleMapping={roleMapping}
       />
     </div>
   );

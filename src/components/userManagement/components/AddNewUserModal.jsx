@@ -9,6 +9,7 @@ const AddNewUserModal = ({
   onSubmit,
   editingUser = null,
   roles = [],
+  roleMapping = {},
 }) => {
   const [form] = Form.useForm();
 
@@ -84,7 +85,7 @@ const AddNewUserModal = ({
           <Select placeholder="Select role" className="mli-tall-select">
             {roles.map((role) => (
               <Option key={role} value={role}>
-                {role}
+                {roleMapping[role] || role}
               </Option>
             ))}
           </Select>

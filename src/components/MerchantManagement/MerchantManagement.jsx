@@ -109,7 +109,7 @@ const MerchantManagement = () => {
       businessName: item.businessName || "-",
       phone: item.phone || "-",
       email: item.email || "-",
-      location: item.address || "-",
+      location: item.country + ", " + item.city || "-",
       salesRep: item.salesRep || "-",
       totalSales: item.totalSales || 0,
       totalPointsEarned: item.totalPointsEarned || 0,

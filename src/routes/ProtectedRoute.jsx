@@ -24,7 +24,13 @@ const parseJwt = () => {
   }
 };
 
-const allowedRoles = ["ADMIN", "SUPER_ADMIN"];
+const allowedRoles = [
+  "ADMIN",
+  "SUPER_ADMIN",
+  "ADMIN_REP",
+  "ADMIN_SELL",
+  "VIEW_ADMIN",
+];
 
 const PrivateRoute = ({ children }) => {
   const location = useLocation();

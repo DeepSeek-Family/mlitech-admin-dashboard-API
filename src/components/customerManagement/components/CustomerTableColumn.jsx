@@ -72,7 +72,7 @@ const CustomerTableColumn = ({
       title: "Action",
       key: "action",
       align: "center",
-      width: 170,
+      width: 140,
       render: (_, record) => (
         <div
           className="flex gap-2 justify-between align-middle py-[7px] px-[15px] border border-primary rounded-md"
@@ -87,14 +87,14 @@ const CustomerTableColumn = ({
             </button>
           </Tooltip>
 
-          <Tooltip title="Edit">
+          {/* <Tooltip title="Edit">
             <button
               onClick={() => onEdit(record)}
               className="text-primary hover:text-green-700 text-xl"
             >
               <FaEdit />
             </button>
-          </Tooltip>
+          </Tooltip> */}
 
           <Tooltip title="Delete">
             <button
@@ -124,7 +124,10 @@ const CustomerTableColumn = ({
                 confirmButtonText: "Yes, change it!",
               }).then((result) => {
                 if (result.isConfirmed) {
-                  onStatusChange(record.recordId, checked ? "Active" : "Inactive");
+                  onStatusChange(
+                    record.recordId,
+                    checked ? "Active" : "Inactive"
+                  );
                 }
               });
             }}

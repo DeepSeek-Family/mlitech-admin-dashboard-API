@@ -1,6 +1,9 @@
 import { DatePicker, Form, Input, Modal, Select } from "antd";
+import { useState } from "react";
 import { useGetPackagesQuery } from "../../../redux/apiSlices/packageSlice";
 import { useGetTierQuery } from "../../../redux/apiSlices/PointTierSlice";
+
+const { Option } = Select;
 
 const AddEditModal = ({
   visible,
@@ -11,17 +14,50 @@ const AddEditModal = ({
   setIsAddModalVisible,
   setIsEditModalVisible,
 }) => {
+  const [selectedCountry, setSelectedCountry] = useState("");
+
   const handleCancel = () => {
     setIsAddModalVisible(false);
     setIsEditModalVisible(false);
   };
-const {data:subscribers} =useGetPackagesQuery();
-const packages = subscribers?.data || [];
-const  {data:tier}=useGetTierQuery()
-const tiersList = tier?.data || [];
-console.log("tierList", tiersList);
+  const { data: subscribers } = useGetPackagesQuery();
+  const packages = subscribers?.data || [];
+  const { data: tier } = useGetTierQuery();
+  const tiersList = tier?.data || [];
+  console.log("tierList", tiersList);
 
-
+  const countryCityData = {
+    Pakistan: [
+      "Islamabad",
+      "Rawalpindi",
+      "Karachi",
+      "Lahore",
+      "Peshawar",
+      "Quetta",
+    ],
+    "United Arab Emirates": [
+      "Abu Dhabi",
+      "Dubai",
+      "Sharjah",
+      "Ajman",
+      "Ras Al Khaimah",
+      "Fujairah",
+      "Umm Al Quwain",
+    ],
+    Oman: ["Muscat"],
+    Qatar: ["Doha"],
+    Kuwait: ["Kuwait City"],
+    Bahrain: ["Manama"],
+    "Saudi Arabia": ["Jeddah", "Riyadh"],
+    Bangladesh: ["Dhaka"],
+    "United Kingdom": [
+      "London",
+      "Manchester",
+      "Birmingham",
+      "Glasgow",
+      "Liverpool",
+    ],
+  };
 
   return (
     <Modal
@@ -50,9 +86,7 @@ console.log("tierList", tiersList);
             <Form.Item
               name="firstName"
               label="First Name"
-              rules={[
-                { required: true, message: "Please enter First Name" },
-              ]}
+              rules={[{ required: true, message: "Please enter First Name" }]}
             >
               <Input
                 placeholder="Enter First Name"
@@ -96,24 +130,68 @@ console.log("tierList", tiersList);
                 className="mli-tall-input"
               />
             </Form.Item>
+
+            <Form.Item
+              name="tier"
+              label="Tier"
+              rules={[{ required: true, message: "Please select tier" }]}
+            >
+              <Select placeholder="Select tier" className="mli-tall-select">
+                {tiersList.map((tier) => (
+                  <Select.Option key={tier._id} value={tier.title}>
+                    {tier.name}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
           </div>
 
           <div className="flex flex-col gap-4">
+            {/* Country */}
+            <Form.Item
+              name="country"
+              label="Country"
+              rules={[
+                { required: true, message: "Please select your country" },
+              ]}
+            >
+              <Select
+                placeholder="Select your country"
+                showSearch
+                optionFilterProp="children"
+                className="mli-tall-select"
+                onChange={(value) => {
+                  setSelectedCountry(value);
+                  form.setFieldValue("city", undefined);
+                }}
+              >
+                {Object.keys(countryCityData).map((country) => (
+                  <Option key={country} value={country}>
+                    {country}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            {/* City */}
             <Form.Item
               name="city"
               label="City"
-              rules={[{ required: true, message: "Please select city" }]}
+              rules={[{ required: true, message: "Please select your City" }]}
             >
-              <Select placeholder="Select city" className="mli-tall-select">
-                <Select.Option value="Dhaka">Dhaka</Select.Option>
-                <Select.Option value="Chittagong">Chittagong</Select.Option>
-                <Select.Option value="Sylhet">Sylhet</Select.Option>
-                <Select.Option value="Khulna">Khulna</Select.Option>
-                <Select.Option value="Rajshahi">Rajshahi</Select.Option>
-                <Select.Option value="Barisal">Barisal</Select.Option>
-                <Select.Option value="Rangpur">Rangpur</Select.Option>
-                <Select.Option value="Mymensingh">Mymensingh</Select.Option>
-                <Select.Option value="Other">Other</Select.Option>
+              <Select
+                placeholder="Select your city"
+                showSearch
+                optionFilterProp="children"
+                className="mli-tall-select"
+                disabled={!selectedCountry}
+              >
+                {selectedCountry &&
+                  countryCityData[selectedCountry].map((city) => (
+                    <Option key={city} value={city}>
+                      {city}
+                    </Option>
+                  ))}
               </Select>
             </Form.Item>
 
@@ -165,23 +243,11 @@ console.log("tierList", tiersList);
             </Form.Item>
 
             <Form.Item
-              name="tier"
-              label="Tier"
-              rules={[{ required: true, message: "Please select tier" }]}
-            >
-              <Select placeholder="Select tier" className="mli-tall-select">
-                {tiersList.map((tier) => (
-                  <Select.Option key={tier._id} value={tier.title}>
-                    {tier.name}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-
-            <Form.Item
               name="password"
               label="Password"
-              rules={[{ required: !selectedRecord, message: "Please enter password" }]}
+              rules={[
+                { required: !selectedRecord, message: "Please enter password" },
+              ]}
             >
               <Input.Password
                 placeholder="Enter password"
