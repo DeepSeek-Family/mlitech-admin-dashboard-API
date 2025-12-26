@@ -1,5 +1,5 @@
 import { DatePicker, Form, Input, Modal, Select } from "antd";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useGetPackagesQuery } from "../../../redux/apiSlices/packageSlice";
 import { useGetTierQuery } from "../../../redux/apiSlices/PointTierSlice";
 
@@ -15,6 +15,15 @@ const AddEditModal = ({
   setIsEditModalVisible,
 }) => {
   const [selectedCountry, setSelectedCountry] = useState("");
+
+  // Update selectedCountry when visible or selectedRecord changes
+  React.useEffect(() => {
+    if (visible && selectedRecord?.raw?.country) {
+      setSelectedCountry(selectedRecord.raw.country);
+    } else if (!visible) {
+      setSelectedCountry("");
+    }
+  }, [visible, selectedRecord]);
 
   const handleCancel = () => {
     setIsAddModalVisible(false);
@@ -137,11 +146,13 @@ const AddEditModal = ({
               rules={[{ required: true, message: "Please select tier" }]}
             >
               <Select placeholder="Select tier" className="mli-tall-select">
-                {tiersList.map((tier) => (
-                  <Select.Option key={tier._id} value={tier.title}>
-                    {tier.name}
-                  </Select.Option>
-                ))}
+                {tiersList && tiersList.length > 0 ? (
+                  tiersList.map((tier) => (
+                    <Select.Option key={tier._id} value={tier.title}>
+                      {tier.name}
+                    </Select.Option>
+                  ))
+                ) : null}
               </Select>
             </Form.Item>
           </div>
@@ -187,6 +198,7 @@ const AddEditModal = ({
                 disabled={!selectedCountry}
               >
                 {selectedCountry &&
+                  countryCityData[selectedCountry] &&
                   countryCityData[selectedCountry].map((city) => (
                     <Option key={city} value={city}>
                       {city}
@@ -206,11 +218,13 @@ const AddEditModal = ({
                 placeholder="Select subscription"
                 className="mli-tall-select"
               >
-                {packages.map((pkg) => (
-                  <Select.Option key={pkg._id} value={pkg.title}>
-                    {pkg.title}
-                  </Select.Option>
-                ))}
+                {packages && packages.length > 0 ? (
+                  packages.map((pkg) => (
+                    <Select.Option key={pkg._id} value={pkg.title}>
+                      {pkg.title}
+                    </Select.Option>
+                  ))
+                ) : null}
               </Select>
             </Form.Item>
 

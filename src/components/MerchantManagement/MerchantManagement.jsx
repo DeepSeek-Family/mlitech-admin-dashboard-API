@@ -207,17 +207,19 @@ const MerchantManagement = () => {
 
       form.setFieldsValue({
         salesRep: record.salesRep || raw.salesRep,
-        address: record.location || raw.city || raw.address,
+        firstName: raw.firstName || raw.name,
         businessName: record.businessName,
+        email: record.email,
+        phone: record.phone,
+        country: raw.country || "",
+        city: raw.city || "",
         subscription: raw.subscription || raw.subscriptionType,
         lastPaymentDate: raw.lastPaymentDate
           ? dayjs(raw.lastPaymentDate)
           : null,
         expiryDate: raw.expiryDate ? dayjs(raw.expiryDate) : null,
-        email: record.email,
-        firstName: raw.firstName || raw.name,
-        phone: record.phone,
         tier: raw.tier,
+        address: raw.address || "",
       });
       setIsEditModalVisible(true);
     } else {
