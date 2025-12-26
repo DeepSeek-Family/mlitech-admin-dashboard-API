@@ -34,7 +34,7 @@ const columns = [
     dataIndex: "totalRevenue",
     key: "totalRevenue",
     align: "center",
-    render: (value) => `$${value.toFixed(2)}`,
+    render: (value) => `${value.toFixed(2)}`,
   },
   {
     title: "Date",

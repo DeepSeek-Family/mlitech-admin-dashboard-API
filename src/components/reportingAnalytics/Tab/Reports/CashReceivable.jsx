@@ -1,46 +1,20 @@
-import { Button, DatePicker, Table } from "antd";
+import { Button, DatePicker, message } from "antd";
 import "antd/dist/reset.css";
 import dayjs from "dayjs";
 import { useMemo, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-
-// Sample data for cash receivable
-const data = [
-  {
-    sl: 1,
-    date: "2025-01-01",
-    merchantId: "M-1001",
-    transactions: 5,
-    totalCollected: 1200.5,
-    salesRep: "John Doe",
-    location: "Chicago",
-  },
-  {
-    sl: 2,
-    date: "2025-02-01",
-    merchantId: "M-1002",
-    transactions: 3,
-    totalCollected: 850.0,
-    salesRep: "Jane Smith",
-    location: "Los Angeles",
-  },
-  {
-    sl: 3,
-    date: "2025-03-01",
-    merchantId: "M-1003",
-    transactions: 7,
-    totalCollected: 1500.0,
-    salesRep: "Alice Johnson",
-    location: "New York",
-  },
-];
+import {
+  useGetCashReceivableQuery,
+  useLazyExportCashReceivableQuery,
+} from "../../../../redux/apiSlices/accountingSlice";
+import CustomTable from "../../../common/CustomTable";
 
 // Table columns
 const columns = [
   {
     title: "Customer ID",
-    dataIndex: "merchantId",
-    key: "merchantId",
+    dataIndex: "customerId",
+    key: "customerId",
     align: "center",
   },
   {
@@ -49,7 +23,6 @@ const columns = [
     key: "salesRep",
     align: "center",
   },
-  { title: "Date", dataIndex: "date", key: "date", align: "center" },
   {
     title: "Location",
     dataIndex: "location",
@@ -58,55 +31,121 @@ const columns = [
   },
   {
     title: "Transactions",
-    dataIndex: "transactions",
-    key: "transactions",
+    dataIndex: "totalTransactions",
+    key: "totalTransactions",
     align: "center",
   },
   {
     title: "Total Outstanding",
-    dataIndex: "totalCollected",
-    key: "totalCollected",
+    dataIndex: "totalOutstanding",
+    key: "totalOutstanding",
     align: "center",
-    render: (value) => `$${value.toFixed(2)}`,
+    render: (value) => `${value.toFixed(2)}`,
   },
 ];
 
 export default function CashReceivable() {
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   // Read values from URL params
-  const fromDate = searchParams.get("cr_fromDate") || "";
-  const toDate = searchParams.get("cr_toDate") || "";
-  const currentPage = parseInt(searchParams.get("cr_page") || "1", 10);
+  const fromDate = searchParams.get("fromDate") || "";
+  const toDate = searchParams.get("toDate") || "";
+  const currentPage = parseInt(searchParams.get("page") || "1", 10);
 
-  // Helper function to update URL params
-  const updateSearchParam = useCallback((key, value) => {
-    setSearchParams((prev) => {
-      const newParams = new URLSearchParams(prev);
-      if (value && value !== "") {
-        newParams.set(key, value);
-      } else {
-        newParams.delete(key);
-      }
-      return newParams;
-    });
-  }, [setSearchParams]);
-
-  // Filter data based on URL params
-  const filteredData = useMemo(() => {
-    let filtered = data;
+  // Build query params for API
+  const queryParams = useMemo(() => {
+    const params = [];
     if (fromDate) {
-      filtered = filtered.filter((item) =>
-        dayjs(item.date).isSameOrAfter(dayjs(fromDate), "day")
-      );
+      params.push({ name: "startDate", value: fromDate });
     }
     if (toDate) {
-      filtered = filtered.filter((item) =>
-        dayjs(item.date).isSameOrBefore(dayjs(toDate), "day")
-      );
+      params.push({ name: "endDate", value: toDate });
     }
-    return filtered;
-  }, [fromDate, toDate]);
+    params.push({ name: "page", value: currentPage });
+    params.push({ name: "limit", value: 6 });
+    return params;
+  }, [fromDate, toDate, currentPage]);
+
+  // Fetch data from API
+  const {
+    data: apiResponse,
+    isLoading,
+    isFetching,
+  } = useGetCashReceivableQuery(queryParams);
+
+  // Lazy query for export
+  const [triggerExport, { isLoading: isExportLoading }] =
+    useLazyExportCashReceivableQuery();
+
+  const handleExportCashReceivable = async () => {
+    try {
+      const result = await triggerExport([
+        { name: "startDate", value: fromDate },
+        { name: "endDate", value: toDate },
+      ]);
+
+      if (result.data) {
+        // Create a blob URL and trigger download
+        const blob = result.data;
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+
+        // Generate filename with current date
+        const dateStr = new Date().toISOString().split("T")[0];
+        link.download = `cash-receivable-export-${dateStr}.xlsx`;
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+
+        message.success("Report exported successfully!");
+      }
+    } catch (error) {
+      console.error("Export failed:", error);
+      message.error("Failed to export report");
+    }
+  };
+
+  // Debug: Log API response structure
+  console.log("CashReceivable API Response:", apiResponse);
+
+  // Helper function to update URL params
+  const updateSearchParam = useCallback(
+    (key, value) => {
+      setSearchParams((prev) => {
+        const newParams = new URLSearchParams(prev);
+        if (value && value !== "") {
+          newParams.set(key, value);
+        } else {
+          newParams.delete(key);
+        }
+        return newParams;
+      });
+    },
+    [setSearchParams]
+  );
+
+  // Transform API data for table
+  const filteredData = useMemo(() => {
+    // API response has nested data structure: apiResponse.data.data
+    if (!apiResponse?.data?.data) return [];
+
+    const dataArray = Array.isArray(apiResponse.data.data)
+      ? apiResponse.data.data
+      : [];
+
+    return dataArray.map((item, index) => ({
+      key: index,
+      sl: index + 1 + (currentPage - 1) * 6,
+      customerId: item.customerId || item._id || "-",
+      salesRep: item.salesRep || "-",
+      location: item.location || "-",
+      totalTransactions: item.totalTransactions || 0,
+      totalOutstanding: item.totalOutstanding || 0,
+    }));
+  }, [apiResponse, currentPage]);
 
   return (
     <div style={{ width: "100%" }}>
@@ -116,39 +155,53 @@ export default function CashReceivable() {
           <div>
             <DatePicker
               value={fromDate ? dayjs(fromDate) : null}
-              onChange={(date) => updateSearchParam("cr_fromDate", date ? dayjs(date).format("YYYY-MM-DD") : "")}
+              onChange={(date) =>
+                updateSearchParam(
+                  "fromDate",
+                  date ? dayjs(date).format("YYYY-MM-DD") : ""
+                )
+              }
               style={{ marginLeft: "auto", marginRight: "20px" }}
               placeholder="From Date"
               format="YYYY-MM-DD"
             />
             <DatePicker
               value={toDate ? dayjs(toDate) : null}
-              onChange={(date) => updateSearchParam("cr_toDate", date ? dayjs(date).format("YYYY-MM-DD") : "")}
+              onChange={(date) =>
+                updateSearchParam(
+                  "toDate",
+                  date ? dayjs(date).format("YYYY-MM-DD") : ""
+                )
+              }
               style={{ marginRight: "20px" }}
               placeholder="To Date"
               format="YYYY-MM-DD"
             />
           </div>
-          <Button className="bg-primary text-white font-semibold px-[20px] hover:!text-black">
+          <Button
+            className="bg-primary text-white font-semibold px-[20px] hover:!text-black"
+            onClick={handleExportCashReceivable}
+            loading={isExportLoading}
+            disabled={isExportLoading}
+          >
             Export Report
           </Button>
         </div>
       </div>
-      <Table
-        bordered={false}
-        size="small"
-        rowClassName="custom-row"
-        className="custom-table"
+      <CustomTable
+        data={filteredData}
         columns={columns}
-        dataSource={filteredData.map((row, index) => ({
-          ...row,
-          key: index,
-        }))}
-        pagination={{ 
+        isLoading={isLoading}
+        isFetching={isFetching}
+        pagination={{
           current: currentPage,
           pageSize: 6,
-          onChange: (page) => updateSearchParam("cr_page", page > 1 ? page.toString() : "")
+          total: apiResponse?.pagination?.total || 0,
         }}
+        onPaginationChange={(page) =>
+          updateSearchParam("page", page > 1 ? page.toString() : "")
+        }
+        rowKey="key"
       />
     </div>
   );
