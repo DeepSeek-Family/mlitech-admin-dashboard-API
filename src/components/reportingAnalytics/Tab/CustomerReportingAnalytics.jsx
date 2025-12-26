@@ -1,4 +1,4 @@
-import { Button, Col, DatePicker, Form, Input, Row, Select, Table, Spin } from "antd";
+import { Button, Col, DatePicker, Form, Input, Row, Select, Spin } from "antd";
 import "antd/dist/reset.css";
 import dayjs from "dayjs";
 import { useMemo, useCallback } from "react";
@@ -17,39 +17,13 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { useCustomerReportAnalyticsQuery } from "../../../redux/apiSlices/reportAnalyticsApi";
+import {
+  useCustomerReportAnalyticsQuery,
+  useLazyExportCustomerChartMonthlyDataQuery,
+} from "../../../redux/apiSlices/reportAnalyticsApi";
+import CustomTable from "../../common/CustomTable";
 
 const { Option } = Select;
-
-const components = {
-  header: {
-    row: (props) => (
-      <tr
-        {...props}
-        style={{
-          backgroundColor: "#f0f5f9",
-          height: "50px",
-          color: "secondary",
-          fontSize: "18px",
-          textAlign: "center",
-          padding: "12px",
-        }}
-      />
-    ),
-    cell: (props) => (
-      <th
-        {...props}
-        style={{
-          color: "secondary",
-          fontWeight: "bold",
-          fontSize: "18px",
-          textAlign: "center",
-          padding: "12px",
-        }}
-      />
-    ),
-  },
-};
 
 // Dropdown options for frontend filtering
 const subscriptionOptions = ["All Statuses", "active", "inActive"];
@@ -59,7 +33,7 @@ const pointsFilterOptions = ["All", "Points Redeemed", "Points Accumulated"];
 
 export default function MonthlyStatsChartCustomer() {
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   // Default dates: current year start and end
   const currentYear = new Date().getFullYear();
   const defaultStartDate = `${currentYear}-01-01`;
@@ -70,7 +44,8 @@ export default function MonthlyStatsChartCustomer() {
   const toDate = searchParams.get("c_endDate") || defaultEndDate;
   const customerName = searchParams.get("c_customerName") || "";
   const location = searchParams.get("c_location") || "";
-  const selectedSubscription = searchParams.get("c_subscription") || "All Statuses";
+  const selectedSubscription =
+    searchParams.get("c_subscription") || "All Statuses";
   const selectedPayment = searchParams.get("c_payment") || "All Payments";
   const selectedMetric = searchParams.get("c_metric") || "all";
   const selectedPointsFilter = searchParams.get("c_pointsFilter") || "All";
@@ -78,26 +53,37 @@ export default function MonthlyStatsChartCustomer() {
   const currentPage = parseInt(searchParams.get("c_page") || "1", 10);
 
   // Helper function to update URL params
-  const updateSearchParam = useCallback((key, value) => {
-    setSearchParams((prev) => {
-      const newParams = new URLSearchParams(prev);
-      if (value && value !== "" && value !== "All Statuses" && value !== "All Payments" && value !== "all" && value !== "All" && value !== "Bar") {
-        newParams.set(key, value);
-      } else if (key === "c_startDate" && value !== defaultStartDate) {
-        newParams.set(key, value);
-      } else if (key === "c_endDate" && value !== defaultEndDate) {
-        newParams.set(key, value);
-      } else {
-        newParams.delete(key);
-      }
-      return newParams;
-    });
-  }, [setSearchParams, defaultStartDate, defaultEndDate]);
+  const updateSearchParam = useCallback(
+    (key, value) => {
+      setSearchParams((prev) => {
+        const newParams = new URLSearchParams(prev);
+        if (
+          value &&
+          value !== "" &&
+          value !== "All Statuses" &&
+          value !== "All Payments" &&
+          value !== "all" &&
+          value !== "All" &&
+          value !== "Bar"
+        ) {
+          newParams.set(key, value);
+        } else if (key === "c_startDate" && value !== defaultStartDate) {
+          newParams.set(key, value);
+        } else if (key === "c_endDate" && value !== defaultEndDate) {
+          newParams.set(key, value);
+        } else {
+          newParams.delete(key);
+        }
+        return newParams;
+      });
+    },
+    [setSearchParams, defaultStartDate, defaultEndDate]
+  );
 
   // Build query params for API
   const queryParams = useMemo(() => {
     const params = [];
-    
+
     if (fromDate) {
       params.push({ name: "startDate", value: fromDate });
     }
@@ -119,37 +105,53 @@ export default function MonthlyStatsChartCustomer() {
     if (currentPage > 1) {
       params.push({ name: "page", value: currentPage });
     }
-    
+
     return params;
-  }, [fromDate, toDate, customerName, location, selectedSubscription, selectedPayment, currentPage]);
+  }, [
+    fromDate,
+    toDate,
+    customerName,
+    location,
+    selectedSubscription,
+    selectedPayment,
+    currentPage,
+  ]);
 
   // Fetch data from API
-  const { data: apiResponse, isLoading, isFetching } = useCustomerReportAnalyticsQuery(queryParams);
+  const {
+    data: apiResponse,
+    isLoading,
+    isFetching,
+  } = useCustomerReportAnalyticsQuery(queryParams);
+
+  // Lazy query for export (only triggers on button click)
+  const [triggerExport, { isLoading: isExportLoading }] =
+    useLazyExportCustomerChartMonthlyDataQuery();
 
   // Transform API data for table
   const tableData = useMemo(() => {
     if (!apiResponse?.data?.records) return [];
-    
+
     return apiResponse.data.records.map((record, index) => ({
       key: index,
       sl: index + 1,
-      date: record.date ? dayjs(record.date).format("YYYY-MM-DD") : "",
-      customerId: record.customUserId || "",
-      CustomerName: record.customerName || "",
-      Location: record.location || "",
-      SubscriptionStatus: record.subscriptionStatus || "",
-      PaymentStatus: record.paymentStatus || "",
-      Revenue: record.revenue || "",
-      Users: record.users || "",
-      "Points Redeemed": record.pointsRedeemed ?? "",
-      "Points Accumulated": record.pointsAccumulated ?? "",
+      date: record.date ? dayjs(record.date).format("YYYY-MM-DD") : "-",
+      customerId: record.customUserId || "-",
+      CustomerName: record.customerName || "-",
+      Location: record.location || "-",
+      SubscriptionStatus: record.subscriptionStatus || "-",
+      PaymentStatus: record.paymentStatus || "-",
+      Revenue: record.revenue || "-",
+      Users: record.users || "-",
+      "Points Redeemed": record.pointsRedeemed ?? "-",
+      "Points Accumulated": record.pointsAccumulated ?? "-",
     }));
   }, [apiResponse]);
 
   // Transform monthly data for chart
   const chartData = useMemo(() => {
     if (!apiResponse?.data?.monthlyData) return [];
-    
+
     return apiResponse.data.monthlyData.map((item) => ({
       date: `${item.monthName} ${item.year}`,
       Revenue: item.revenue || 0,
@@ -172,8 +174,10 @@ export default function MonthlyStatsChartCustomer() {
     return {
       Revenue: Math.max(...chartData.map((d) => d.Revenue)) || 100,
       Users: Math.max(...chartData.map((d) => d.Users)) || 100,
-      "Points Accumulated": Math.max(...chartData.map((d) => d["Points Accumulated"])) || 100,
-      "Points Redeemed": Math.max(...chartData.map((d) => d["Points Redeemed"])) || 100,
+      "Points Accumulated":
+        Math.max(...chartData.map((d) => d["Points Accumulated"])) || 100,
+      "Points Redeemed":
+        Math.max(...chartData.map((d) => d["Points Redeemed"])) || 100,
     };
   }, [chartData]);
 
@@ -190,11 +194,11 @@ export default function MonthlyStatsChartCustomer() {
     const depth = 10;
     const maxValue = maxValues[dataKey] || 100;
     const currentValue = payload?.[dataKey] || 0;
-    
+
     if (!currentValue || !height || height <= 0) {
       return null;
     }
-    
+
     const scale = maxValue / currentValue;
     const watermarkHeight = height * scale;
     const watermarkY = y - (watermarkHeight - height);
@@ -218,9 +222,9 @@ export default function MonthlyStatsChartCustomer() {
           <polygon
             points={`${x + width},${watermarkY} ${x + width + depth},${
               watermarkY - depth
-            } ${x + width + depth},${watermarkY + watermarkHeight} ${x + width},${
-              watermarkY + watermarkHeight
-            }`}
+            } ${x + width + depth},${watermarkY + watermarkHeight} ${
+              x + width
+            },${watermarkY + watermarkHeight}`}
             fill={fill}
           />
         </g>
@@ -248,6 +252,31 @@ export default function MonthlyStatsChartCustomer() {
         />
       </g>
     );
+  };
+
+  const handleExportChartData = async () => {
+    try {
+      const result = await triggerExport(queryParams);
+
+      if (result.data) {
+        // Create a blob URL and trigger download
+        const blob = result.data;
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+
+        // Generate filename with current date
+        const dateStr = new Date().toISOString().split("T")[0];
+        link.download = `customer-report-${dateStr}.xlsx`;
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error("Export failed:", error);
+    }
   };
 
   const columns = [
@@ -334,7 +363,12 @@ export default function MonthlyStatsChartCustomer() {
               <Form.Item label="Start Date" style={{ marginBottom: "0.5rem" }}>
                 <DatePicker
                   value={fromDate ? dayjs(fromDate) : null}
-                  onChange={(date) => updateSearchParam("c_startDate", date ? dayjs(date).format("YYYY-MM-DD") : "")}
+                  onChange={(date) =>
+                    updateSearchParam(
+                      "c_startDate",
+                      date ? dayjs(date).format("YYYY-MM-DD") : ""
+                    )
+                  }
                   style={{ width: "100%" }}
                   placeholder="Start Date"
                   className="mli-tall-picker"
@@ -346,7 +380,12 @@ export default function MonthlyStatsChartCustomer() {
               <Form.Item label="End Date" style={{ marginBottom: "0.5rem" }}>
                 <DatePicker
                   value={toDate ? dayjs(toDate) : null}
-                  onChange={(date) => updateSearchParam("c_endDate", date ? dayjs(date).format("YYYY-MM-DD") : "")}
+                  onChange={(date) =>
+                    updateSearchParam(
+                      "c_endDate",
+                      date ? dayjs(date).format("YYYY-MM-DD") : ""
+                    )
+                  }
                   style={{ width: "100%" }}
                   placeholder="End Date"
                   className="mli-tall-picker"
@@ -361,7 +400,9 @@ export default function MonthlyStatsChartCustomer() {
               >
                 <Input
                   value={customerName}
-                  onChange={(e) => updateSearchParam("c_customerName", e.target.value)}
+                  onChange={(e) =>
+                    updateSearchParam("c_customerName", e.target.value)
+                  }
                   style={{ width: "100%", height: "40px" }}
                   placeholder="Enter Customer Name"
                   allowClear
@@ -373,7 +414,9 @@ export default function MonthlyStatsChartCustomer() {
               <Form.Item label="Location" style={{ marginBottom: "0.5rem" }}>
                 <Input
                   value={location}
-                  onChange={(e) => updateSearchParam("c_location", e.target.value)}
+                  onChange={(e) =>
+                    updateSearchParam("c_location", e.target.value)
+                  }
                   style={{ width: "100%", height: "40px" }}
                   placeholder="Enter Location"
                   allowClear
@@ -389,12 +432,16 @@ export default function MonthlyStatsChartCustomer() {
                 <Select
                   value={selectedSubscription}
                   style={{ width: "100%" }}
-                  onChange={(value) => updateSearchParam("c_subscription", value)}
+                  onChange={(value) =>
+                    updateSearchParam("c_subscription", value)
+                  }
                   className="mli-tall-select"
                 >
                   {subscriptionOptions.map((option) => (
                     <Option key={option} value={option}>
-                      {option === "All Statuses" ? option : option.charAt(0).toUpperCase() + option.slice(1)}
+                      {option === "All Statuses"
+                        ? option
+                        : option.charAt(0).toUpperCase() + option.slice(1)}
                     </Option>
                   ))}
                 </Select>
@@ -471,7 +518,9 @@ export default function MonthlyStatsChartCustomer() {
                 <Select
                   value={selectedPointsFilter}
                   style={{ width: "100%" }}
-                  onChange={(value) => updateSearchParam("c_pointsFilter", value)}
+                  onChange={(value) =>
+                    updateSearchParam("c_pointsFilter", value)
+                  }
                   className="mli-tall-select"
                 >
                   {pointsFilterOptions.map((option) => (
@@ -492,8 +541,13 @@ export default function MonthlyStatsChartCustomer() {
                   >
                     Clear Selection
                   </Button>
-                  <Button className="bg-primary px-6 py-[19px] rounded-md text-white hover:text-secondary text-[14px] font-bold">
-                    Export Report
+                  <Button
+                    onClick={handleExportChartData}
+                    loading={isExportLoading}
+                    disabled={isExportLoading}
+                    className="bg-primary px-6 py-[19px] rounded-md text-white hover:text-secondary text-[14px] font-bold"
+                  >
+                    Export Report Monthly
                   </Button>
                 </div>
               </Form.Item>
@@ -508,7 +562,14 @@ export default function MonthlyStatsChartCustomer() {
         style={{ width: "100%", height: 400, marginTop: "40px" }}
       >
         {isLoading || isFetching ? (
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%",
+            }}
+          >
             <Spin size="large" />
           </div>
         ) : (
@@ -543,7 +604,8 @@ export default function MonthlyStatsChartCustomer() {
                     )}
                   />
                 )}
-                {(selectedMetric === "all" || selectedMetric === "Points Redeemed") && (
+                {(selectedMetric === "all" ||
+                  selectedMetric === "Points Redeemed") && (
                   <Bar
                     dataKey="Points Redeemed"
                     fill="#FFAE4C"
@@ -572,7 +634,8 @@ export default function MonthlyStatsChartCustomer() {
                 {(selectedMetric === "all" || selectedMetric === "Users") && (
                   <Line type="monotone" dataKey="Users" stroke="#6FD195" />
                 )}
-                {(selectedMetric === "all" || selectedMetric === "Points Redeemed") && (
+                {(selectedMetric === "all" ||
+                  selectedMetric === "Points Redeemed") && (
                   <Line
                     type="monotone"
                     dataKey="Points Redeemed"
@@ -606,7 +669,8 @@ export default function MonthlyStatsChartCustomer() {
                     fill="#6FD195"
                   />
                 )}
-                {(selectedMetric === "all" || selectedMetric === "Points Redeemed") && (
+                {(selectedMetric === "all" ||
+                  selectedMetric === "Points Redeemed") && (
                   <Area
                     type="monotone"
                     dataKey="Points Redeemed"
@@ -624,17 +688,17 @@ export default function MonthlyStatsChartCustomer() {
       <div style={{ marginTop: "50px" }}>
         <div className="flex justify-between items-end mb-4">
           <h1 className="text-[22px] font-bold">Data Table</h1>
-          <Button className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary text-[17px] font-bold">
+          <Button
+            className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary text-[17px] font-bold"
+            onClick={handleExportChartData}
+            loading={isExportLoading}
+            disabled={isExportLoading}
+          >
             Export Report
           </Button>
         </div>
-        <Table
-          bordered={false}
-          size="small"
-          rowClassName="custom-row"
-          components={components}
-          className="custom-table"
-          loading={isLoading || isFetching}
+        <CustomTable
+          data={tableData}
           columns={columns.filter((col) => {
             // Always show basic columns (not metric-related)
             if (
@@ -669,14 +733,17 @@ export default function MonthlyStatsChartCustomer() {
             }
             return col.dataIndex === selectedMetric;
           })}
-          dataSource={tableData}
-          pagination={{ 
+          isLoading={isLoading}
+          isFetching={isFetching}
+          pagination={{
             current: currentPage,
             pageSize: 6,
             total: apiResponse?.pagination?.total || 0,
-            showTotal: (total) => `Total ${total} records`,
-            onChange: (page) => updateSearchParam("c_page", page > 1 ? page.toString() : "")
           }}
+          onPaginationChange={(page) =>
+            updateSearchParam("c_page", page > 1 ? page.toString() : "")
+          }
+          rowKey="key"
         />
       </div>
     </div>

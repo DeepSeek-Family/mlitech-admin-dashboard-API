@@ -1,14 +1,4 @@
-import {
-  Button,
-  Col,
-  DatePicker,
-  Form,
-  Input,
-  Row,
-  Select,
-  Table,
-  Spin,
-} from "antd";
+import { Button, Col, DatePicker, Form, Input, Row, Select, Spin } from "antd";
 import "antd/dist/reset.css";
 import dayjs from "dayjs";
 import { useMemo, useCallback } from "react";
@@ -32,38 +22,9 @@ import {
   useLazyExportChartDataQuery,
   useMerchantReportAnalyticsQuery,
 } from "../../../redux/apiSlices/reportAnalyticsApi";
+import CustomTable from "../../common/CustomTable";
 
 const { Option } = Select;
-
-const components = {
-  header: {
-    row: (props) => (
-      <tr
-        {...props}
-        style={{
-          backgroundColor: "#f0f5f9",
-          height: "50px",
-          color: "secondary",
-          fontSize: "18px",
-          textAlign: "center",
-          padding: "12px",
-        }}
-      />
-    ),
-    cell: (props) => (
-      <th
-        {...props}
-        style={{
-          color: "secondary",
-          fontWeight: "bold",
-          fontSize: "18px",
-          textAlign: "center",
-          padding: "12px",
-        }}
-      />
-    ),
-  },
-};
 
 // Dropdown options for frontend filtering
 const subscriptionOptions = ["All Statuses", "Active", "Inactive"];
@@ -735,13 +696,8 @@ export default function MonthlyStatsChartMerchant() {
             Export Report
           </Button>
         </div>
-        <Table
-          bordered={false}
-          size="small"
-          rowClassName="custom-row"
-          components={components}
-          className="custom-table"
-          loading={isLoading || isFetching}
+        <CustomTable
+          data={tableData}
           columns={columns.filter(
             (col) =>
               selectedMetric === "all" ||
@@ -750,15 +706,17 @@ export default function MonthlyStatsChartMerchant() {
               ) ||
               col.dataIndex === selectedMetric
           )}
-          dataSource={tableData}
+          isLoading={isLoading}
+          isFetching={isFetching}
           pagination={{
             current: currentPage,
             pageSize: 6,
             total: apiResponse?.pagination?.total || 0,
-            showTotal: (total) => `Total ${total} records`,
-            onChange: (page) =>
-              updateSearchParam("m_page", page > 1 ? page.toString() : ""),
           }}
+          onPaginationChange={(page) =>
+            updateSearchParam("m_page", page > 1 ? page.toString() : "")
+          }
+          rowKey="key"
         />
       </div>
     </div>

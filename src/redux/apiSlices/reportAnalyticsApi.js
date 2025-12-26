@@ -94,6 +94,30 @@ const reportAnalyticsApi = api.injectEndpoints({
       },
       providesTags: ["ReportAnalytics"],
     }),
+
+    exportCustomerChartMonthlyData: builder.query({
+      query: (args) => {
+        const params = new URLSearchParams();
+        if (args && args.length > 0) {
+          args.forEach((arg) => {
+            if (
+              arg.value !== undefined &&
+              arg.value !== null &&
+              arg.value !== ""
+            ) {
+              params.append(arg.name, arg.value);
+            }
+          });
+        }
+        return {
+          url: `/report-analytics/customer/monthly/export`,
+          method: "GET",
+          params,
+          responseHandler: (response) => response.blob(),
+        };
+      },
+      providesTags: ["ReportAnalytics"],
+    }),
   }),
 });
 
@@ -104,4 +128,6 @@ export const {
   useLazyExportChartDataQuery,
   useExportChartMonthlyDataQuery,
   useLazyExportChartMonthlyDataQuery,
+  useExportCustomerChartMonthlyDataQuery,
+  useLazyExportCustomerChartMonthlyDataQuery,
 } = reportAnalyticsApi;
