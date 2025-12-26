@@ -28,6 +28,7 @@ import {
   YAxis,
 } from "recharts";
 import {
+  useLazyExportChartMonthlyDataQuery,
   useLazyExportChartDataQuery,
   useMerchantReportAnalyticsQuery,
 } from "../../../redux/apiSlices/reportAnalyticsApi";
@@ -159,9 +160,14 @@ export default function MonthlyStatsChartMerchant() {
     isLoading,
     isFetching,
   } = useMerchantReportAnalyticsQuery(queryParams);
-  
-  // Lazy query for export (only triggers on button click)
-  const [triggerExport, { isLoading: isExportLoading }] = useLazyExportChartDataQuery();
+
+  // Lazy query for monthly export (only triggers on button click)
+  const [triggerMonthlyExport, { isLoading: isMonthlyExportLoading }] =
+    useLazyExportChartMonthlyDataQuery();
+
+  // Lazy query for regular export (only triggers on button click)
+  const [triggerExport, { isLoading: isExportLoading }] =
+    useLazyExportChartDataQuery();
 
   // Transform API data for table
   const tableData = useMemo(() => {
@@ -172,16 +178,16 @@ export default function MonthlyStatsChartMerchant() {
       sl: index + 1,
       date: record.joiningDate
         ? dayjs(record.joiningDate).format("YYYY-MM-DD")
-        : "",
-      merchantId: record._id || "",
-      MerchantName: record.merchantName || "",
-      Location: record.location || "",
-      SubscriptionStatus: record.subscriptionStatus || "",
-      PaymentStatus: record.paymentStatus || "",
-      DaysToExpire: record.daysToExpire ?? "",
-      Revenue: record.totalRevenue ?? "",
-      Users: record.usersCount ?? "",
-      "Points Redeemed": record.pointsRedeemed ?? "",
+        : "-",
+      merchantId: record._id || "-",
+      MerchantName: record.merchantName || "-",
+      Location: record.location || "-",
+      SubscriptionStatus: record.subscriptionStatus || "-",
+      PaymentStatus: record.paymentStatus || "-",
+      DaysToExpire: record.daysToExpire ?? "-",
+      Revenue: record.totalRevenue ?? "-",
+      Users: record.usersCount ?? "-",
+      "Points Redeemed": record.pointsRedeemed ?? "-",
     }));
   }, [apiResponse]);
 
@@ -286,21 +292,46 @@ export default function MonthlyStatsChartMerchant() {
       </g>
     );
   };
-  const handleExportChartData = async () => {
+  const handleExportChartMonthlyData = async () => {
     try {
-      const result = await triggerExport(queryParams);
-      
+      const result = await triggerMonthlyExport(queryParams);
+
       if (result.data) {
         // Create a blob URL and trigger download
         const blob = result.data;
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        
+
+        // Generate filename with current date
+        const dateStr = new Date().toISOString().split("T")[0];
+        link.download = `merchant-report-monthly-${dateStr}.xlsx`;
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error("Export failed:", error);
+    }
+  };
+
+  const handleExportChartData = async () => {
+    try {
+      const result = await triggerExport(queryParams);
+
+      if (result.data) {
+        // Create a blob URL and trigger download
+        const blob = result.data;
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+
         // Generate filename with current date
         const dateStr = new Date().toISOString().split("T")[0];
         link.download = `merchant-report-${dateStr}.xlsx`;
-        
+
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -548,13 +579,13 @@ export default function MonthlyStatsChartMerchant() {
                   >
                     Clear Selection
                   </Button>
-                  <Button 
-                    onClick={handleExportChartData}
-                    loading={isExportLoading}
-                    disabled={isExportLoading}
+                  <Button
+                    onClick={handleExportChartMonthlyData}
+                    loading={isMonthlyExportLoading}
+                    disabled={isMonthlyExportLoading}
                     className="bg-primary px-6 py-[19px] rounded-md text-white hover:text-secondary text-[14px] font-bold"
                   >
-                    Export Report
+                    Export Report Monthly
                   </Button>
                 </div>
               </Form.Item>
@@ -695,7 +726,7 @@ export default function MonthlyStatsChartMerchant() {
       <div style={{ marginTop: "50px" }}>
         <div className="flex justify-between items-end mb-4">
           <h1 className="text-[22px] font-bold">Data Table</h1>
-          <Button 
+          <Button
             className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary text-[17px] font-bold"
             onClick={handleExportChartData}
             loading={isExportLoading}

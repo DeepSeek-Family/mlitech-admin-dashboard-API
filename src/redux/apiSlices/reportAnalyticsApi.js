@@ -7,7 +7,11 @@ const reportAnalyticsApi = api.injectEndpoints({
         const params = new URLSearchParams();
         if (args && args.length > 0) {
           args.forEach((arg) => {
-            if (arg.value !== undefined && arg.value !== null && arg.value !== "") {
+            if (
+              arg.value !== undefined &&
+              arg.value !== null &&
+              arg.value !== ""
+            ) {
               params.append(arg.name, arg.value);
             }
           });
@@ -15,7 +19,7 @@ const reportAnalyticsApi = api.injectEndpoints({
         return {
           url: `/report-analytics/merchant`,
           method: "GET",
-          params
+          params,
         };
       },
       providesTags: ["ReportAnalytics"],
@@ -25,7 +29,11 @@ const reportAnalyticsApi = api.injectEndpoints({
         const params = new URLSearchParams();
         if (args && args.length > 0) {
           args.forEach((arg) => {
-            if (arg.value !== undefined && arg.value !== null && arg.value !== "") {
+            if (
+              arg.value !== undefined &&
+              arg.value !== null &&
+              arg.value !== ""
+            ) {
               params.append(arg.name, arg.value);
             }
           });
@@ -33,7 +41,31 @@ const reportAnalyticsApi = api.injectEndpoints({
         return {
           url: `/report-analytics/customer`,
           method: "GET",
-          params
+          params,
+        };
+      },
+      providesTags: ["ReportAnalytics"],
+    }),
+
+    exportChartMonthlyData: builder.query({
+      query: (args) => {
+        const params = new URLSearchParams();
+        if (args && args.length > 0) {
+          args.forEach((arg) => {
+            if (
+              arg.value !== undefined &&
+              arg.value !== null &&
+              arg.value !== ""
+            ) {
+              params.append(arg.name, arg.value);
+            }
+          });
+        }
+        return {
+          url: `/report-analytics/merchant/monthly/export`,
+          method: "GET",
+          params,
+          responseHandler: (response) => response.blob(),
         };
       },
       providesTags: ["ReportAnalytics"],
@@ -44,7 +76,11 @@ const reportAnalyticsApi = api.injectEndpoints({
         const params = new URLSearchParams();
         if (args && args.length > 0) {
           args.forEach((arg) => {
-            if (arg.value !== undefined && arg.value !== null && arg.value !== "") {
+            if (
+              arg.value !== undefined &&
+              arg.value !== null &&
+              arg.value !== ""
+            ) {
               params.append(arg.name, arg.value);
             }
           });
@@ -61,9 +97,11 @@ const reportAnalyticsApi = api.injectEndpoints({
   }),
 });
 
-export const { 
-  useMerchantReportAnalyticsQuery, 
+export const {
+  useMerchantReportAnalyticsQuery,
   useCustomerReportAnalyticsQuery,
   useExportChartDataQuery,
-  useLazyExportChartDataQuery
+  useLazyExportChartDataQuery,
+  useExportChartMonthlyDataQuery,
+  useLazyExportChartMonthlyDataQuery,
 } = reportAnalyticsApi;
