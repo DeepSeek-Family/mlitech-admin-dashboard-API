@@ -50,7 +50,55 @@ const accountingSlice = api.injectEndpoints({
       transformResponse: (response) => response,
       providesTags: ["PointsRedeemed"],
     }),
+    exportPointsRedeemed: builder.query({
+      query: (args) => {
+        const params = new URLSearchParams();
+        if (args) {
+          args.forEach((arg) => {
+            params.append(arg.name, arg.value);
+          });
+        }
+        return {
+          url: `/report-analytics/accountings/point-redeemed/export?${params.toString()}`,
+          method: "GET",
+          responseHandler: (response) => response.blob(),
+        };
+      },
+      providesTags: ["PointsRedeemed"],
+    }),
+    exportRevenuePerUser: builder.query({
+      query: (args) => {
+        const params = new URLSearchParams();
+        if (args) {
+          args.forEach((arg) => {
+            params.append(arg.name, arg.value);
+          });
+        }
+        return {
+          url: `/report-analytics/accountings/revenue-per-user/export?${params.toString()}`,
+          method: "GET",
+          responseHandler: (response) => response.blob(),
+        };
+      },
+      providesTags: ["RevenuePerUser"],
+    }),
+    exportCashCollection: builder.query({
+      query: (args) => {
+        const params = new URLSearchParams();
+        if (args) {
+          args.forEach((arg) => {
+            params.append(arg.name, arg.value);
+          });
+        }
+        return {
+          url: `/report-analytics/accountings/cash-collection/export?${params.toString()}`,
+          method: "GET",
+          responseHandler: (response) => response.blob(),
+        };
+      },
+      providesTags: ["CashCollection"],
+    }),
   }),
 });
 
-export const { useGetCashCollectionQuery, useGetRevenuePerUserQuery, useGetPointsRedeemedQuery } = accountingSlice;
+export const { useGetCashCollectionQuery, useGetRevenuePerUserQuery, useGetPointsRedeemedQuery, useLazyExportPointsRedeemedQuery, useLazyExportRevenuePerUserQuery, useLazyExportCashCollectionQuery } = accountingSlice;

@@ -1,9 +1,12 @@
-import { Button, DatePicker } from "antd";
+import { Button, DatePicker, message } from "antd";
 import "antd/dist/reset.css";
 import dayjs from "dayjs";
 import { useMemo, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useGetPointsRedeemedQuery } from "../../../../redux/apiSlices/accountingSlice";
+import {
+  useGetPointsRedeemedQuery,
+  useLazyExportPointsRedeemedQuery,
+} from "../../../../redux/apiSlices/accountingSlice";
 import CustomTable from "../../../common/CustomTable";
 
 // Table columns
@@ -70,6 +73,41 @@ export default function PointsRedeemed() {
     isLoading,
     isFetching,
   } = useGetPointsRedeemedQuery(queryParams);
+
+  // Lazy query for export
+  const [triggerExport, { isLoading: isExportLoading }] =
+    useLazyExportPointsRedeemedQuery();
+
+  const handleExportPointsRedeemed = async () => {
+    try {
+      const result = await triggerExport([
+        { name: "startDate", value: fromDate },
+        { name: "endDate", value: toDate },
+      ]);
+
+      if (result.data) {
+        // Create a blob URL and trigger download
+        const blob = result.data;
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+
+        // Generate filename with current date
+        const dateStr = new Date().toISOString().split("T")[0];
+        link.download = `points-redeemed-export-${dateStr}.xlsx`;
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+
+        message.success("Report exported successfully!");
+      }
+    } catch (error) {
+      console.error("Export failed:", error);
+      message.error("Failed to export report");
+    }
+  };
 
   // Debug: Log API response structure
   console.log("PointsRedeemed API Response:", apiResponse);
@@ -142,7 +180,12 @@ export default function PointsRedeemed() {
               format="YYYY-MM-DD"
             />
           </div>
-          <Button className="bg-primary text-white font-semibold px-[20px] hover:!text-black">
+          <Button
+            className="bg-primary text-white font-semibold px-[20px] hover:!text-black"
+            onClick={handleExportPointsRedeemed}
+            loading={isExportLoading}
+            disabled={isExportLoading}
+          >
             Export Report
           </Button>
         </div>
