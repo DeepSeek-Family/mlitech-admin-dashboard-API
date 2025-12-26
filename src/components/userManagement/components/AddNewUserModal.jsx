@@ -54,9 +54,15 @@ const AddNewUserModal = ({
         <Form.Item
           name="email"
           label="Email"
-          rules={[{ required: true, message: "Please enter email" }]}
+          rules={[
+            { required: true, message: "Please enter email" },
+            {
+              pattern: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+              message: "Please enter a valid email address",
+            },
+          ]}
         >
-          <Input className="mli-tall-input" />
+          <Input className="mli-tall-input" type="email" />
         </Form.Item>
         <Form.Item
           name="password"
@@ -73,9 +79,15 @@ const AddNewUserModal = ({
         <Form.Item
           name="phone"
           label="Phone Number"
-          rules={[{ required: true, message: "Please enter phone number" }]}
+          rules={[
+            { required: true, message: "Please enter phone number" },
+            {
+              pattern: /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/,
+              message: "Please enter a valid phone number",
+            },
+          ]}
         >
-          <Input className="mli-tall-input" />
+          <Input className="mli-tall-input" type="tel" />
         </Form.Item>
         <Form.Item
           name="role"

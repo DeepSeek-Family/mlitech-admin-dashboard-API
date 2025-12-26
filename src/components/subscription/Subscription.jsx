@@ -28,7 +28,8 @@ const PackagesPlans = () => {
 
   const [createPackage, { isLoading: isCreating }] = useCreatePackageMutation();
   const [updatePackage, { isLoading: isUpdating }] = useUpdatePackageMutation();
-  const [toggleStatus, { isLoading: isToggling }] = useTogglePackageStatusMutation();
+  const [toggleStatus, { isLoading: isToggling }] =
+    useTogglePackageStatusMutation();
 
   // Transform API data to UI format
   const packages = useMemo(() => {
@@ -238,7 +239,6 @@ const PackagesPlans = () => {
                     )} transition-transform duration-300`}
                   >
                     <div className="flex justify-end mb-2">
-
                       <div className="flex gap-2">
                         <Button
                           icon={<EditOutlined />}
@@ -260,7 +260,8 @@ const PackagesPlans = () => {
                       <div className="">
                         <span className="text-secondary font-semibold text-[38px]">
                           ${pkg.price}
-                        </span> / mth
+                        </span>{" "}
+                        / mth
                       </div>
                       <p className="text-[16px] font-normal text-center text-[#667085]">
                         {pkg.description}

@@ -230,11 +230,40 @@ const NewCampaign = ({ onSave, onCancel, editData = null, isEdit = false }) => {
             <Form.Item
               label="Discount Percentage"
               name="discountPercentage"
-              rules={[{ required: true }]}
+              rules={[
+                { required: true, message: "Discount percentage is required" },
+                {
+                  validator: (_, value) => {
+                    if (value === undefined || value === null || value === "") {
+                      return Promise.resolve();
+                    }
+                    const numValue = Number(value);
+                    if (isNaN(numValue)) {
+                      return Promise.reject(
+                        new Error("Please enter a valid number")
+                      );
+                    }
+                    if (numValue < 0) {
+                      return Promise.reject(
+                        new Error("Discount percentage cannot be negative")
+                      );
+                    }
+                    if (numValue > 100) {
+                      return Promise.reject(
+                        new Error("Discount percentage cannot exceed 100%")
+                      );
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
             >
               <Input
                 className="px-3 mli-tall-input"
-                placeholder="Enter Discount Percentage"
+                placeholder="Enter Discount Percentage (0-100)"
+                type="number"
+                min="0"
+                max="100"
               />
             </Form.Item>
           </div>

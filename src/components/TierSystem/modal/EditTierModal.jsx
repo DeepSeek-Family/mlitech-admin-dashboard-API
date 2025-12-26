@@ -10,13 +10,21 @@ const EditTierModal = ({
   onCancel,
   onSave,
 }) => {
+  // Reset form when modal is opened in add mode
+  const handleCancel = () => {
+    if (isAddMode) {
+      form.resetFields();
+    }
+    onCancel();
+  };
+
   return (
     <Modal
       title={
         isAddMode ? "Add New Tier" : `Set Rules - ${editingTier?.name || ""}`
       }
       open={visible}
-      onCancel={onCancel}
+      onCancel={handleCancel}
       footer={null}
     >
       <Form
@@ -24,11 +32,11 @@ const EditTierModal = ({
         layout="vertical"
         initialValues={{
           name: "",
-          threshold: 0,
+          threshold: "",
           reward: "",
-          lockoutDuration: 0,
-          pointsSystemLockoutDuration: 0,
-          minSpend: 0,
+          lockoutDuration: "",
+          pointsSystemLockoutDuration: "",
+          minSpend: "",
         }}
         onFinish={onSave}
         className="flex flex-col gap-4"
@@ -43,9 +51,26 @@ const EditTierModal = ({
         <Form.Item
           label="Points Threshold"
           name="threshold"
-          rules={[{ required: true, message: "Please enter threshold" }]}
+          rules={[
+            { required: true, message: "Please enter threshold" },
+            {
+              validator: (_, value) => {
+                if (!value && value !== 0) return Promise.resolve();
+                const numValue = parseFloat(value);
+                if (isNaN(numValue)) {
+                  return Promise.reject(
+                    new Error("Please enter a valid number")
+                  );
+                }
+                if (numValue < 0) {
+                  return Promise.reject(new Error("Value cannot be negative"));
+                }
+                return Promise.resolve();
+              },
+            },
+          ]}
         >
-          <Input type="number" className="mli-tall-input" />
+          <Input type="number" className="mli-tall-input" min="0" />
         </Form.Item>
         <Form.Item
           label="Reward"
@@ -57,9 +82,26 @@ const EditTierModal = ({
         <Form.Item
           label="Point accumulation rule"
           name="lockoutDuration"
-          rules={[{ required: true, message: "Please enter rule" }]}
+          rules={[
+            { required: true, message: "Please enter rule" },
+            {
+              validator: (_, value) => {
+                if (!value && value !== 0) return Promise.resolve();
+                const numValue = parseFloat(value);
+                if (isNaN(numValue)) {
+                  return Promise.reject(
+                    new Error("Please enter a valid number")
+                  );
+                }
+                if (numValue < 0) {
+                  return Promise.reject(new Error("Value cannot be negative"));
+                }
+                return Promise.resolve();
+              },
+            },
+          ]}
         >
-          <Input type="number" className="mli-tall-input" />
+          <Input type="number" className="mli-tall-input" min="0" />
         </Form.Item>
         <Form.Item
           label="Point redemption rule"
@@ -67,23 +109,56 @@ const EditTierModal = ({
           rules={[
             { required: true, message: "Please enter redemption rule" },
             {
-              pattern: /^[1-9]\d*$/,
-              message: "Redemption rule must be a number greater than 0",
+              validator: (_, value) => {
+                if (!value && value !== 0) return Promise.resolve();
+                const numValue = parseFloat(value);
+                if (isNaN(numValue)) {
+                  return Promise.reject(
+                    new Error("Please enter a valid number")
+                  );
+                }
+                if (numValue < 0) {
+                  return Promise.reject(new Error("Value cannot be negative"));
+                }
+                if (numValue === 0) {
+                  return Promise.reject(
+                    new Error("Value must be greater than 0")
+                  );
+                }
+                return Promise.resolve();
+              },
             },
           ]}
         >
-          <Input type="number" min="1" className="mli-tall-input" />
+          <Input type="number" className="mli-tall-input" min="1" />
         </Form.Item>
         <Form.Item
           label="Min Total Spend ($)"
           name="minSpend"
-          rules={[{ required: true, message: "Please enter min spend" }]}
+          rules={[
+            { required: true, message: "Please enter min spend" },
+            {
+              validator: (_, value) => {
+                if (!value && value !== 0) return Promise.resolve();
+                const numValue = parseFloat(value);
+                if (isNaN(numValue)) {
+                  return Promise.reject(
+                    new Error("Please enter a valid number")
+                  );
+                }
+                if (numValue < 0) {
+                  return Promise.reject(new Error("Value cannot be negative"));
+                }
+                return Promise.resolve();
+              },
+            },
+          ]}
         >
-          <Input type="number" className="mli-tall-input" />
+          <Input type="number" className="mli-tall-input" min="0" step="0.01" />
         </Form.Item>
         <div className="flex justify-end gap-2">
           <Button
-            onClick={onCancel}
+            onClick={handleCancel}
             className="border border-primary"
             disabled={isAdding || isUpdating}
           >

@@ -79,7 +79,22 @@ const EditModal = ({
           <Form.Item
             name="price"
             label="Price"
-            rules={[{ required: true, message: "Price is required" }]}
+            rules={[
+              { required: true, message: "Price is required" },
+              {
+                validator: (_, value) => {
+                  if (value === undefined || value === null || value === "") {
+                    return Promise.resolve();
+                  }
+                  if (isNaN(value) || Number(value) < 0) {
+                    return Promise.reject(
+                      new Error("Price cannot be negative")
+                    );
+                  }
+                  return Promise.resolve();
+                },
+              },
+            ]}
             className="w-1/2"
           >
             <Input
@@ -87,6 +102,7 @@ const EditModal = ({
               prefix="$"
               placeholder="29.99"
               className="mli-tall-input"
+              min="0"
             />
           </Form.Item>
 

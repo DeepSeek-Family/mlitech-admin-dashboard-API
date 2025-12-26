@@ -121,22 +121,35 @@ const AddEditModal = ({
               label="Email Address"
               rules={[
                 { required: true, message: "Please enter email address" },
+                {
+                  pattern: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: "Please enter a valid email address",
+                },
               ]}
             >
               <Input
                 placeholder="Enter email address"
                 className="mli-tall-input"
+                type="email"
               />
             </Form.Item>
 
             <Form.Item
               name="phone"
               label="Phone Number"
-              rules={[{ required: true, message: "Please enter phone number" }]}
+              rules={[
+                { required: true, message: "Please enter phone number" },
+                {
+                  pattern:
+                    /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/,
+                  message: "Please enter a valid phone number",
+                },
+              ]}
             >
               <Input
-                placeholder="Enter phone number"
+                placeholder="e.g. +1-234-567-8900"
                 className="mli-tall-input"
+                type="tel"
               />
             </Form.Item>
 
@@ -146,13 +159,13 @@ const AddEditModal = ({
               rules={[{ required: true, message: "Please select tier" }]}
             >
               <Select placeholder="Select tier" className="mli-tall-select">
-                {tiersList && tiersList.length > 0 ? (
-                  tiersList.map((tier) => (
-                    <Select.Option key={tier._id} value={tier.title}>
-                      {tier.name}
-                    </Select.Option>
-                  ))
-                ) : null}
+                {tiersList && tiersList.length > 0
+                  ? tiersList.map((tier) => (
+                      <Select.Option key={tier._id} value={tier.title}>
+                        {tier.name}
+                      </Select.Option>
+                    ))
+                  : null}
               </Select>
             </Form.Item>
           </div>
@@ -218,13 +231,13 @@ const AddEditModal = ({
                 placeholder="Select subscription"
                 className="mli-tall-select"
               >
-                {packages && packages.length > 0 ? (
-                  packages.map((pkg) => (
-                    <Select.Option key={pkg._id} value={pkg.title}>
-                      {pkg.title}
-                    </Select.Option>
-                  ))
-                ) : null}
+                {packages && packages.length > 0
+                  ? packages.map((pkg) => (
+                      <Select.Option key={pkg._id} value={pkg.title}>
+                        {pkg.title}
+                      </Select.Option>
+                    ))
+                  : null}
               </Select>
             </Form.Item>
 
