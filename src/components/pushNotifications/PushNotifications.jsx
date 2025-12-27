@@ -1,8 +1,8 @@
-import React, { useRef, useState } from "react";
-import JoditEditor from "jodit-react";
+import React, { useRef, useState, useEffect } from "react";
 import { Button, Input, message, Select } from "antd";
 import { Row, Col } from "antd";
 import { useCreatePushNotificationMutation } from "../../redux/apiSlices/pushNotification";
+import { useGetTierQuery } from "../../redux/apiSlices/PointTierSlice";
 
 const { Option } = Select;
 
@@ -13,11 +13,28 @@ const PushNotifications = () => {
   const [title, setTitle] = useState("");
   const [bodyContent, setBodyContent] = useState("");
   const [sendTo, setSendTo] = useState("ALL"); // Default to ALL
-  const [location, setLocation] = useState("Chittagong"); // Default value
-  const [tier, setTier] = useState("PLATINUM"); // Default value
+  const [location, setLocation] = useState(undefined); // Default value
+  const [tier, setTier] = useState(""); // Will be set once tiers load
   const [subscriptionType, setSubscriptionType] = useState("ACTIVE"); // Default value
   const [status, setStatus] = useState("ACTIVE"); // Default value
-  const [createPushNotification, { isLoading }] = useCreatePushNotificationMutation();
+  const [tiersList, setTiersList] = useState([]);
+
+  const [createPushNotification, { isLoading }] =
+    useCreatePushNotificationMutation();
+
+  // Fetch tier data from API
+  const { data: tierData } = useGetTierQuery([]);
+
+  // Set tiers list and default tier value
+  useEffect(() => {
+    if (tierData?.data && Array.isArray(tierData.data)) {
+      setTiersList(tierData.data);
+      // Set default tier to first tier's title if available
+      if (tierData.data.length > 0 && !tier) {
+        setTier(tierData.data[0].title);
+      }
+    }
+  }, [tierData]);
 
   const handleSend = async () => {
     if (!title.trim() || !bodyContent.trim()) {
@@ -27,7 +44,7 @@ const PushNotifications = () => {
 
     try {
       let payload;
-      
+
       if (sendTo === "ALL") {
         payload = {
           sendType: "ALL",
@@ -48,13 +65,13 @@ const PushNotifications = () => {
 
       await createPushNotification(payload).unwrap();
       message.success("Push Notification sent successfully!");
-      
+
       // Reset fields after sending
       setTitle("");
       setBodyContent("");
       setSendTo("ALL");
-      setLocation("Chittagong");
-      setTier("PLATINUM");
+      setLocation(undefined);
+      setTier(tiersList.length > 0 ? tiersList[0].title : "");
       setSubscriptionType("ACTIVE");
       setStatus("ACTIVE");
     } catch (error) {
@@ -67,8 +84,8 @@ const PushNotifications = () => {
     setTitle("");
     setBodyContent("");
     setSendTo("ALL");
-    setLocation("Chittagong");
-    setTier("PLATINUM");
+    setLocation(undefined);
+    setTier(tiersList.length > 0 ? tiersList[0].title : "");
     setSubscriptionType("ACTIVE");
     setStatus("ACTIVE");
     message.info("Notification draft cleared.");
@@ -76,6 +93,18 @@ const PushNotifications = () => {
 
   // Check if fields should be disabled
   const isFieldsDisabled = sendTo === "ALL";
+
+  const countries = [
+    "Pakistan",
+    "United Arab Emirates",
+    "Oman",
+    "Qatar",
+    "Kuwait",
+    "Bahrain",
+    "Saudi Arabia",
+    "Bangladesh",
+    "United Kingdom",
+  ];
 
   return (
     <div className="border rounded-lg px-12 py-8 bg-white">
@@ -115,10 +144,11 @@ const PushNotifications = () => {
                 className="mli-tall-select"
                 disabled={isFieldsDisabled}
               >
-                <Option value="Chittagong">Chittagong</Option>
-                <Option value="Dhaka">Dhaka</Option>
-                <Option value="Sylhet">Sylhet</Option>
-                <Option value="Khulna">Khulna</Option>
+                {countries.map((country) => (
+                  <Option key={country} value={country}>
+                    {country}
+                  </Option>
+                ))}
               </Select>
             </div>
           </Col>
@@ -135,9 +165,11 @@ const PushNotifications = () => {
                 className="mli-tall-select"
                 disabled={isFieldsDisabled}
               >
-                <Option value="PLATINUM">Platinum</Option>
-                <Option value="GOLD">Gold</Option>
-                <Option value="SILVER">Silver</Option>
+                {tiersList.map((tierItem) => (
+                  <Option key={tierItem._id} value={tierItem.title}>
+                    {tierItem.name}
+                  </Option>
+                ))}
               </Select>
             </div>
           </Col>
@@ -196,16 +228,22 @@ const PushNotifications = () => {
       {/* Body Editor */}
       <div className="mb-6 flex flex-col gap-2">
         <label className="font-bold text-[18px] mb-1">Body</label>
-        <JoditEditor
-          ref={editor}
+        <Input.TextArea
+          placeholder="Enter notification body"
           value={bodyContent}
-          onChange={(newContent) => setBodyContent(newContent)}
+          onChange={(e) => setBodyContent(e.target.value)}
+          style={{ height: "300px", resize: "vertical" }}
+          className="mli-tall-input"
         />
       </div>
 
       {/* Action Buttons */}
       <div className="flex justify-end gap-4">
-        <Button onClick={handleCancel} className="px-12 py-5" disabled={isLoading}>
+        <Button
+          onClick={handleCancel}
+          className="px-12 py-5"
+          disabled={isLoading}
+        >
           Cancel
         </Button>
         <Button
