@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
-import { Modal } from "antd";
+import { useEffect, useState, useContext } from "react";
+import { Modal, Tooltip } from "antd";
 import Swal from "sweetalert2";
 import NewCampaign from "../../promotionManagement/components/NewCampaing.jsx";
 import { CopyOutlined } from "@ant-design/icons";
 import CustomerReferredTableColumn from "./CustomerReferredTableColumn.jsx";
+import { UserContext } from "../../../provider/User";
 import {
   useGetSalesRepDataQuery,
   useAcknowledgeSalesRepMutation,
@@ -12,9 +13,20 @@ import {
 } from "../../../redux/apiSlices/salesRepSlice";
 
 const CustomerReferred = () => {
+  const { user } = useContext(UserContext);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [rows, setRows] = useState([]);
+  const [referralID, setReferralID] = useState("");
+
+  // Get referenceId from logged-in user profile
+  useEffect(() => {
+    if (user?.referenceId) {
+      setReferralID(user.referenceId);
+    } else if (user?.data?.referenceId) {
+      setReferralID(user.data.referenceId);
+    }
+  }, [user]);
 
   const {
     data: response,
@@ -75,7 +87,6 @@ const CustomerReferred = () => {
   const [isCashTokenModalVisible, setIsCashTokenModalVisible] = useState(false);
   const [generatedToken, setGeneratedToken] = useState("");
   const [selectedRecord, setSelectedRecord] = useState(null);
-  const [referralID, setReferralID] = useState("ANDREW856 D");
 
   // Handle Acknowledge Cash Payment - Call API
   const handleAcknowledge = async (record) => {
@@ -165,7 +176,6 @@ const CustomerReferred = () => {
 
   // Then, update handleConfirmToken:
   const handleConfirmToken = () => {
-    setReferralID(generatedToken); // set token as referral ID
     Swal.fire({
       icon: "success",
       title: "Token Generated!",
@@ -209,8 +219,12 @@ const CustomerReferred = () => {
                 ? {
                     ...item,
                     status: newStatus === "active" ? "active" : "inactive",
-                    actionStatus: newStatus === "active" ? "Active" : "Inactive",
-                    statusProgress: newStatus === "active" ? Math.max(item.statusProgress, 1) : item.statusProgress,
+                    actionStatus:
+                      newStatus === "active" ? "Active" : "Inactive",
+                    statusProgress:
+                      newStatus === "active"
+                        ? Math.max(item.statusProgress, 1)
+                        : item.statusProgress,
                     activateDate: new Date().toLocaleDateString(),
                   }
                 : item
@@ -236,25 +250,79 @@ const CustomerReferred = () => {
   };
 
   const handleCopyReferralID = () => {
-    if (!referralID) return;
-    navigator.clipboard
-      .writeText(referralID)
-      .then(() => {
+    console.log("Copy button clicked, referralID:", referralID);
+
+    if (!referralID) {
+      Swal.fire({
+        icon: "warning",
+        title: "No Referral ID",
+        text: "Referral ID is not available yet.",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    // Try modern clipboard API first
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard
+        .writeText(referralID)
+        .then(() => {
+          console.log("Copy successful");
+          Swal.fire({
+            icon: "success",
+            title: "Copied!",
+            text: `Referral ID "${referralID}" has been copied to clipboard.`,
+            timer: 1500,
+            showConfirmButton: false,
+          });
+        })
+        .catch((err) => {
+          console.error("Clipboard API failed:", err);
+          // Fallback to older method
+          fallbackCopyTextToClipboard(referralID);
+        });
+    } else {
+      // Fallback for older browsers
+      fallbackCopyTextToClipboard(referralID);
+    }
+  };
+
+  const fallbackCopyTextToClipboard = (text) => {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    textArea.style.left = "-999999px";
+    textArea.style.top = "-999999px";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    try {
+      const successful = document.execCommand("copy");
+      document.body.removeChild(textArea);
+
+      if (successful) {
+        console.log("Fallback copy successful");
         Swal.fire({
           icon: "success",
           title: "Copied!",
-          text: `Referral ID "${referralID}" has been copied.`,
+          text: `Referral ID "${text}" has been copied to clipboard.`,
           timer: 1500,
           showConfirmButton: false,
         });
-      })
-      .catch(() => {
-        Swal.fire({
-          icon: "error",
-          title: "Oops!",
-          text: "Failed to copy referral ID.",
-        });
+      } else {
+        throw new Error("Copy command failed");
+      }
+    } catch (err) {
+      console.error("Fallback copy failed:", err);
+      document.body.removeChild(textArea);
+      Swal.fire({
+        icon: "error",
+        title: "Copy Failed",
+        text: "Unable to copy to clipboard. Please copy manually.",
       });
+    }
   };
 
   return (
@@ -269,10 +337,22 @@ const CustomerReferred = () => {
         <div className="flex flex-col items-center gap-1 border border-secondary rounded-md px-12 py-2">
           <p>Your Referral ID</p>
           <div className="flex items-center gap-2">
-            <p className="font-bold text-[16px]">{referralID}</p>
-            <button onClick={handleCopyReferralID}>
-              <CopyOutlined />
-            </button>
+            <p className="font-bold text-[16px]">
+              {referralID || "Loading..."}
+            </p>
+            <Tooltip title="Copy to clipboard">
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleCopyReferralID();
+                }}
+                className="hover:text-primary cursor-pointer transition-colors p-1"
+                type="button"
+              >
+                <CopyOutlined />
+              </button>
+            </Tooltip>
           </div>
         </div>
       </div>

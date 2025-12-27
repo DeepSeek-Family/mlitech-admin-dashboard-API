@@ -43,7 +43,7 @@ const UserManagement = () => {
   console.log(response);
 
   const tableData = useMemo(() => {
-    const items = response?.data || [];
+    const items = response?.data?.users || [];
     return items.map((item, index) => ({
       key: item._id,
       recordId: item._id,
