@@ -1,6 +1,5 @@
 import { api } from "../api/baseApi";
 
-
 const notificationApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getNotifications: builder.query({
@@ -14,7 +13,7 @@ const notificationApi = api.injectEndpoints({
         return {
           url: `/notifications`,
           method: "GET",
-          params
+          params,
         };
       },
       providesTags: ["Notifications"],
@@ -23,7 +22,7 @@ const notificationApi = api.injectEndpoints({
       query: () => ({
         url: `/notifications`,
         method: "GET",
-        params: { limit: 1 }
+        params: { limit: 1 },
       }),
       providesTags: ["Notifications"],
     }),
@@ -37,10 +36,10 @@ const notificationApi = api.injectEndpoints({
   }),
 });
 
-export const { 
-  useGetNotificationsQuery, 
+export const {
+  useGetNotificationsQuery,
   useGetUnreadCountQuery,
-  useReadNotificationMutation 
+  useReadNotificationMutation,
 } = notificationApi;
 
 export { notificationApi };

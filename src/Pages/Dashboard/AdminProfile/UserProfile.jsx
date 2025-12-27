@@ -84,7 +84,7 @@ const UserProfile = () => {
       formData.append("language", values.language || "");
 
       if (imageFile) {
-        formData.append("image", imageFile);
+        formData.append("profile", imageFile);
       }
 
       // Call the update mutation
