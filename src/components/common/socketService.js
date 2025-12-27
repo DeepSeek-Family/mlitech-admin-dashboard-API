@@ -13,7 +13,7 @@ class SocketService {
 
     const token = localStorage.getItem("token");
 
-    this.socket = io("http://10.10.7.8:5004", {
+    this.socket = io("https://44kb593x-5004.inc1.devtunnels.ms", {
       auth: {
         token,
       },
