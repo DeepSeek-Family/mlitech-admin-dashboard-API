@@ -82,8 +82,18 @@ const NewCampaign = ({ onSave, onCancel, editData = null, isEdit = false }) => {
         dateRange: dateRange,
         promotionDays: initialDays,
       });
+    } else if (!isEdit) {
+      // Reset form for new promotion
+      resetForm();
     }
   }, [isEdit, editData]);
+
+  const resetForm = () => {
+    form.resetFields();
+    setThumbnail("");
+    setUploadedImage([]);
+    setCheckAll(false);
+  };
 
   const handleThumbnailChange = ({ file }) => {
     if (file.status === "done" || file.originFileObj) {
@@ -118,9 +128,7 @@ const NewCampaign = ({ onSave, onCancel, editData = null, isEdit = false }) => {
     }
 
     onSave(campaignData);
-    form.resetFields();
-    setThumbnail("");
-    setUploadedImage([]);
+    resetForm();
   };
 
   // Image upload validation
