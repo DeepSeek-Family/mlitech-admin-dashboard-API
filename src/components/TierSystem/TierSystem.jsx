@@ -20,13 +20,14 @@ export default function TierSystem() {
   const [limit, setLimit] = useState(10);
   const [auditLogPage, setAuditLogPage] = useState(1);
   const [auditLogLimit, setAuditLogLimit] = useState(10);
-  
+
   // Fetch audit logs with pagination
   const auditLogQueryParams = [
     { name: "page", value: auditLogPage },
     { name: "limit", value: auditLogLimit },
   ];
-  const { data: auditLogsResponse, isLoading: isLoadingLogs } = useGetAllAuditLogQuery(auditLogQueryParams);
+  const { data: auditLogsResponse, isLoading: isLoadingLogs } =
+    useGetAllAuditLogQuery(auditLogQueryParams);
 
   const queryParams = [
     { name: "page", value: page },
@@ -79,13 +80,13 @@ export default function TierSystem() {
   // Format timestamp for display
   const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
-    return date.toLocaleString('en-US', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
+    return date.toLocaleString("en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
     });
   };
 
@@ -239,7 +240,7 @@ export default function TierSystem() {
                     {tier.pointsSystemLockoutDuration}
                   </p>
                   <p>
-                    <span className="font-semibold">Minimum Spend:</span> $
+                    <span className="font-semibold">Minimum Spend:</span> {" "}
                     {tier.minSpend}
                   </p>
                 </div>
@@ -269,23 +270,25 @@ export default function TierSystem() {
           <h2 className="font-bold text-[24px] text-secondary mb-2">
             Tier System Change Log
           </h2>
-          
+
           {isLoadingLogs ? (
             <p className="text-gray-500">Loading audit logs...</p>
-          ) : auditLogsResponse?.data?.data && auditLogsResponse.data.data.length > 0 ? (
+          ) : auditLogsResponse?.data?.data &&
+            auditLogsResponse.data.data.length > 0 ? (
             <>
               {auditLogsResponse.data.data.map((log) => (
-                <div key={log._id} className="py-2 border-b border-gray-100 last:border-b-0">
+                <div
+                  key={log._id}
+                  className="py-2 border-b border-gray-100 last:border-b-0"
+                >
                   <p className="text-gray-800">{log.details}</p>
-                  <p className="text-sm text-gray-600">
-                    {log.user} 
-                  </p>
+                  <p className="text-sm text-gray-600">{log.user}</p>
                   <p className="text-sm text-gray-600">
                     {formatTimestamp(log.timestamp)}
                   </p>
                 </div>
               ))}
-              
+
               {/* Pagination */}
               <div className="flex justify-center mt-4">
                 <Pagination
