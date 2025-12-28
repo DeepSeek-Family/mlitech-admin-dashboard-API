@@ -2,8 +2,6 @@ import { api } from "../api/baseApi";
 
 export const PushNotificationApi = api.injectEndpoints({
   endpoints: (builder) => ({
-
-   
     createPushNotification: builder.mutation({
       query: (data) => ({
         url: `/push-notification/admin/notify`,
@@ -12,12 +10,7 @@ export const PushNotificationApi = api.injectEndpoints({
       }),
       invalidatesTags: ["PushNotification"],
     }),
-    
- 
   }),
 });
 
-export const {
-     useCreatePushNotificationMutation,
-
-} = PushNotificationApi;
+export const { useCreatePushNotificationMutation } = PushNotificationApi;

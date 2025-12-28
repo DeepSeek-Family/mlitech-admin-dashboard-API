@@ -32,7 +32,6 @@ class SocketService {
       console.error("❌ Socket connection error:", error);
     });
 
-   
     this.socket.onAny((event, ...args) => {
       console.log("📨 Event received:", event, args);
     });

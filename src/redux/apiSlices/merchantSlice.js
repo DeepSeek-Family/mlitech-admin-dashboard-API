@@ -59,7 +59,7 @@ export const merchantApi = api.injectEndpoints({
     // ---------------------------------------
     updateMerchantApprovalStatus: builder.mutation({
       query: ({ id, approveStatus }) => ({
-        url: `/admin/merchants/${id}`,
+        url: `/admin/merchants/${id}/approve-status`,
         method: "PATCH",
         body: { approveStatus },
       }),
