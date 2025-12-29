@@ -1,5 +1,5 @@
 import { Button, Form, Typography, Input } from "antd";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import OTPInput from "react-otp-input";
 import { useNavigate, useParams } from "react-router-dom";
 import mailIcon from "../../assets/mail.png";
@@ -13,11 +13,36 @@ import Swal from "sweetalert2";
 const VerifyOtp = () => {
   const navigate = useNavigate();
   const [otp, setOtp] = useState("");
+  const [timeLeft, setTimeLeft] = useState(180); // 3 minutes in seconds
+  const [isExpired, setIsExpired] = useState(false);
   const phone = new URLSearchParams(location.search).get("phone");
   const [otpVerify, { isLoading }] = useOtpVerifyMutation();
   const [resendOtp, { isLoading: isResending }] = useResendOtpMutation();
 
+  // Timer effect
+  useEffect(() => {
+    if (timeLeft <= 0) {
+      setIsExpired(true);
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [timeLeft]);
+
   const onFinish = async () => {
+    if (isExpired) {
+      Swal.fire({
+        icon: "error",
+        title: "OTP Expired",
+        text: "Your OTP has expired. Please request a new one.",
+      });
+      return;
+    }
+
     if (otp.length !== 6) {
       Swal.fire({
         icon: "error",
@@ -78,6 +103,10 @@ const VerifyOtp = () => {
         phone: phone,
       }).unwrap();
 
+      // Reset timer to 3 minutes
+      setTimeLeft(180);
+      setIsExpired(false);
+
       Swal.fire({
         icon: "success",
         title: "OTP Resent",
@@ -103,6 +132,19 @@ const VerifyOtp = () => {
         <p className="mx-auto text-base text-[#667085]">
           We sent a 6-digit code to {phone || "your phone"}
         </p>
+        <p
+          className={`text-sm mt-2 font-semibold ${
+            isExpired ? "text-red-500" : "text-[#3FAE6A]"
+          }`}
+        >
+          Time remaining: {Math.floor(timeLeft / 60)}:
+          {String(timeLeft % 60).padStart(2, "0")}
+        </p>
+        {isExpired && (
+          <p className="text-red-500 text-sm mt-2">
+            OTP has expired. Please request a new one.
+          </p>
+        )}
       </div>
       <Form layout="vertical">
         <Form.Item>
@@ -111,10 +153,12 @@ const VerifyOtp = () => {
               value={otp}
               onChange={setOtp}
               numInputs={6}
+              disabled={isExpired}
               renderSeparator={<span className="mx-2">-</span>}
               renderInput={(props) => (
                 <input
                   {...props}
+                  disabled={isExpired}
                   style={{
                     width: "45px",
                     height: "45px",
@@ -123,6 +167,8 @@ const VerifyOtp = () => {
                     border: "2px solid #3FAE6A",
                     borderRadius: "8px",
                     fontWeight: "600",
+                    opacity: isExpired ? 0.5 : 1,
+                    cursor: isExpired ? "not-allowed" : "text",
                   }}
                 />
               )}
@@ -134,7 +180,7 @@ const VerifyOtp = () => {
           <button
             type="button"
             onClick={onFinish}
-            disabled={isLoading || otp.length !== 6}
+            disabled={isLoading || otp.length !== 6 || isExpired}
             style={{
               width: "100%",
               height: 45,
@@ -143,8 +189,11 @@ const VerifyOtp = () => {
               fontSize: "18px",
               borderRadius: "200px",
               marginTop: 20,
-              opacity: isLoading || otp.length !== 6 ? 0.6 : 1,
-              cursor: isLoading || otp.length !== 6 ? "not-allowed" : "pointer",
+              opacity: isLoading || otp.length !== 6 || isExpired ? 0.6 : 1,
+              cursor:
+                isLoading || otp.length !== 6 || isExpired
+                  ? "not-allowed"
+                  : "pointer",
             }}
             className="flex items-center justify-center bg-[#3FAE6A] rounded-lg hover:opacity-90"
           >
@@ -157,10 +206,16 @@ const VerifyOtp = () => {
           Didn't receive the code?{" "}
           <button
             onClick={handleResendEmail}
-            disabled={isResending}
+            disabled={isResending || timeLeft > 0}
             className="text-[#3FAE6A] hover:text-[#1E1E1E] font-semibold bg-none border-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isResending ? "Resending..." : "Click to resend"}
+            {isResending
+              ? "Resending..."
+              : timeLeft > 0
+              ? `Resend in ${Math.floor(timeLeft / 60)}:${String(
+                  timeLeft % 60
+                ).padStart(2, "0")}`
+              : "Click to resend"}
           </button>
         </p>
       </div>

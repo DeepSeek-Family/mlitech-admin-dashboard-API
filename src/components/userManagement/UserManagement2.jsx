@@ -75,6 +75,35 @@ const UserManagement = () => {
     VIEW_ADMIN: "View Admin",
   };
 
+  // const roleMapping = {
+  //   DASHBOARD_OVERVIEW_SUPER_ADMIN: "Dashboard Overview - Super Admin",
+
+  //   MERCHANT_MANAGEMENT_SUPER_ADMIN: "Merchant Management - Super Admin",
+  //   MERCHANT_MANAGEMENT_VIEW: "Merchant Management - View",
+
+  //   CUSTOMER_PROFILE_SUPER_ADMIN: "Customer Profile - Super Admin",
+  //   CUSTOMER_PROFILE_VIEW: "Customer Profile - View",
+
+  //   POINTS_TIER_SYSTEM_SUPER_ADMIN: "Points and Tier System - Super Admin",
+
+  //   REPORTING_ANALYSIS_SUPER_ADMIN: "Reporting and Analysis - Super Admin",
+  //   REPORTING_ANALYSIS_ADMIN_FIN:
+  //     "Reporting and Analysis - Merchant, Customer & Accounting Reports (Admin Fin)",
+  //   REPORTING_ANALYSIS_VIEW:
+  //     "Reporting and Analysis - Merchant Reporting (View)",
+
+  //   SUBSCRIPTION_PACKAGE_SUPER_ADMIN: "Subscription Package - Super Admin",
+  //   SUBSCRIPTION_PACKAGE_VIEW: "Subscription Package - View",
+
+  //   PROMOTION_MANAGEMENT_SUPER_ADMIN: "Promotion Management - Super Admin",
+
+  //   SALES_REP_PORTAL_SUPER_ADMIN: "Sales Rep Portal - Super Admin",
+  //   SALES_REP_PORTAL_ADMIN_FIN: "Sales Rep Portal - Admin (Fin)",
+  //   SALES_REP_PORTAL_ADMIN_REP: "Sales Rep Portal - Admin (Rep)",
+
+  //   SETTINGS_USER_MANAGEMENT_ADMIN: "Settings - User Management (Admin)",
+  // };
+
   const [roles] = useState(Object.keys(roleMapping));
 
   const [isUserModalVisible, setIsUserModalVisible] = useState(false);

@@ -85,6 +85,40 @@ const AddNewUserModal = ({
               required: !editingUser,
               message: "Please enter password",
             },
+            {
+              validator(_, value) {
+                if (!value) return Promise.resolve();
+
+                const hasUpperCase = /[A-Z]/.test(value);
+                const hasLowerCase = /[a-z]/.test(value);
+                const hasNumber = /\d/.test(value);
+                const hasSpecialChar =
+                  /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value);
+
+                if (
+                  hasUpperCase &&
+                  hasLowerCase &&
+                  hasNumber &&
+                  hasSpecialChar
+                ) {
+                  return Promise.resolve();
+                }
+
+                const missing = [];
+                if (!hasUpperCase) missing.push("uppercase letter");
+                if (!hasLowerCase) missing.push("lowercase letter");
+                if (!hasNumber) missing.push("number");
+                if (!hasSpecialChar) missing.push("special character");
+
+                return Promise.reject(
+                  new Error(
+                    `Password must contain at least one ${missing.join(
+                      ", one "
+                    )}`
+                  )
+                );
+              },
+            },
           ]}
         >
           <Input.Password className="mli-tall-input" />

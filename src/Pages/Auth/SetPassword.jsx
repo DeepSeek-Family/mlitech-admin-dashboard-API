@@ -73,7 +73,11 @@ const SetPassword = () => {
         </p>
       </div>
 
-      <Form layout="vertical" onFinish={onFinish}>
+      <Form
+        layout="vertical"
+        onFinish={onFinish}
+        className="flex flex-col gap-6"
+      >
         <Form.Item
           name="newPassword"
           label={
@@ -88,10 +92,45 @@ const SetPassword = () => {
               New Password
             </p>
           }
+          validateTrigger="onChange"
           rules={[
             {
               required: true,
               message: "Please input your new Password!",
+            },
+            {
+              validator(_, value) {
+                if (!value) return Promise.resolve();
+
+                const hasUpperCase = /[A-Z]/.test(value);
+                const hasLowerCase = /[a-z]/.test(value);
+                const hasNumber = /\d/.test(value);
+                const hasSpecialChar =
+                  /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value);
+
+                if (
+                  hasUpperCase &&
+                  hasLowerCase &&
+                  hasNumber &&
+                  hasSpecialChar
+                ) {
+                  return Promise.resolve();
+                }
+
+                const missing = [];
+                if (!hasUpperCase) missing.push("uppercase letter");
+                if (!hasLowerCase) missing.push("lowercase letter");
+                if (!hasNumber) missing.push("number");
+                if (!hasSpecialChar) missing.push("special character");
+
+                return Promise.reject(
+                  new Error(
+                    `Password must contain at least one ${missing.join(
+                      ", one "
+                    )}`
+                  )
+                );
+              },
             },
           ]}
           style={{ marginBottom: 0 }}
@@ -106,7 +145,6 @@ const SetPassword = () => {
               borderRadius: "200px",
               outline: "none",
             }}
-            className="mb-6"
           />
         </Form.Item>
 
@@ -154,7 +192,6 @@ const SetPassword = () => {
               borderRadius: "200px",
               outline: "none",
             }}
-            className="mb-6"
           />
         </Form.Item>
 
