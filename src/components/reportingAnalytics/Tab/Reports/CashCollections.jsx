@@ -140,7 +140,7 @@ export default function CashCollections() {
     return dataArray.map((item, index) => ({
       key: index,
       sl: index + 1 + (currentPage - 1) * 6,
-      merchantId: item.customUserId || item.merchantId || item._id || "-",
+      merchantId: item.customerId || "-",
       salesRep: item.salesRep || "-",
       pendingTransactions: item.totalTransactions || 0,
       totalReceivable: item.totalReceived || 0,

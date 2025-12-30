@@ -171,6 +171,15 @@ const AddEditModal = ({
           </div>
 
           <div className="flex flex-col gap-4">
+            {selectedRecord && (
+              <Form.Item name="merchantId" label="Merchant ID">
+                <Input
+                  placeholder="Merchant ID"
+                  className="mli-tall-input"
+                  disabled
+                />
+              </Form.Item>
+            )}
             {/* Country */}
             <Form.Item
               name="country"
@@ -253,6 +262,7 @@ const AddEditModal = ({
                 style={{ width: "100%" }}
                 className="mli-tall-picker"
                 format="YYYY-MM-DD"
+                disabled={!!selectedRecord}
               />
             </Form.Item>
 
@@ -266,21 +276,61 @@ const AddEditModal = ({
                 style={{ width: "100%" }}
                 className="mli-tall-picker"
                 format="YYYY-MM-DD"
+                disabled={!!selectedRecord}
               />
             </Form.Item>
 
-            <Form.Item
-              name="password"
-              label="Password"
-              rules={[
-                { required: !selectedRecord, message: "Please enter password" },
-              ]}
-            >
-              <Input.Password
-                placeholder="Enter password"
-                className="mli-tall-input"
-              />
-            </Form.Item>
+            {!selectedRecord && (
+              <Form.Item
+                name="password"
+                label="Password"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please input your new Password!",
+                  },
+                  {
+                    validator(_, value) {
+                      if (!value) return Promise.resolve();
+
+                      const hasUpperCase = /[A-Z]/.test(value);
+                      const hasLowerCase = /[a-z]/.test(value);
+                      const hasNumber = /\d/.test(value);
+                      const hasSpecialChar =
+                        /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value);
+
+                      if (
+                        hasUpperCase &&
+                        hasLowerCase &&
+                        hasNumber &&
+                        hasSpecialChar
+                      ) {
+                        return Promise.resolve();
+                      }
+
+                      const missing = [];
+                      if (!hasUpperCase) missing.push("uppercase letter");
+                      if (!hasLowerCase) missing.push("lowercase letter");
+                      if (!hasNumber) missing.push("number");
+                      if (!hasSpecialChar) missing.push("special character");
+
+                      return Promise.reject(
+                        new Error(
+                          `Password must contain at least one ${missing.join(
+                            ", one "
+                          )}`
+                        )
+                      );
+                    },
+                  },
+                ]}
+              >
+                <Input.Password
+                  placeholder="Enter password"
+                  className="mli-tall-input"
+                />
+              </Form.Item>
+            )}
           </div>
         </div>
       </Form>

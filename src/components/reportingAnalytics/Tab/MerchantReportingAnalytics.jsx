@@ -140,7 +140,7 @@ export default function MonthlyStatsChartMerchant() {
       date: record.joiningDate
         ? dayjs(record.joiningDate).format("YYYY-MM-DD")
         : "-",
-      merchantId: record._id || "-",
+      merchantId: record.merchantId || "-",
       MerchantName: record.merchantName || "-",
       Location: record.location || "-",
       SubscriptionStatus: record.subscriptionStatus || "-",

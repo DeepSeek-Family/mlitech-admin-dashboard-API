@@ -1,4 +1,4 @@
-import { Button, Form, Input, message } from "antd";
+import { Button, Form, Input, message, Select } from "antd";
 import dayjs from "dayjs";
 import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -28,6 +28,7 @@ const MerchantManagement = () => {
   const page = parseInt(searchParams.get("page") || "1", 10);
   const limit = parseInt(searchParams.get("limit") || "10", 10);
   const searchText = searchParams.get("searchTerm") || "";
+  const statusFilter = searchParams.get("status") || "";
 
   // Helper function to update URL params
   const updateSearchParam = (key, value) => {
@@ -51,6 +52,9 @@ const MerchantManagement = () => {
   ];
   if (searchText.trim()) {
     queryParams.push({ name: "searchTerm", value: searchText.trim() });
+  }
+  if (statusFilter) {
+    queryParams.push({ name: "status", value: statusFilter });
   }
 
   const {
@@ -235,6 +239,7 @@ const MerchantManagement = () => {
       const raw = record.raw || {};
 
       form.setFieldsValue({
+        merchantId: record.merchantCardId,
         salesRep: record.salesRep || raw.salesRep,
         firstName: raw.firstName || raw.name,
         businessName: record.businessName,
@@ -302,29 +307,56 @@ const MerchantManagement = () => {
   };
 
   const handleApproveMerchant = async (recordId) => {
-    try {
-      await updateApprovalStatus({
-        id: recordId,
-        approveStatus: "approved",
-      }).unwrap();
-      message.success("Merchant approved successfully!");
-    } catch (err) {
-      console.error("Approve failed", err);
-      message.error(err?.data?.message || "Failed to approve merchant");
-    }
+    const target = response?.data?.find((m) => m._id === recordId);
+
+    Swal.fire({
+      title: "Approve merchant?",
+      text: `This will approve ${target?.businessName || "this merchant"}.`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, approve",
+    }).then(async (result) => {
+      if (!result.isConfirmed) return;
+
+      try {
+        await updateApprovalStatus({
+          id: recordId,
+          approveStatus: "approved",
+        }).unwrap();
+        message.success("Merchant approved successfully!");
+      } catch (err) {
+        console.error("Approve failed", err);
+        message.error(err?.data?.message || "Failed to approve merchant");
+      }
+    });
   };
 
   const handleRejectMerchant = async (recordId) => {
-    try {
-      await updateApprovalStatus({
-        id: recordId,
-        approveStatus: "rejected",
-      }).unwrap();
-      message.success("Merchant rejected!");
-    } catch (err) {
-      console.error("Reject failed", err);
-      message.error(err?.data?.message || "Failed to reject merchant");
-    }
+    const target = response?.data?.find((m) => m._id === recordId);
+
+    Swal.fire({
+      title: "Reject merchant?",
+      text: `This will reject and delete ${
+        target?.businessName || "this merchant"
+      }.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, reject",
+    }).then(async (result) => {
+      if (!result.isConfirmed) return;
+
+      try {
+        await deleteMerchant(recordId).unwrap();
+        message.success("Merchant rejected and deleted!");
+      } catch (err) {
+        console.error("Reject failed", err);
+        message.error(err?.data?.message || "Failed to reject merchant");
+      }
+    });
   };
 
   return (
@@ -338,26 +370,40 @@ const MerchantManagement = () => {
         </div>
 
         <div className="flex md:flex-row flex-col items-end gap-4">
-          <Input
-            placeholder="Search by Customer ID, Name, Phone or Email, Location"
-            value={searchText}
-            onChange={(e) => updateSearchParam("searchTerm", e.target.value)}
-            className="w-96 h-10"
-          />
-          <Button
-            className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary text-[17px] font-bold"
-            onClick={() => showAddOrEditModal()}
-          >
-            Add New Merchant
-          </Button>
-          <Button
-            className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary text-[17px] font-bold"
-            onClick={handleExportMerchants}
-            loading={isExportLoading}
-            disabled={isExportLoading}
-          >
-            Export
-          </Button>
+          <div className="flex flex-col lg:flex-row gap-4">
+            <Input
+              placeholder="Search by Merchant ID, Name, Phone or Email, Location"
+              value={searchText}
+              onChange={(e) => updateSearchParam("searchTerm", e.target.value)}
+              className="w-96 h-10"
+            />
+            <Select
+              placeholder="Filter by Status"
+              value={statusFilter || undefined}
+              onChange={(value) => updateSearchParam("status", value || "")}
+              className="w-38 h-10"
+              allowClear
+            >
+              <Select.Option value="active">Active</Select.Option>
+              <Select.Option value="inactive">Inactive</Select.Option>
+            </Select>
+          </div>
+          <div className="flex flex-col lg:flex-row gap-4">
+            <Button
+              className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary text-[17px] font-bold"
+              onClick={() => showAddOrEditModal()}
+            >
+              Add New Merchant
+            </Button>
+            <Button
+              className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary text-[17px] font-bold"
+              onClick={handleExportMerchants}
+              loading={isExportLoading}
+              disabled={isExportLoading}
+            >
+              Export
+            </Button>
+          </div>
         </div>
       </div>
 

@@ -64,7 +64,7 @@ const AuditLogs = () => {
       recordId: item._id,
       timeStamp: new Date(item.timestamp).toLocaleString(),
       actionType: item.actionType,
-      user: item.user,
+      user: item.email || "N/A",
       details: item.details,
     }));
   }, [apiData, page, pageSize]);
