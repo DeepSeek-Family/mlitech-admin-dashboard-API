@@ -25,7 +25,7 @@ const ViewModal = ({ visible, onCancel, selectedRecord, columns2, data }) => {
 
               {/* Displaying the customer details */}
               <p>
-                <strong>Customer Name:</strong> {selectedRecord.name}
+                <strong>Customer Name:</strong> {selectedRecord.customerName}
               </p>
               <p>
                 <strong>Phone Number:</strong> {selectedRecord.phone}
@@ -42,10 +42,10 @@ const ViewModal = ({ visible, onCancel, selectedRecord, columns2, data }) => {
                 Loyalty Points
               </p>
               <p>
-                <strong>Points Balance:</strong> {selectedRecord.sales}
+                <strong>Points Balance:</strong> {selectedRecord.totalSales}
               </p>
               <p>
-                <strong>Tier:</strong> {selectedRecord.tier}
+                <strong>Tier:</strong> {selectedRecord.tier || "N/A"}
               </p>
               <p>
                 <strong>Subscription Type:</strong>{" "}
@@ -53,16 +53,17 @@ const ViewModal = ({ visible, onCancel, selectedRecord, columns2, data }) => {
               </p>
               <p>
                 <strong>Last Payment Date:</strong>{" "}
-                {selectedRecord.lastPaymentDate}
+                {selectedRecord.lastPaymentDate || "00-00-0000"}
               </p>
               <p>
-                <strong>Expiry Date:</strong> {selectedRecord.expiryDate}
+                <strong>Expiry Date:</strong>{" "}
+                {selectedRecord.expiryDate || "00-00-0000"}
               </p>
             </div>
           </div>
           <Table
             columns={columns2}
-            dataSource={data}
+            dataSource={[]}
             rowKey="orderId"
             pagination={{ pageSize: 5 }}
             className="mt-6"

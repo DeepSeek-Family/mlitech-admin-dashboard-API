@@ -113,6 +113,7 @@ const MerchantManagement = () => {
       key: item._id,
       recordId: item._id,
       sl: index + 1 + (page - 1) * limit,
+      firstName: item.firstName || item.name || "-",
       merchantCardId: item.customUserId || "-",
       businessName: item.businessName || "-",
       phone: item.phone || "-",
@@ -124,8 +125,10 @@ const MerchantManagement = () => {
       totalPointsRedeemed: item.totalPointsRedeemed || 0,
       totalPointsPending: item.totalPointsPending || 0,
       totalVisits: item.totalVisits || 0,
+      website: item.website || "-",
       status: item.status === "active" ? "Active" : "Inactive",
       ratings: item.ratings || 0,
+      service: item.service || "-",
       approveStatus: item.approveStatus || "pending",
       address: item.address || "-",
       raw: item,
@@ -372,7 +375,7 @@ const MerchantManagement = () => {
         <div className="flex md:flex-row flex-col items-end gap-4">
           <div className="flex flex-col lg:flex-row gap-4">
             <Input
-              placeholder="Search by Merchant ID, Name, Phone or Email, Location"
+              placeholder="Search by Merchant ID, Business Name, Phone, Email or Location"
               value={searchText}
               onChange={(e) => updateSearchParam("searchTerm", e.target.value)}
               className="w-96 h-10"
@@ -381,11 +384,11 @@ const MerchantManagement = () => {
               placeholder="Filter by Status"
               value={statusFilter || undefined}
               onChange={(value) => updateSearchParam("status", value || "")}
-              className="w-38 h-10"
+              className="w-40 h-10"
               allowClear
             >
               <Select.Option value="active">Active</Select.Option>
-              <Select.Option value="inactive">Inactive</Select.Option>
+              <Select.Option value="inActive">Inactive</Select.Option>
             </Select>
           </div>
           <div className="flex flex-col lg:flex-row gap-4">

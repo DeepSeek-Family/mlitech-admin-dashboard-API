@@ -1,5 +1,6 @@
-import { Modal, Table } from "antd";
+import { Modal } from "antd";
 import MarchantIcon from "../../../assets/marchant.png";
+import CustomTable from "../../common/CustomTable";
 
 const detailsColumns = [
   {
@@ -64,7 +65,7 @@ const ViewModal = ({ visible, record, onCancel }) => {
               Marchant Profile
             </p>
             <p>
-              <strong>Name:</strong> {record.name}
+              <strong>Name:</strong> {record.firstName}
             </p>
             <p>
               <strong>Business Name:</strong> {record.businessName}
@@ -79,7 +80,7 @@ const ViewModal = ({ visible, record, onCancel }) => {
               <strong>Location:</strong> {record.location}
             </p>
             <p>
-              <strong>Total Sales:</strong> {record.sales}
+              <strong>Total Sales:</strong> {record.totalSales}
             </p>
             <p>
               <strong>Status:</strong> {record.status}
@@ -108,34 +109,35 @@ const ViewModal = ({ visible, record, onCancel }) => {
               </a>
             </p>
             <p>
-              <strong>Address:</strong> {record.address}
+              <strong>Address:</strong> {record.location}
             </p>
             <p>
-              <strong>Services Offered:</strong> {record.servicesOffered}
+              <strong>Services Offered:</strong> {record.service}
             </p>
             <p>
-              <strong>Tier:</strong> {record.tier}
+              <strong>Tier:</strong> {record.tier || "N/A"}
             </p>
             <p>
-              <strong>Subscription Type:</strong> {record.subscriptionType}
+              <strong>Subscription Type:</strong>{" "}
+              {record.subscriptionType || "N/A"}
             </p>
             <p>
-              <strong>Last Payment Date:</strong> {record.lastPaymentDate}
+              <strong>Last Payment Date:</strong>{" "}
+              {record.lastPaymentDate || "00-00-0000"}
             </p>
             <p>
-              <strong>Expiry Date:</strong> {record.expiryDate}
+              <strong>Expiry Date:</strong> {record.expiryDate || "00-00-0000"}
             </p>
             <p>
-              <strong>Total Revenue:</strong> {record.totalRevenue}
+              <strong>Total Revenue:</strong> {record.totalSales}
             </p>
           </div>
         </div>
-        <Table
+        <CustomTable
           columns={detailsColumns}
-          dataSource={[record]}
+          data={[]}
           pagination={false}
           rowKey="id"
-          className="mt-6"
         />
       </div>
     </Modal>

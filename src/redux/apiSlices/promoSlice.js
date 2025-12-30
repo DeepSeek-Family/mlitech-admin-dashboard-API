@@ -27,7 +27,7 @@ export const customerApi = api.injectEndpoints({
     // ---------------------------------------
     togglePromoStatus: builder.mutation({
       query: (id) => ({
-        url: `/promo/toggle/${id}`,
+        url: `/admin-promo/toggle/${id}`,
         method: "PATCH",
       }),
       invalidatesTags: ["Promo"],

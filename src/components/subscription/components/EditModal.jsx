@@ -36,7 +36,13 @@ const EditModal = ({
   };
 
   const handleSubmit = (values) => {
-    onSubmit(values);
+    // Send the selected duration value directly as paymentType
+    const updatedValues = {
+      ...values,
+      paymentType: values.duration,
+    };
+
+    onSubmit(updatedValues);
     form.resetFields();
   };
 
@@ -99,7 +105,7 @@ const EditModal = ({
           >
             <Input
               type="number"
-              prefix="$"
+              prefix=""
               placeholder="29.99"
               className="mli-tall-input"
               min="0"

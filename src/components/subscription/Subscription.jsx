@@ -259,9 +259,9 @@ const PackagesPlans = () => {
                       </h3>
                       <div className="">
                         <span className="text-secondary font-semibold text-[38px]">
-                          ${pkg.price}
+                          {pkg.price}
                         </span>{" "}
-                        / mth
+                        / {pkg.paymentType}
                       </div>
                       <p className="text-[16px] font-normal text-center text-[#667085]">
                         {pkg.description}
