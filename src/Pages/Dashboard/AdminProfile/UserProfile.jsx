@@ -17,6 +17,8 @@ import {
   useUpdateProfileMutation,
 } from "../../../redux/apiSlices/authSlice";
 import { getImageUrl } from "../../../components/common/imageUrl";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 
 const { Option } = Select;
 
@@ -24,6 +26,7 @@ const UserProfile = () => {
   const [form] = Form.useForm();
   const [imageUrl, setImageUrl] = useState(null);
   const [fileList, setFileList] = useState([]);
+  const [phoneValue, setPhoneValue] = useState("");
 
   // Fetch profile data using RTK Query
   const {
@@ -39,10 +42,11 @@ const UserProfile = () => {
       form.setFieldsValue({
         username: profile.firstName || "",
         email: profile.email || "",
-        phone: profile.phone || "",
         address: profile.address || profile.location || "",
         language: profile.language || "english",
+        phone: profile.phone || "",
       });
+      setPhoneValue(profile.phone || "");
 
       // Set the image URL and file list if a profile image exists
       if (profile.profile || profile.image || profile.profileImage) {
@@ -79,7 +83,7 @@ const UserProfile = () => {
       const formData = new FormData();
 
       formData.append("firstName", values.username);
-      formData.append("phone", values.phone || "");
+      formData.append("phone", phoneValue || "");
       formData.append("address", values.address || "");
       formData.append("language", values.language || "");
 
@@ -199,8 +203,8 @@ const UserProfile = () => {
               <Input
                 placeholder="Enter your Username"
                 style={{
-                  height: "45px",
-                  backgroundColor: "#f7f7f7",
+                  height: 45,
+                  backgroundColor: "#ffffff",
                   borderRadius: "8px",
                   outline: "none",
                 }}
@@ -221,7 +225,7 @@ const UserProfile = () => {
                 placeholder="Enter your Email"
                 style={{
                   height: "45px",
-                  backgroundColor: "#f7f7f7",
+                  backgroundColor: "#ffffff",
                   borderRadius: "8px",
                   // border: "1px solid #E0E4EC",
                   outline: "none",
@@ -230,22 +234,55 @@ const UserProfile = () => {
               />
             </Form.Item>
 
-            {/* Username */}
+            {/* Phone Number */}
             <Form.Item
               name="phone"
-              label="Phone Number"
+              label={<p>Phone Number</p>}
               style={{ marginBottom: 0 }}
               rules={[
                 { required: true, message: "Please enter your phone number" },
+                {
+                  validator: (_, value) => {
+                    if (!value) return Promise.resolve();
+                    // Validate that it's a valid phone number format
+                    if (!/^\+?[1-9]\d{1,14}$/.test(value.replace(/\D/g, ""))) {
+                      return Promise.reject(
+                        new Error("Please enter a valid phone number")
+                      );
+                    }
+                    return Promise.resolve();
+                  },
+                },
               ]}
             >
-              <Input
-                placeholder="Enter your Phone Number"
+              <PhoneInput
+                international
+                countryCallingCodeEditable={false}
+                countries={[
+                  "PK",
+                  "AE",
+                  "OM",
+                  "QA",
+                  "KW",
+                  "BH",
+                  "SA",
+                  "BD",
+                  "GB",
+                ]}
+                value={phoneValue}
+                onChange={(value) => {
+                  setPhoneValue(value);
+                  form.setFieldValue("phone", value);
+                }}
+                placeholder="Enter your phone number"
+                className="phone-input-no-focus"
                 style={{
-                  height: "45px",
-                  backgroundColor: "#f7f7f7",
+                  height: 45,
+                  border: "1px solid #3FAE6A",
                   borderRadius: "8px",
-                  outline: "none",
+                  paddingLeft: "12px",
+                  fontSize: "14px",
+                  fontFamily: "inherit",
                 }}
               />
             </Form.Item>
@@ -263,7 +300,7 @@ const UserProfile = () => {
                 placeholder="Select your Country"
                 style={{
                   height: "45px",
-                  backgroundColor: "#f7f7f7",
+                  backgroundColor: "#ffffff",
                   borderRadius: "8px",
                   border: "1px solid #E0E4EC", // Custom border for language
                 }}
@@ -284,7 +321,7 @@ const UserProfile = () => {
                 placeholder="Select your City"
                 style={{
                   height: "45px",
-                  backgroundColor: "#f7f7f7",
+                  backgroundColor: "#ffffff",
                   borderRadius: "8px",
                   border: "1px solid #E0E4EC", // Custom border for language
                 }}
