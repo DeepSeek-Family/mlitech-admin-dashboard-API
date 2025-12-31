@@ -177,12 +177,16 @@ const UserProfile = () => {
                 >
                   {imageUrl ? (
                     <Avatar
-                      className="rounded-[8px]"
                       size={100}
                       src={getImageUrl(imageUrl)}
+                      style={{ borderRadius: "8px" }}
                     />
                   ) : (
-                    <Avatar size={100} icon={<UploadOutlined />} />
+                    <Avatar
+                      size={100}
+                      icon={<UploadOutlined />}
+                      style={{ borderRadius: "8px" }}
+                    />
                   )}
                 </Upload>
               </Form.Item>
@@ -205,6 +209,7 @@ const UserProfile = () => {
                 style={{
                   height: 45,
                   backgroundColor: "#ffffff",
+                  border: "1px solid #d8d8d8",
                   borderRadius: "8px",
                   outline: "none",
                 }}
@@ -227,7 +232,7 @@ const UserProfile = () => {
                   height: "45px",
                   backgroundColor: "#ffffff",
                   borderRadius: "8px",
-                  // border: "1px solid #E0E4EC",
+                  border: "1px solid #d8d8d8",
                   outline: "none",
                 }}
                 disabled // Disable the email field
@@ -278,7 +283,7 @@ const UserProfile = () => {
                 className="phone-input-no-focus"
                 style={{
                   height: 45,
-                  border: "1px solid #3FAE6A",
+                  border: "1px solid #d8d8d8",
                   borderRadius: "8px",
                   paddingLeft: "12px",
                   fontSize: "14px",
