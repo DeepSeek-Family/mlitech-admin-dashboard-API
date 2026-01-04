@@ -318,6 +318,7 @@ const PackagesPlans = () => {
         currentPackage={currentPackage}
         onCancel={handleCancel}
         onSubmit={handleSubmit}
+        isLoading={isEditing ? isUpdating : isCreating}
       />
     </div>
   );

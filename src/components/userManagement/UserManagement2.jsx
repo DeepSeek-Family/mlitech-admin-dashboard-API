@@ -71,7 +71,7 @@ const UserManagement = () => {
   const roleMapping = {
     ADMIN: "Administrator",
     ADMIN_REP: "Admin Representative",
-    ADMIN_SEL: "Admin Seller",
+    ADMIN_SELL: "Admin Seller",
     VIEW_ADMIN: "View Admin",
   };
 

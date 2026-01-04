@@ -8,6 +8,7 @@ const EditModal = ({
   currentPackage,
   onCancel,
   onSubmit,
+  isLoading = false,
 }) => {
   const [form] = Form.useForm();
 
@@ -43,7 +44,6 @@ const EditModal = ({
     };
 
     onSubmit(updatedValues);
-    form.resetFields();
   };
 
   return (
@@ -183,6 +183,7 @@ const EditModal = ({
           <Button
             onClick={handleCancel}
             size="large"
+            disabled={isLoading}
             className="border border-primary hover:!border-primary hover:!text-primary"
           >
             Cancel
@@ -190,10 +191,18 @@ const EditModal = ({
           <Button
             type="primary"
             htmlType="submit"
+            loading={isLoading}
+            disabled={isLoading}
             className="bg-primary text-white rounded-lg hover:bg-[#012F60] transition-all h-auto py-2 px-6"
             size="large"
           >
-            {isEditing ? "Update Package" : "Add Package"}
+            {isLoading
+              ? isEditing
+                ? "Updating..."
+                : "Adding..."
+              : isEditing
+              ? "Update Package"
+              : "Add Package"}
           </Button>
         </div>
       </Form>

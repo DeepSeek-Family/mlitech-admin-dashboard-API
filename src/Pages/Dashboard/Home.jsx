@@ -57,15 +57,34 @@ const Home = () => {
 
   // Show loading state
   if (isLoading) {
-    return (<div className="flex justify-center items-center h-screen">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-      {/* <p className="text-gray-600">Loading...</p> */}
-    </div>);
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+        {/* <p className="text-gray-600">Loading...</p> */}
+      </div>
+    );
   }
 
   // Show error state
   if (isError) {
-    return <div>Error loading data.</div>;
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="flex flex-col items-center text-center gap-3">
+          <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center">
+            <span className="text-red-600 text-2xl font-bold">!</span>
+          </div>
+
+          <h2 className="text-lg font-semibold text-gray-800">
+            You dont't have permission to access this data.
+          </h2>
+
+          <p className="text-sm text-gray-500 max-w-xs">
+            We couldn’t load the data. Please refresh the page or try again
+            later.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
