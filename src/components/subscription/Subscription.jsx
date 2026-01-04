@@ -100,13 +100,24 @@ const PackagesPlans = () => {
 
   const handleSubmit = async (values) => {
     try {
+      // Determine paymentType based on duration
+      let paymentType = "Monthly";
+      if (values.duration && values.duration.toLowerCase().includes("year")) {
+        paymentType = "Yearly";
+      } else if (
+        values.duration &&
+        values.duration.toLowerCase().includes("month")
+      ) {
+        paymentType = "Monthly";
+      }
+
       const packageData = {
         title: values.title,
         description: values.description,
         price: Number(values.price),
         duration: values.duration,
         credit: values.credit ? Number(values.credit) : 0,
-        paymentType: values.paymentType || "Monthly",
+        paymentType: paymentType,
         loginLimit: values.loginLimit ? Number(values.loginLimit) : 1,
         features: values.features.filter((f) => f && f.trim() !== ""),
       };
