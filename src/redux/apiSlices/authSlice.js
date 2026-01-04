@@ -24,7 +24,7 @@ export const authApi = api.injectEndpoints({
     // ---------------------------------------
     resendOtp: builder.mutation({
       query: (data) => ({
-        url: "/auth/phone-otp",
+        url: "/auth/resend-otp",
         method: "POST",
         body: data,
       }),

@@ -54,7 +54,7 @@ const VerifyOtp = () => {
 
     try {
       const response = await otpVerify({
-        phone: phone,
+        identifier: phone,
         oneTimeCode: parseInt(otp, 10),
       }).unwrap();
 
