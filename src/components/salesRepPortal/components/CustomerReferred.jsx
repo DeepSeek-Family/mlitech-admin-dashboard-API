@@ -9,7 +9,8 @@ import {
   useGetSalesRepDataQuery,
   useAcknowledgeSalesRepMutation,
   useGenerateSalesRepTokenMutation,
-  useUpdateUserStatusMutation,
+  useActivateUserAccountMutation,
+  useDeactivateUserAccountMutation,
 } from "../../../redux/apiSlices/salesRepSlice";
 
 const CustomerReferred = () => {
@@ -39,8 +40,10 @@ const CustomerReferred = () => {
     useAcknowledgeSalesRepMutation();
   const [generateSalesRepToken, { isLoading: isGeneratingToken }] =
     useGenerateSalesRepTokenMutation();
-  const [updateUserStatus, { isLoading: isUpdatingStatus }] =
-    useUpdateUserStatusMutation();
+  const [activateUserAccount, { isLoading: isActivatingAccount }] =
+    useActivateUserAccountMutation();
+  const [deactivateUserAccount, { isLoading: isDeactivatingAccount }] =
+    useDeactivateUserAccountMutation();
 
   // Normalize API data into table rows
   useEffect(() => {
@@ -58,20 +61,25 @@ const CustomerReferred = () => {
         customerName: customer.firstName || "-",
         phoneNumber: customer.phone || "-",
         email: customer.email || "-",
-        salesRep: customer.salesRep || "-",
+        salesRepName: item.salesRepName || "-",
+        salesRepReferralId: item.salesRepReferralId || "-",
         paymentStatus: item.paymentStatus
           ? `${item.paymentStatus
               .charAt(0)
               .toUpperCase()}${item.paymentStatus.slice(1)}`
           : "-",
-        actionStatus: customer.status === "active" ? "Active" : "Inactive",
-        status: customer.status || "inactive",
+        actionStatus:
+          item.subscriptionStatus === "active" ? "Active" : "Inactive",
+        status: item.subscriptionStatus || "inActive",
         statusProgress,
         acknowledgeDate: item.acknowledgeDate
           ? new Date(item.acknowledgeDate).toLocaleDateString()
           : null,
         generatedToken: item.token || "",
         activateDate: null,
+        subscriptionStatusChangedDate: item.subscriptionStatusChangedDate
+          ? new Date(item.subscriptionStatusChangedDate).toLocaleDateString()
+          : null,
         tokenGeneratedDate: item.tokenGenerateDate
           ? new Date(item.tokenGenerateDate).toLocaleDateString()
           : null,
@@ -91,7 +99,7 @@ const CustomerReferred = () => {
   // Handle Acknowledge Cash Payment - Call API
   const handleAcknowledge = async (record) => {
     try {
-      await acknowledgeSalesRep(record.customerId).unwrap();
+      await acknowledgeSalesRep(record.recordId).unwrap();
 
       // Update local state after successful API call
       setRows((prev) =>
@@ -146,7 +154,7 @@ const CustomerReferred = () => {
   // Generate Cash Token - Call API
   const handleGenerateToken = async (record) => {
     try {
-      const response = await generateSalesRepToken(record.customerId).unwrap();
+      const response = await generateSalesRepToken(record.recordId).unwrap();
       const token = response?.data?.token || "TOKEN_GENERATED";
 
       setSelectedRecord(record);
@@ -154,7 +162,7 @@ const CustomerReferred = () => {
 
       setRows((prevData) =>
         prevData.map((item) =>
-          item.customerId === record.customerId
+          item.recordId === record.recordId
             ? {
                 ...item,
                 generatedToken: token,
@@ -206,11 +214,12 @@ const CustomerReferred = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          // Call API to update user status
-          await updateUserStatus({
-            id: record.customerId,
-            status: newStatus,
-          }).unwrap();
+          // Call API to activate or deactivate user
+          if (isCurrentlyActive) {
+            await deactivateUserAccount(record.recordId).unwrap();
+          } else {
+            await activateUserAccount(record.recordId).unwrap();
+          }
 
           // Update local state after successful API call
           setRows((prevData) =>

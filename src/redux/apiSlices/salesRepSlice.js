@@ -24,8 +24,9 @@ export const salesRepApi = api.injectEndpoints({
     // ACKNOWLEDGE - Mark referral as acknowledged
     // ---------------------------------------
     acknowledgeSalesRep: builder.mutation({
-      query: (customerId) => ({
-        url: `/sales-rep/acknowledge/users/${customerId}`,
+      query: (_id) => ({
+        // url: `/sales-rep/acknowledge/users/${_id}`,
+        url: `sales-rep/${_id}/acknowledge/`,
         method: "PATCH",
       }),
       invalidatesTags: ["SalesRep"],
@@ -35,21 +36,32 @@ export const salesRepApi = api.injectEndpoints({
     // GENERATE TOKEN - Generate cash token for referral
     // ---------------------------------------
     generateSalesRepToken: builder.mutation({
-      query: (customerId) => ({
-        url: `/sales-rep/token/users/${customerId}`,
+      query: (_id) => ({
+        // url: `/sales-rep/token/users/${customerId}`,
+        url: `/sales-rep/${_id}/token`,
         method: "POST",
       }),
       invalidatesTags: ["SalesRep"],
     }),
 
     // ---------------------------------------
-    // UPDATE USER STATUS - Activate/Deactivate user
+    // ACTIVATE USER ACCOUNT
     // ---------------------------------------
-    updateUserStatus: builder.mutation({
-      query: ({ id, status }) => ({
-        url: `/admin/users/${id}/status`,
+    activateUserAccount: builder.mutation({
+      query: (id) => ({
+        url: `/sales-rep/${id}/activate-account/`,
         method: "PATCH",
-        body: { status },
+      }),
+      invalidatesTags: ["SalesRep"],
+    }),
+
+    // ---------------------------------------
+    // DEACTIVATE USER ACCOUNT
+    // ---------------------------------------
+    deactivateUserAccount: builder.mutation({
+      query: (id) => ({
+        url: `/sales-rep/${id}/deactivate-account/`,
+        method: "PATCH",
       }),
       invalidatesTags: ["SalesRep"],
     }),
@@ -60,5 +72,6 @@ export const {
   useGetSalesRepDataQuery,
   useAcknowledgeSalesRepMutation,
   useGenerateSalesRepTokenMutation,
-  useUpdateUserStatusMutation,
+  useActivateUserAccountMutation,
+  useDeactivateUserAccountMutation,
 } = salesRepApi;

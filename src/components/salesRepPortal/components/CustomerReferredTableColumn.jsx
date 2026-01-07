@@ -25,13 +25,19 @@ const CustomerReferredTableColumn = ({
       key: "phoneNumber",
       align: "center",
     },
-    // {
-    //   title: "Sales Rep",
-    //   dataIndex: "salesRep",
-    //   key: "salesRep",
-    //   align: "center",
-    // },
     { title: "Email", dataIndex: "email", key: "email", align: "center" },
+    {
+      title: "Sales Rep Name",
+      dataIndex: "salesRepName",
+      key: "salesRepName",
+      align: "center",
+    },
+    {
+      title: "Referral ID",
+      dataIndex: "salesRepReferralId",
+      key: "salesRepReferralId",
+      align: "center",
+    },
     {
       title: "Payment Status",
       dataIndex: "paymentStatus",
@@ -68,12 +74,12 @@ const CustomerReferredTableColumn = ({
             </button>
           </Tooltip>
 
-          {/* <Tooltip
+          <Tooltip
             title={
-              record.activateDate
+              record.subscriptionStatusChangedDate
                 ? `${
                     record.status === "active" ? "Activated" : "Deactivated"
-                  } on ${record.activateDate}`
+                  } on ${record.subscriptionStatusChangedDate}`
                 : `${
                     record.status === "active" ? "Deactivate" : "Activate"
                   } user account`
@@ -89,9 +95,10 @@ const CustomerReferredTableColumn = ({
               disabled={record.statusProgress < 1}
             >
               {record.status === "active" ? "Deactivate" : "Activate"}
-              {record.activateDate && ` (${record.activateDate})`}
+              {record.subscriptionStatusChangedDate &&
+                ` (${record.subscriptionStatusChangedDate})`}
             </button>
-          </Tooltip> */}
+          </Tooltip>
 
           <Tooltip
             title={
@@ -103,7 +110,7 @@ const CustomerReferredTableColumn = ({
             <button
               className="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
               onClick={() => onGenerateToken(record)}
-              disabled={record.statusProgress < 1}
+              disabled={record.status !== "active" || record.generatedToken}
             >
               {record.generatedToken
                 ? `Token Generated (${record.tokenGeneratedDate})`
