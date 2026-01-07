@@ -10,6 +10,7 @@ const CustomerReferredTableColumn = ({
   onAcknowledge,
   onToggleStatus,
   onGenerateToken,
+  userRole,
 }) => {
   const columns = [
     { title: "SL", dataIndex: "id", key: "id", align: "center" },
@@ -111,6 +112,12 @@ const CustomerReferredTableColumn = ({
               className="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
               onClick={() => onGenerateToken(record)}
               disabled={record.status !== "active" || record.generatedToken}
+              style={{
+                display:
+                  userRole === "ADMIN" || userRole === "SUPER_ADMIN"
+                    ? "block"
+                    : "none",
+              }}
             >
               {record.generatedToken
                 ? `Token Generated (${record.tokenGeneratedDate})`

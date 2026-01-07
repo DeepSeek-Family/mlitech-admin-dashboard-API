@@ -382,6 +382,7 @@ const CustomerReferred = () => {
         onAcknowledge={handleAcknowledge}
         onToggleStatus={handleToggleUserStatus}
         onGenerateToken={handleGenerateToken}
+        userRole={user?.role || user?.data?.role}
       />
 
       {/* New Campaign Modal */}
