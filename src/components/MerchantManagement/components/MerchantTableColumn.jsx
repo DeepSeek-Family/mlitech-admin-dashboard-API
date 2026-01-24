@@ -138,10 +138,21 @@ const MerchantTableColumn = ({
               </button>
             </Tooltip>
 
-            <Tooltip title="Edit">
+            <Tooltip
+              title={
+                record.status === "Inactive"
+                  ? "Cannot edit inactive merchant"
+                  : "Edit"
+              }
+            >
               <button
                 onClick={() => onEdit(record)}
-                className="text-primary hover:text-green-700 text-xl"
+                disabled={record.status === "Inactive"}
+                className={`text-xl ${
+                  record.status === "Inactive"
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "text-primary hover:text-green-700"
+                }`}
               >
                 <FaEdit />
               </button>
@@ -178,7 +189,7 @@ const MerchantTableColumn = ({
                   if (result.isConfirmed) {
                     onStatusChange(
                       record.recordId || record.id,
-                      checked ? "Active" : "Inactive"
+                      checked ? "Active" : "Inactive",
                     );
                   }
                 });

@@ -152,22 +152,6 @@ const AddEditModal = ({
                 type="tel"
               />
             </Form.Item>
-
-            <Form.Item
-              name="tier"
-              label="Tier"
-              rules={[{ required: true, message: "Please select tier" }]}
-            >
-              <Select placeholder="Select tier" className="mli-tall-select">
-                {tiersList && tiersList.length > 0
-                  ? tiersList.map((tier) => (
-                      <Select.Option key={tier._id} value={tier.title}>
-                        {tier.name}
-                      </Select.Option>
-                    ))
-                  : null}
-              </Select>
-            </Form.Item>
           </div>
 
           <div className="flex flex-col gap-4">
@@ -229,7 +213,7 @@ const AddEditModal = ({
               </Select>
             </Form.Item>
 
-            <Form.Item
+            {/* <Form.Item
               name="subscription"
               label="Subscription"
               rules={[
@@ -278,6 +262,26 @@ const AddEditModal = ({
                 format="YYYY-MM-DD"
                 disabled={!!selectedRecord}
               />
+            </Form.Item> */}
+            
+            <Form.Item
+              name="tier"
+              label="Tier"
+              // rules={[{ required: true, message: "Please select tier" }]}
+            >
+              <Select
+                placeholder="Select tier"
+                className="mli-tall-select"
+                disabled
+              >
+                {tiersList && tiersList.length > 0
+                  ? tiersList.map((tier) => (
+                      <Select.Option key={tier._id} value={tier.title}>
+                        {tier.name}
+                      </Select.Option>
+                    ))
+                  : null}
+              </Select>
             </Form.Item>
 
             {!selectedRecord && (
@@ -317,9 +321,9 @@ const AddEditModal = ({
                       return Promise.reject(
                         new Error(
                           `Password must contain at least one ${missing.join(
-                            ", one "
-                          )}`
-                        )
+                            ", one ",
+                          )}`,
+                        ),
                       );
                     },
                   },

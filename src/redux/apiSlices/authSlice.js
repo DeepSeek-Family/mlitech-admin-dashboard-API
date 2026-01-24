@@ -8,7 +8,7 @@ export const authApi = api.injectEndpoints({
     // ---------------------------------------
     otpVerify: builder.mutation({
       query: (data) => ({
-        url: "/auth/verify-phone",
+        url: "/auth/verify-otp",
         method: "POST",
         body: data,
       }),

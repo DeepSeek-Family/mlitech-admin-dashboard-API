@@ -167,6 +167,8 @@ const MerchantManagement = () => {
           salesRep: values.salesRep,
           address: values.address,
           businessName: values.businessName,
+          country: values.country,
+          city: values.city,
           subscription: values.subscription,
           lastPaymentDate: toISODate(values.lastPaymentDate),
           expiryDate: toISODate(values.expiryDate),
