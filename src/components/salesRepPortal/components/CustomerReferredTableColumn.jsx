@@ -21,6 +21,12 @@ const CustomerReferredTableColumn = ({
       align: "center",
     },
     {
+      title: "Customer ID",
+      dataIndex: "customerId",
+      key: "customerId",
+      align: "center",
+    },
+    {
       title: "Phone Number",
       dataIndex: "phoneNumber",
       key: "phoneNumber",

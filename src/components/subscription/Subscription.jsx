@@ -272,7 +272,7 @@ const PackagesPlans = () => {
                         <span className="text-secondary font-semibold text-[38px]">
                           {pkg.price}
                         </span>{" "}
-                        / {pkg.paymentType}
+                        / {pkg.duration}
                       </div>
                       <p className="text-[16px] font-normal text-center text-[#667085]">
                         {pkg.description}

@@ -252,7 +252,7 @@ const UserProfile = () => {
                     // Validate that it's a valid phone number format
                     if (!/^\+?[1-9]\d{1,14}$/.test(value.replace(/\D/g, ""))) {
                       return Promise.reject(
-                        new Error("Please enter a valid phone number")
+                        new Error("Please enter a valid phone number"),
                       );
                     }
                     return Promise.resolve();

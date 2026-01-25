@@ -57,10 +57,10 @@ const CustomerReferred = () => {
       return {
         recordId: item._id,
         id: index + 1 + (page - 1) * pageSize,
-        customerId: customer._id,
-        customerName: customer.firstName || "-",
-        phoneNumber: customer.phone || "-",
-        email: customer.email || "-",
+        customerId: customer?.customUserId,
+        customerName: customer?.firstName || "-",
+        phoneNumber: customer?.phone || "-",
+        email: customer?.email || "-",
         salesRepName: item.salesRepName || "-",
         salesRepReferralId: item.salesRepReferralId || "-",
         paymentStatus: item.paymentStatus
