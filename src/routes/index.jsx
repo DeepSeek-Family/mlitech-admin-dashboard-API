@@ -82,7 +82,7 @@ const router = createBrowserRouter([
         element: <LoyaltyProgram />,
       },
       {
-        path: "/subscription",
+        path: "/membership-plans",
         element: <PackagesPlans />,
       },
       {

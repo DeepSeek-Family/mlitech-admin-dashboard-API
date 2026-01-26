@@ -95,11 +95,11 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
       ),
     },
     {
-      key: "/subscription",
-      icon: renderIcon(SubscriptionManagement, "/subscription"),
+      key: "/membership-plans",
+      icon: renderIcon(SubscriptionManagement, "/membership-plans"),
       label: (
-        <Link to="/subscription">
-          {collapsed ? "" : "Subscription Package"}
+        <Link to="/membership-plans">
+          {collapsed ? "" : "Membership Plans"}
         </Link>
       ),
     },

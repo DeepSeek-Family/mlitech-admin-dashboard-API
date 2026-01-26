@@ -186,7 +186,7 @@ const PackagesPlans = () => {
         <div className="flex justify-center items-center py-20">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading packages...</p>
+            <p className="text-gray-600">Loading membership plans...</p>
           </div>
         </div>
       </div>
@@ -198,7 +198,7 @@ const PackagesPlans = () => {
       <div className="pt-1 px-4">
         <div className="flex justify-center items-center py-20">
           <div className="text-center text-red-500">
-            <p className="text-lg font-semibold mb-2">Error loading packages</p>
+            <p className="text-lg font-semibold mb-2">Error loading membership plans</p>
             <p className="text-sm">
               {error?.data?.message || "Something went wrong"}
             </p>
@@ -226,16 +226,16 @@ const PackagesPlans = () => {
           className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary text-[17px] font-bold"
           onClick={() => showModal()}
         >
-          Add Package
+          Add Membership Plan
         </Button>
       </div>
       <div className="flex justify-center">
         <div className="w-4/5 mb-6">
           {packages.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
-              <p className="text-lg">No packages available.</p>
+              <p className="text-lg">No membership plans available.</p>
               <p>
-                Click the "Add Package" button to create your first package.
+                Click the "Add Membership Plan" button to create your first membership plan.
               </p>
             </div>
           ) : (

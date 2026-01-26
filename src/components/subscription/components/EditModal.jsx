@@ -48,7 +48,7 @@ const EditModal = ({
 
   return (
     <Modal
-      title={isEditing ? "Edit Package" : "Add Package"}
+      title={isEditing ? "Edit Membership Plan" : "Add Membership Plan"}
       open={isOpen}
       onCancel={handleCancel}
       footer={null}
@@ -63,7 +63,7 @@ const EditModal = ({
       >
         <Form.Item
           name="title"
-          label="Package Title"
+          label="Membership Plan Title"
           rules={[{ required: true, message: "Title is required" }]}
         >
           <Input placeholder="e.g. Basic Plan" className="mli-tall-input" />
@@ -94,7 +94,7 @@ const EditModal = ({
                   }
                   if (isNaN(value) || Number(value) < 0) {
                     return Promise.reject(
-                      new Error("Price cannot be negative")
+                      new Error("Price cannot be negative"),
                     );
                   }
                   return Promise.resolve();
@@ -201,8 +201,8 @@ const EditModal = ({
                 ? "Updating..."
                 : "Adding..."
               : isEditing
-              ? "Update Package"
-              : "Add Package"}
+                ? "Update Membership Plan"
+                : "Add Membership Plan"}
           </Button>
         </div>
       </Form>
