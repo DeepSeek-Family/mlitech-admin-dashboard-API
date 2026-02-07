@@ -3,6 +3,7 @@ import { Table, Modal, Tooltip, Spin } from "antd";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import MarchantIcon from "../../assets/exclemetion.png";
 import { useGetAuditLogsQuery } from "../../redux/apiSlices/auditLogSlice";
+import { toReadableTime } from "../common/TimeConvertion";
 
 const components = {
   header: {
@@ -62,7 +63,7 @@ const AuditLogs = () => {
     return apiData.data.data.map((item, index) => ({
       id: index + 1 + (page - 1) * pageSize,
       recordId: item._id,
-      timeStamp: new Date(item.timestamp).toLocaleString(),
+      timeStamp: toReadableTime(item.createdAt),
       actionType: item.actionType,
       user: item.email || "N/A",
       details: item.details,

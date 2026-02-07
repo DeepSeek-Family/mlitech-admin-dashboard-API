@@ -343,7 +343,7 @@ const CustomerReferred = () => {
             Track and manage customers you've referred effortlessly.
           </p>
         </div>
-        <div className="flex flex-col items-center gap-1 border border-secondary rounded-md px-12 py-2">
+        {/* <div className="flex flex-col items-center gap-1 border border-secondary rounded-md px-12 py-2">
           <p>Your Referral ID</p>
           <div className="flex items-center gap-2">
             <p className="font-bold text-[16px]">
@@ -363,7 +363,7 @@ const CustomerReferred = () => {
               </button>
             </Tooltip>
           </div>
-        </div>
+        </div> */}
       </div>
 
       <CustomerReferredTableColumn

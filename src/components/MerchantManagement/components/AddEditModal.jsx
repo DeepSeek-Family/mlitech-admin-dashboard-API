@@ -133,25 +133,6 @@ const AddEditModal = ({
                 type="email"
               />
             </Form.Item>
-
-            <Form.Item
-              name="phone"
-              label="Phone Number"
-              rules={[
-                { required: true, message: "Please enter phone number" },
-                {
-                  pattern:
-                    /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/,
-                  message: "Please enter a valid phone number",
-                },
-              ]}
-            >
-              <Input
-                placeholder="e.g. +1-234-567-8900"
-                className="mli-tall-input"
-                type="tel"
-              />
-            </Form.Item>
           </div>
 
           <div className="flex flex-col gap-4">
@@ -263,8 +244,8 @@ const AddEditModal = ({
                 disabled={!!selectedRecord}
               />
             </Form.Item> */}
-            
-            <Form.Item
+
+            {/* <Form.Item
               name="tier"
               label="Tier"
               // rules={[{ required: true, message: "Please select tier" }]}
@@ -282,7 +263,7 @@ const AddEditModal = ({
                     ))
                   : null}
               </Select>
-            </Form.Item>
+            </Form.Item> */}
 
             {!selectedRecord && (
               <Form.Item
@@ -335,6 +316,25 @@ const AddEditModal = ({
                 />
               </Form.Item>
             )}
+
+            <Form.Item
+              name="phone"
+              label="Phone Number"
+              rules={[
+                { required: true, message: "Please enter phone number" },
+                {
+                  pattern:
+                    /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/,
+                  message: "Please enter a valid phone number",
+                },
+              ]}
+            >
+              <Input
+                placeholder="e.g. +1-234-567-8900"
+                className="mli-tall-input"
+                type="tel"
+              />
+            </Form.Item>
           </div>
         </div>
       </Form>

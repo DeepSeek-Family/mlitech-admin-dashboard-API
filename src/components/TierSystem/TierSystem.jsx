@@ -10,6 +10,7 @@ import {
   useDeleteTierMutation,
   useGetAllAuditLogQuery,
 } from "../../redux/apiSlices/PointTierSlice";
+import { toReadableTime } from "../common/TimeConvertion.js";
 
 export default function TierSystem() {
   const [form] = Form.useForm();
@@ -130,7 +131,7 @@ export default function TierSystem() {
         Swal.fire(
           "Added!",
           `The "${values.name}" tier has been created.`,
-          "success"
+          "success",
         );
       } else {
         const response = await updateTier({
@@ -140,7 +141,7 @@ export default function TierSystem() {
         Swal.fire(
           "Updated!",
           `The "${values.name}" tier has been updated.`,
-          "success"
+          "success",
         );
       }
       handleCancelRules();
@@ -148,7 +149,7 @@ export default function TierSystem() {
       Swal.fire(
         "Error!",
         error?.data?.message || "Failed to save tier",
-        "error"
+        "error",
       );
     }
   };
@@ -171,13 +172,13 @@ export default function TierSystem() {
           Swal.fire(
             "Removed!",
             `The "${tierToRemove?.name}" tier has been removed.`,
-            "success"
+            "success",
           );
         } catch (error) {
           Swal.fire(
             "Error!",
             error?.data?.message || "Failed to delete tier",
-            "error"
+            "error",
           );
         }
       }
@@ -279,9 +280,9 @@ export default function TierSystem() {
                   className="py-2 border-b border-gray-100 last:border-b-0"
                 >
                   <p className="text-gray-800">{log.details}</p>
-                  <p className="text-sm text-gray-600">{log.user}</p>
+                  <p className="text-sm text-gray-600">{log.email}</p>
                   <p className="text-sm text-gray-600">
-                    {formatTimestamp(log.timestamp)}
+                    {toReadableTime(log.createdAt)}
                   </p>
                 </div>
               ))}
