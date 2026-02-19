@@ -53,7 +53,7 @@ const PushNotifications = () => {
         };
       } else {
         payload = {
-          sendType: "SPECIFIC",
+          sendType: sendTo,
           title: title,
           body: bodyContent,
           location: location,
@@ -127,7 +127,8 @@ const PushNotifications = () => {
                 className="mli-tall-select"
               >
                 <Option value="ALL">All</Option>
-                <Option value="SPECIFIC">Specific Users</Option>
+                <Option value="USER">User</Option>
+                <Option value="MERCHANT">Merchant</Option>
               </Select>
             </div>
           </Col>
@@ -264,7 +265,7 @@ const PushNotifications = () => {
               <strong>Send To:</strong> {sendTo}
             </p>
           )}
-          {sendTo === "SPECIFIC" && (
+          {sendTo !== "ALL" && (
             <>
               {location && (
                 <p className="text-md font-medium mb-2">

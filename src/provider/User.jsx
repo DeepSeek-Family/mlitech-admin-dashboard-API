@@ -6,7 +6,7 @@ export const UserContext = React.createContext(null);
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(
-    typeof window !== "undefined" ? localStorage.getItem("token") : null
+    typeof window !== "undefined" ? localStorage.getItem("token") : null,
   );
 
   // Listen for token changes in localStorage
