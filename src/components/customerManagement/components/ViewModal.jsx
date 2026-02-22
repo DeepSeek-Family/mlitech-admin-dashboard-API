@@ -48,8 +48,7 @@ const ViewModal = ({ visible, onCancel, selectedRecord, columns2, data }) => {
                 <strong>Tier:</strong> {selectedRecord.tier || "N/A"}
               </p>
               <p>
-                <strong>Subscription Type:</strong>{" "}
-                {selectedRecord.subscription}
+                <strong>Membership:</strong> {selectedRecord.subscription}
               </p>
               <p>
                 <strong>Last Payment Date:</strong>{" "}

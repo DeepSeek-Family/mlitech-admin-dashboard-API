@@ -168,7 +168,7 @@ const Home = () => {
             <div className="bg-white border border-primary rounded-lg flex items-center justify-start p-6">
               <div className="flex flex-col items-baseline">
                 <h2 className="text-[16px] font-semibold mb-1">
-                  Subscription Revenue
+                  Membership Revenue
                 </h2>
                 <h3 className="text-secondary text-[24px] font-semibold flex items-center gap-3">
                   <SubscriptionManagement className="w-[20px] h-[20px] text-secondary" />

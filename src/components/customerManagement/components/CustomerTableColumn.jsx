@@ -1,5 +1,5 @@
 import { Tooltip } from "antd";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaTrash } from "react-icons/fa";
 import { IoEyeSharp } from "react-icons/io5";
 import { Switch } from "antd";
 import Swal from "sweetalert2";
@@ -12,7 +12,6 @@ const CustomerTableColumn = ({
   pagination,
   onPaginationChange,
   onView,
-  onEdit,
   onDelete,
   onStatusChange,
 }) => {
@@ -31,10 +30,21 @@ const CustomerTableColumn = ({
       align: "center",
     },
     {
-      title: "Subscription",
+      title: "Membership",
       dataIndex: "subscription",
       key: "subscription",
       align: "center",
+      render: (subscription) => (
+        <span
+          className={
+            subscription === "Active" || subscription
+              ? "text-green-600 font-semibold"
+              : "text-red-600 font-semibold"
+          }
+        >
+          {subscription === "Active" || subscription ? "Active" : "Inactive"}
+        </span>
+      ),
     },
     {
       title: "Tier",
@@ -126,7 +136,7 @@ const CustomerTableColumn = ({
                 if (result.isConfirmed) {
                   onStatusChange(
                     record.recordId,
-                    checked ? "Active" : "Inactive"
+                    checked ? "Active" : "Inactive",
                   );
                 }
               });

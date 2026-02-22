@@ -247,7 +247,7 @@ const CustomerManagement2 = () => {
       align: "center",
     },
     {
-      title: "Subscription Type",
+      title: "Membership Type",
       dataIndex: "subscription",
       key: "subscription",
       align: "center",

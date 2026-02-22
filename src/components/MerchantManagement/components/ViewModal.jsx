@@ -9,7 +9,7 @@ const detailsColumns = [
     key: "id",
   },
   {
-    title: "Subscription Type",
+    title: "Membership Type",
     dataIndex: "subscriptionType",
     key: "subscriptionType",
   },
@@ -118,7 +118,7 @@ const ViewModal = ({ visible, record, onCancel }) => {
               <strong>Tier:</strong> {record.tier || "N/A"}
             </p>
             <p>
-              <strong>Subscription Type:</strong>{" "}
+              <strong>Membership Type:</strong>{" "}
               {record.subscriptionType || "N/A"}
             </p>
             <p>

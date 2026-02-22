@@ -27,7 +27,7 @@ import CustomTable from "../../common/CustomTable";
 const { Option } = Select;
 
 // Dropdown options for frontend filtering
-const subscriptionOptions = ["All Statuses", "Active", "Inactive"];
+const subscriptionOptions = ["All Status", "Active", "Inactive"];
 const paymentOptions = ["All Payments", "Paid", "Unpaid"];
 const metricOptions = ["Revenue", "Users", "Points Redeemed"];
 
@@ -45,7 +45,7 @@ export default function MonthlyStatsChartMerchant() {
   const merchantName = searchParams.get("m_merchantName") || "";
   const location = searchParams.get("m_location") || "";
   const selectedSubscription =
-    searchParams.get("m_subscription") || "All Statuses";
+    searchParams.get("m_subscription") || "All Status";
   const selectedPayment = searchParams.get("m_payment") || "All Payments";
   const selectedMetric = searchParams.get("m_metric") || "all";
   const chartType = searchParams.get("m_chartType") || "Bar";
@@ -59,7 +59,7 @@ export default function MonthlyStatsChartMerchant() {
         if (
           value &&
           value !== "" &&
-          value !== "All Statuses" &&
+          value !== "All Status" &&
           value !== "All Payments" &&
           value !== "all" &&
           value !== "Bar"
@@ -94,7 +94,7 @@ export default function MonthlyStatsChartMerchant() {
     if (location && location.trim() !== "") {
       params.push({ name: "location", value: location.trim() });
     }
-    if (selectedSubscription && selectedSubscription !== "All Statuses") {
+    if (selectedSubscription && selectedSubscription !== "All Status") {
       params.push({ name: "subscriptionStatus", value: selectedSubscription });
     }
     if (selectedPayment && selectedPayment !== "All Payments") {
@@ -331,7 +331,7 @@ export default function MonthlyStatsChartMerchant() {
       align: "center",
     },
     {
-      title: "Subscription Status",
+      title: "Membership Status",
       dataIndex: "SubscriptionStatus",
       key: "SubscriptionStatus",
       align: "center",
@@ -449,7 +449,7 @@ export default function MonthlyStatsChartMerchant() {
 
             <Col flex="1 1 200px">
               <Form.Item
-                label="Subscription Status"
+                label="Membership Status"
                 style={{ marginBottom: "0.5rem" }}
               >
                 <Select

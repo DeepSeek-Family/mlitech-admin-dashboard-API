@@ -86,7 +86,7 @@ const RetailerManageTable = () => {
       align: "center",
     },
     {
-      title: "Subscription",
+      title: "Membership",
       dataIndex: "accountStatus",
       key: "accountStatus",
       align: "center",

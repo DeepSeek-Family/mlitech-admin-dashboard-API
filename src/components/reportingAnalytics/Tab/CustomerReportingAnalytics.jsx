@@ -26,7 +26,7 @@ import CustomTable from "../../common/CustomTable";
 const { Option } = Select;
 
 // Dropdown options for frontend filtering
-const subscriptionOptions = ["All Statuses", "active", "inActive"];
+const subscriptionOptions = ["All Status", "active", "inActive"];
 const paymentOptions = ["All Payments", "Paid", "Unpaid"];
 const metricOptions = ["Revenue", "Users", "Points Redeemed"];
 const pointsFilterOptions = ["All", "Points Redeemed", "Points Accumulated"];
@@ -45,7 +45,7 @@ export default function MonthlyStatsChartCustomer() {
   const customerName = searchParams.get("c_customerName") || "";
   const location = searchParams.get("c_location") || "";
   const selectedSubscription =
-    searchParams.get("c_subscription") || "All Statuses";
+    searchParams.get("c_subscription") || "All Status";
   const selectedPayment = searchParams.get("c_payment") || "All Payments";
   const selectedMetric = searchParams.get("c_metric") || "all";
   const selectedPointsFilter = searchParams.get("c_pointsFilter") || "All";
@@ -60,7 +60,7 @@ export default function MonthlyStatsChartCustomer() {
         if (
           value &&
           value !== "" &&
-          value !== "All Statuses" &&
+          value !== "All Status" &&
           value !== "All Payments" &&
           value !== "all" &&
           value !== "All" &&
@@ -96,7 +96,7 @@ export default function MonthlyStatsChartCustomer() {
     if (location && location.trim() !== "") {
       params.push({ name: "location", value: location.trim() });
     }
-    if (selectedSubscription && selectedSubscription !== "All Statuses") {
+    if (selectedSubscription && selectedSubscription !== "All Status") {
       params.push({ name: "subscriptionStatus", value: selectedSubscription });
     }
     if (selectedPayment && selectedPayment !== "All Payments") {
@@ -307,7 +307,7 @@ export default function MonthlyStatsChartCustomer() {
       align: "center",
     },
     {
-      title: "Subscription Status",
+      title: "Membership Status",
       dataIndex: "SubscriptionStatus",
       key: "SubscriptionStatus",
       align: "center",
@@ -426,7 +426,7 @@ export default function MonthlyStatsChartCustomer() {
 
             <Col flex="1 1 200px">
               <Form.Item
-                label="Subscription Status"
+                label="Membership Status"
                 style={{ marginBottom: "0.5rem" }}
               >
                 <Select
@@ -439,7 +439,7 @@ export default function MonthlyStatsChartCustomer() {
                 >
                   {subscriptionOptions.map((option) => (
                     <Option key={option} value={option}>
-                      {option === "All Statuses"
+                      {option === "All Status"
                         ? option
                         : option.charAt(0).toUpperCase() + option.slice(1)}
                     </Option>

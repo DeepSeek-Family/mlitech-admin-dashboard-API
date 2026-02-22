@@ -179,7 +179,7 @@ const PushNotifications = () => {
           <Col xs={24} sm={8} md={4}>
             <div className="flex flex-col">
               <label className="font-bold text-[18px] mb-1">
-                Subscription Type
+                Membership Type
               </label>
               <Select
                 placeholder="Select Subscription Type"
@@ -279,7 +279,7 @@ const PushNotifications = () => {
               )}
               {subscriptionType && (
                 <p className="text-md font-medium mb-2">
-                  <strong>Subscription Type:</strong> {subscriptionType}
+                  <strong>Membership Type:</strong> {subscriptionType}
                 </p>
               )}
               {status && (
