@@ -15,6 +15,7 @@ import {
   useLazyExportMerchantsQuery,
 } from "../../redux/apiSlices/merchantSlice";
 import MerchantTableColumn from "./components/MerchantTableColumn";
+import { useUser } from "../../provider/User";
 
 const MerchantManagement = () => {
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
@@ -23,6 +24,7 @@ const MerchantManagement = () => {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [form] = Form.useForm();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { user } = useUser();
 
   // Get values from URL params with defaults
   const page = parseInt(searchParams.get("page") || "1", 10);
@@ -397,6 +399,7 @@ const MerchantManagement = () => {
             <Button
               className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary text-[17px] font-bold"
               onClick={() => showAddOrEditModal()}
+              disabled={user?.role === "VIEW_ADMIN"}
             >
               Add New Merchant
             </Button>
@@ -404,7 +407,7 @@ const MerchantManagement = () => {
               className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary text-[17px] font-bold"
               onClick={handleExportMerchants}
               loading={isExportLoading}
-              disabled={isExportLoading}
+              disabled={isExportLoading || user?.role === "VIEW_ADMIN"}
             >
               Export
             </Button>

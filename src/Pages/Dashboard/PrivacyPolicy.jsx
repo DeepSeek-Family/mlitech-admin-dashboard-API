@@ -7,12 +7,14 @@ import {
   useGetCustomerPrivacyPolicyQuery,
   useUpdatePrivacyPolicyMutation,
 } from "../../redux/apiSlices/privacyPolicySlice";
+import { useUser } from "../../provider/User";
 
 const { TabPane } = Tabs;
 
 const PrivacyPolicy = () => {
   const editor = useRef(null);
   const [searchParams, setSearchParams] = useSearchParams();
+  const { user } = useUser();
   
   // Get active tab from URL or default to "customer"
   const activeTab = searchParams.get("tab") || "customer";
@@ -110,6 +112,7 @@ const PrivacyPolicy = () => {
         <Button
           onClick={showModal}
           className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary text-[17px] font-bold"
+          disabled={user?.role === "VIEW_ADMIN"}
         >
           Edit Privacy Policy
         </Button>

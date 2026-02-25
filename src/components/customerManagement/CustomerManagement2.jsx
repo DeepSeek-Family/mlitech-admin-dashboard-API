@@ -12,6 +12,7 @@ import {
   useLazyExportCustomersQuery,
 } from "../../redux/apiSlices/customerSlice";
 import CustomerTableColumn from "./components/CustomerTableColumn";
+import { useUser } from "../../provider/User";
 
 const CustomerManagement2 = () => {
   const [isViewModalVisible, setIsViewModalVisible] = useState(false);
@@ -22,6 +23,7 @@ const CustomerManagement2 = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [form] = Form.useForm();
+  const { user } = useUser();
 
   const queryParams = [
     { name: "page", value: page },
@@ -158,7 +160,9 @@ const CustomerManagement2 = () => {
   const handleEditSubmit = (values) => {
     const updatedRecord = { ...selectedRecord, ...values };
     setTableData((prev) =>
-      prev.map((item) => (item.id === selectedRecord.id ? updatedRecord : item))
+      prev.map((item) =>
+        item.id === selectedRecord.id ? updatedRecord : item,
+      ),
     );
     setIsEditModalVisible(false);
     form.resetFields();
@@ -187,7 +191,7 @@ const CustomerManagement2 = () => {
         Swal.fire(
           "Error!",
           err?.data?.message || "Failed to delete customer",
-          "error"
+          "error",
         );
       }
     });
@@ -297,7 +301,7 @@ const CustomerManagement2 = () => {
             className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary text-[17px] font-bold"
             onClick={handleExportCustomers}
             loading={isExportLoading}
-            disabled={isExportLoading}
+            disabled={isExportLoading || user?.role === "VIEW_ADMIN"}
           >
             Export
           </Button>

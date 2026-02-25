@@ -5,11 +5,13 @@ import RevenuePerUser from "./Reports/RevenuePerUser";
 import PointsRedeemed from "./Reports/PointsRedeemed";
 import CashReceivable from "./Reports/CashReceivable";
 import CashCollections from "./Reports/CashCollections";
+import { useUser } from "../../../provider/User";
 
 const { TabPane } = Tabs;
 
 export default function AccountingReports() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { user } = useUser();
 
   // Get active accounting tab from URL or default to "1"
   const activeAccountingTab = searchParams.get("accountingTab") || "1";
@@ -42,12 +44,14 @@ export default function AccountingReports() {
         >
           <CashReceivable />
         </TabPane>
-        <TabPane
-          tab={<span className="custom-tab-text">Revenue Per User</span>}
-          key="3"
-        >
-          <RevenuePerUser />
-        </TabPane>
+        {user?.role === "VIEW_ADMIN" || (
+          <TabPane
+            tab={<span className="custom-tab-text">Revenue Per User</span>}
+            key="3"
+          >
+            <RevenuePerUser />
+          </TabPane>
+        )}
         <TabPane
           tab={<span className="custom-tab-text">Points Redeemed</span>}
           key="4"

@@ -22,6 +22,7 @@ import {
   useLazyExportCustomerChartMonthlyDataQuery,
 } from "../../../redux/apiSlices/reportAnalyticsApi";
 import CustomTable from "../../common/CustomTable";
+import { useUser } from "../../../provider/User";
 
 const { Option } = Select;
 
@@ -32,6 +33,10 @@ const metricOptions = ["Revenue", "Users", "Points Redeemed"];
 const pointsFilterOptions = ["All", "Points Redeemed", "Points Accumulated"];
 
 export default function MonthlyStatsChartCustomer() {
+  const { user } = useUser();
+  const userRole = user?.role;
+  const isViewAdmin = userRole === "VIEW_ADMIN";
+  
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Default dates: current year start and end
@@ -77,7 +82,7 @@ export default function MonthlyStatsChartCustomer() {
         return newParams;
       });
     },
-    [setSearchParams, defaultStartDate, defaultEndDate]
+    [setSearchParams, defaultStartDate, defaultEndDate],
   );
 
   // Build query params for API
@@ -366,7 +371,7 @@ export default function MonthlyStatsChartCustomer() {
                   onChange={(date) =>
                     updateSearchParam(
                       "c_startDate",
-                      date ? dayjs(date).format("YYYY-MM-DD") : ""
+                      date ? dayjs(date).format("YYYY-MM-DD") : "",
                     )
                   }
                   style={{ width: "100%" }}
@@ -383,7 +388,7 @@ export default function MonthlyStatsChartCustomer() {
                   onChange={(date) =>
                     updateSearchParam(
                       "c_endDate",
-                      date ? dayjs(date).format("YYYY-MM-DD") : ""
+                      date ? dayjs(date).format("YYYY-MM-DD") : "",
                     )
                   }
                   style={{ width: "100%" }}
@@ -406,6 +411,7 @@ export default function MonthlyStatsChartCustomer() {
                   style={{ width: "100%", height: "40px" }}
                   placeholder="Enter Customer Name"
                   allowClear
+                  className="border border-gray-300 focus:border-gray-300! focus:ring-1 focus:ring-gray-300! rounded-md"
                 />
               </Form.Item>
             </Col>
@@ -420,6 +426,7 @@ export default function MonthlyStatsChartCustomer() {
                   style={{ width: "100%", height: "40px" }}
                   placeholder="Enter Location"
                   allowClear
+                  className="border border-gray-300 focus:border-gray-300! focus:ring-1 focus:ring-gray-300! rounded-md"
                 />
               </Form.Item>
             </Col>
@@ -501,11 +508,13 @@ export default function MonthlyStatsChartCustomer() {
                   className="mli-tall-select"
                 >
                   <Option value="all">All Metrics</Option>
-                  {metricOptions.map((option) => (
-                    <Option key={option} value={option}>
-                      {option}
-                    </Option>
-                  ))}
+                  {metricOptions
+                    .filter((option) => !(isViewAdmin && option === "Revenue"))
+                    .map((option) => (
+                      <Option key={option} value={option}>
+                        {option}
+                      </Option>
+                    ))}
                 </Select>
               </Form.Item>
             </Col>
@@ -586,15 +595,19 @@ export default function MonthlyStatsChartCustomer() {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                {(selectedMetric === "all" || selectedMetric === "Revenue") && (
-                  <Bar
-                    dataKey="Revenue"
-                    fill="#7086FD"
-                    shape={(props) => (
-                      <Custom3DBarWithWatermark {...props} dataKey="Revenue" />
-                    )}
-                  />
-                )}
+                {!isViewAdmin &&
+                  (selectedMetric === "all" || selectedMetric === "Revenue") && (
+                    <Bar
+                      dataKey="Revenue"
+                      fill="#7086FD"
+                      shape={(props) => (
+                        <Custom3DBarWithWatermark
+                          {...props}
+                          dataKey="Revenue"
+                        />
+                      )}
+                    />
+                  )}
                 {(selectedMetric === "all" || selectedMetric === "Users") && (
                   <Bar
                     dataKey="Users"
@@ -628,9 +641,10 @@ export default function MonthlyStatsChartCustomer() {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                {(selectedMetric === "all" || selectedMetric === "Revenue") && (
-                  <Line type="monotone" dataKey="Revenue" stroke="#7086FD" />
-                )}
+                {!isViewAdmin &&
+                  (selectedMetric === "all" || selectedMetric === "Revenue") && (
+                    <Line type="monotone" dataKey="Revenue" stroke="#7086FD" />
+                  )}
                 {(selectedMetric === "all" || selectedMetric === "Users") && (
                   <Line type="monotone" dataKey="Users" stroke="#6FD195" />
                 )}
@@ -653,14 +667,15 @@ export default function MonthlyStatsChartCustomer() {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                {(selectedMetric === "all" || selectedMetric === "Revenue") && (
-                  <Area
-                    type="monotone"
-                    dataKey="Revenue"
-                    stroke="#7086FD"
-                    fill="#7086FD"
-                  />
-                )}
+                {!isViewAdmin &&
+                  (selectedMetric === "all" || selectedMetric === "Revenue") && (
+                    <Area
+                      type="monotone"
+                      dataKey="Revenue"
+                      stroke="#7086FD"
+                      fill="#7086FD"
+                    />
+                  )}
                 {(selectedMetric === "all" || selectedMetric === "Users") && (
                   <Area
                     type="monotone"
@@ -700,6 +715,11 @@ export default function MonthlyStatsChartCustomer() {
         <CustomTable
           data={tableData}
           columns={columns.filter((col) => {
+            // Hide Revenue column for VIEW_ADMIN
+            if (col.dataIndex === "Revenue" && isViewAdmin) {
+              return false;
+            }
+
             // Always show basic columns (not metric-related)
             if (
               ![

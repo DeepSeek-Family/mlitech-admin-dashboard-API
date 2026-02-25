@@ -1,5 +1,6 @@
 import { Tooltip } from "antd";
 import ReusableTable from "../../common/CustomTable";
+import { useUser } from "../../../provider/User";
 
 const CustomerReferredTableColumn = ({
   data,
@@ -12,6 +13,7 @@ const CustomerReferredTableColumn = ({
   onGenerateToken,
   userRole,
 }) => {
+  const { user } = useUser();
   const columns = [
     { title: "SL", dataIndex: "id", key: "id", align: "center" },
     {
@@ -127,7 +129,7 @@ const CustomerReferredTableColumn = ({
             >
               {record.generatedToken
                 ? `Token Generated (${record.tokenGeneratedDate})`
-                : "Generate Token"}
+                : "Cash Received"}
             </button>
           </Tooltip>
         </div>

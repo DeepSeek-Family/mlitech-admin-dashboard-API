@@ -17,8 +17,10 @@ import SubscriptionHeadingIcon from "../../assets/subscription-heading.png";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { useUser } from "../../provider/User";
 
 const PackagesPlans = () => {
+  const { user } = useUser();
   const {
     data: response,
     isLoading,
@@ -138,7 +140,7 @@ const PackagesPlans = () => {
       console.error("Failed to save package:", error);
       message.error(
         error?.data?.message ||
-          `Failed to ${isEditing ? "update" : "create"} package`
+          `Failed to ${isEditing ? "update" : "create"} package`,
       );
     }
   };
@@ -198,7 +200,9 @@ const PackagesPlans = () => {
       <div className="pt-1 px-4">
         <div className="flex justify-center items-center py-20">
           <div className="text-center text-red-500">
-            <p className="text-lg font-semibold mb-2">Error loading membership plans</p>
+            <p className="text-lg font-semibold mb-2">
+              Error loading membership plans
+            </p>
             <p className="text-sm">
               {error?.data?.message || "Something went wrong"}
             </p>
@@ -225,6 +229,7 @@ const PackagesPlans = () => {
           icon={<PlusOutlined />}
           className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary text-[17px] font-bold"
           onClick={() => showModal()}
+          disabled={user?.role === "VIEW_ADMIN"}
         >
           Add Membership Plan
         </Button>
@@ -235,7 +240,8 @@ const PackagesPlans = () => {
             <div className="text-center py-12 text-gray-500">
               <p className="text-lg">No membership plans available.</p>
               <p>
-                Click the "Add Membership Plan" button to create your first membership plan.
+                Click the "Add Membership Plan" button to create your first
+                membership plan.
               </p>
             </div>
           ) : (
@@ -246,7 +252,7 @@ const PackagesPlans = () => {
                     title={null}
                     bordered={false}
                     className={`${getCardStyle(
-                      pkg
+                      pkg,
                     )} transition-transform duration-300`}
                   >
                     <div className="flex justify-end mb-2">
@@ -255,6 +261,7 @@ const PackagesPlans = () => {
                           icon={<EditOutlined />}
                           onClick={() => showModal(pkg)}
                           className="text-gray-800 border-gray-800 hover:text-primary hover:border-primary"
+                          disabled={user?.role === "VIEW_ADMIN"}
                         />
                       </div>
                     </div>
@@ -301,6 +308,7 @@ const PackagesPlans = () => {
                           : "bg-red-500 text-white hover:!bg-gray-400 hover:!text-white"
                       }`}
                       onClick={() => togglePackageStatus(pkg.id)}
+                      disabled={isToggling || user?.role === "VIEW_ADMIN"}
                     >
                       {pkg.active ? "Turn Off" : "Turn On"}
                     </Button>

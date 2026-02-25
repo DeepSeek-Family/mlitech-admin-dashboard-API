@@ -3,6 +3,7 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 import { IoEyeSharp } from "react-icons/io5";
 import Swal from "sweetalert2";
 import ReusableTable from "../../common/CustomTable";
+import { useUser } from "../../../provider/User";
 
 const MerchantTableColumn = ({
   data,
@@ -17,6 +18,7 @@ const MerchantTableColumn = ({
   onApprove,
   onReject,
 }) => {
+  const { user } = useUser();
   const columnsWithActions = [
     { title: "SL", dataIndex: "sl", key: "sl", align: "center" },
     {
@@ -104,6 +106,7 @@ const MerchantTableColumn = ({
               <button
                 onClick={() => onApprove(record.recordId || record.id)}
                 className="bg-primary text-white px-3 py-1 rounded-md hover:opacity-90"
+                disabled={user?.role === "VIEW_MERCENT"}
               >
                 Add
               </button>
@@ -111,6 +114,7 @@ const MerchantTableColumn = ({
               <button
                 onClick={() => onReject(record.recordId || record.id)}
                 className="bg-red-500 text-white px-3 py-1 rounded-md hover:opacity-90"
+                disabled={user?.role === "VIEW_ADMIN"}
               >
                 Reject
               </button>
@@ -147,7 +151,9 @@ const MerchantTableColumn = ({
             >
               <button
                 onClick={() => onEdit(record)}
-                disabled={record.status === "Inactive"}
+                disabled={
+                  record.status === "Inactive" || user?.role === "VIEW_ADMIN"
+                }
                 className={`text-xl ${
                   record.status === "Inactive"
                     ? "text-gray-400 cursor-not-allowed"
@@ -161,7 +167,8 @@ const MerchantTableColumn = ({
             <Tooltip title="Delete">
               <button
                 onClick={() => onDelete(record.recordId || record.id)}
-                className="text-red-500 hover:text-red-700 text-md"
+                className="text-red-500 hover:text-red-700 text-[17px] disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:text-gray-400"
+                disabled={user?.role === "VIEW_ADMIN"}
               >
                 <FaTrash />
               </button>
@@ -170,6 +177,7 @@ const MerchantTableColumn = ({
             <Switch
               size="small"
               checked={record.status === "Active"}
+              disabled={user?.role === "VIEW_ADMIN"}
               style={{
                 backgroundColor:
                   record.status === "Active" ? "#3fae6a" : "gray",

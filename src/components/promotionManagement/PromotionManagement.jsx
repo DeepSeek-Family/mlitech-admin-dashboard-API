@@ -17,6 +17,7 @@ import {
   useCreatePromotionMutation,
   useDeletePromotionMutation,
 } from "../../redux/apiSlices/promoSlice.js";
+import { useUser } from "../../provider/User.jsx";
 
 const CUSTOMER_SEGMENT_MAP = {
   vip_customer: "VIP Customers",
@@ -44,6 +45,7 @@ const getPromotionTypeLabel = (value) => {
 const PromotionManagement = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchText, setSearchText] = useState("");
+  const { user } = useUser();
   const [page, setPage] = useState(() => {
     const urlPage = searchParams.get("page");
     return urlPage ? parseInt(urlPage, 10) : 1;
@@ -413,7 +415,7 @@ const PromotionManagement = () => {
               <button
                 onClick={() => handleEditClick(record)}
                 className="text-primary hover:text-green-700 text-[17px] disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:text-gray-400"
-                disabled={record.status === "Inactive"}
+                disabled={record.status === "Inactive" || user?.role === "VIEW_ADMIN"}
               >
                 <FaEdit />
               </button>
@@ -421,7 +423,8 @@ const PromotionManagement = () => {
             <Tooltip title="Delete">
               <button
                 onClick={() => handleDeleteClick(record)}
-                className="text-red-500 hover:text-red-700 text-[17px]"
+                className="text-red-500 hover:text-red-700 text-[17px] disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:text-gray-400"
+                disabled={user?.role === "VIEW_ADMIN"}
               >
                 <MdDelete />
               </button>
@@ -433,6 +436,7 @@ const PromotionManagement = () => {
                 backgroundColor:
                   record.status === "Active" ? "#3fae6a" : "gray",
               }}
+              disabled={user?.role === "VIEW_ADMIN"}
               onChange={async (checked) => {
                 const result = await Swal.fire({
                   title: "Are you sure?",
@@ -497,6 +501,7 @@ const PromotionManagement = () => {
           <Button
             className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary text-[17px] font-bold"
             onClick={() => setIsNewCampaignModalVisible(true)}
+            disabled={user?.role === "VIEW_ADMIN"}
           >
             New Promotion
           </Button>

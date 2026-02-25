@@ -23,6 +23,7 @@ import {
   useMerchantReportAnalyticsQuery,
 } from "../../../redux/apiSlices/reportAnalyticsApi";
 import CustomTable from "../../common/CustomTable";
+import { useUser } from "../../../provider/User";
 
 const { Option } = Select;
 
@@ -32,6 +33,10 @@ const paymentOptions = ["All Payments", "Paid", "Unpaid"];
 const metricOptions = ["Revenue", "Users", "Points Redeemed"];
 
 export default function MonthlyStatsChartMerchant() {
+  const { user } = useUser();
+  const userRole = user?.role;
+  const isViewAdmin = userRole === "VIEW_ADMIN";
+
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Default dates: current year start and end
@@ -75,7 +80,7 @@ export default function MonthlyStatsChartMerchant() {
         return newParams;
       });
     },
-    [setSearchParams, defaultStartDate, defaultEndDate]
+    [setSearchParams, defaultStartDate, defaultEndDate],
   );
 
   // Build query params for API
@@ -389,7 +394,7 @@ export default function MonthlyStatsChartMerchant() {
                   onChange={(date) =>
                     updateSearchParam(
                       "m_startDate",
-                      date ? dayjs(date).format("YYYY-MM-DD") : ""
+                      date ? dayjs(date).format("YYYY-MM-DD") : "",
                     )
                   }
                   style={{ width: "100%" }}
@@ -406,7 +411,7 @@ export default function MonthlyStatsChartMerchant() {
                   onChange={(date) =>
                     updateSearchParam(
                       "m_endDate",
-                      date ? dayjs(date).format("YYYY-MM-DD") : ""
+                      date ? dayjs(date).format("YYYY-MM-DD") : "",
                     )
                   }
                   style={{ width: "100%" }}
@@ -429,6 +434,7 @@ export default function MonthlyStatsChartMerchant() {
                   style={{ width: "100%", height: "40px" }}
                   placeholder="Enter Merchant Name"
                   allowClear
+                  className="border border-gray-300 focus:border-gray-300! focus:ring-1 focus:ring-gray-300! rounded-md"
                 />
               </Form.Item>
             </Col>
@@ -443,6 +449,7 @@ export default function MonthlyStatsChartMerchant() {
                   style={{ width: "100%", height: "40px" }}
                   placeholder="Enter Location"
                   allowClear
+                  className="border border-gray-300 focus:border-gray-300! focus:ring-1 focus:ring-gray-300! rounded-md"
                 />
               </Form.Item>
             </Col>
@@ -522,11 +529,13 @@ export default function MonthlyStatsChartMerchant() {
                   className="mli-tall-select"
                 >
                   <Option value="all">All Metrics</Option>
-                  {metricOptions.map((option) => (
-                    <Option key={option} value={option}>
-                      {option}
-                    </Option>
-                  ))}
+                  {metricOptions
+                    .filter((option) => !(isViewAdmin && option === "Revenue"))
+                    .map((option) => (
+                      <Option key={option} value={option}>
+                        {option}
+                      </Option>
+                    ))}
                 </Select>
               </Form.Item>
             </Col>
@@ -585,15 +594,20 @@ export default function MonthlyStatsChartMerchant() {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                {(selectedMetric === "all" || selectedMetric === "Revenue") && (
-                  <Bar
-                    dataKey="Revenue"
-                    fill="#7086FD"
-                    shape={(props) => (
-                      <Custom3DBarWithWatermark {...props} dataKey="Revenue" />
-                    )}
-                  />
-                )}
+                {!isViewAdmin &&
+                  (selectedMetric === "all" ||
+                    selectedMetric === "Revenue") && (
+                    <Bar
+                      dataKey="Revenue"
+                      fill="#7086FD"
+                      shape={(props) => (
+                        <Custom3DBarWithWatermark
+                          {...props}
+                          dataKey="Revenue"
+                        />
+                      )}
+                    />
+                  )}
                 {(selectedMetric === "all" || selectedMetric === "Users") && (
                   <Bar
                     dataKey="Users"
@@ -627,9 +641,11 @@ export default function MonthlyStatsChartMerchant() {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                {(selectedMetric === "all" || selectedMetric === "Revenue") && (
-                  <Line type="monotone" dataKey="Revenue" stroke="#7086FD" />
-                )}
+                {!isViewAdmin &&
+                  (selectedMetric === "all" ||
+                    selectedMetric === "Revenue") && (
+                    <Line type="monotone" dataKey="Revenue" stroke="#7086FD" />
+                  )}
                 {(selectedMetric === "all" || selectedMetric === "Users") && (
                   <Line type="monotone" dataKey="Users" stroke="#6FD195" />
                 )}
@@ -652,14 +668,16 @@ export default function MonthlyStatsChartMerchant() {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                {(selectedMetric === "all" || selectedMetric === "Revenue") && (
-                  <Area
-                    type="monotone"
-                    dataKey="Revenue"
-                    stroke="#7086FD"
-                    fill="#7086FD"
-                  />
-                )}
+                {!isViewAdmin &&
+                  (selectedMetric === "all" ||
+                    selectedMetric === "Revenue") && (
+                    <Area
+                      type="monotone"
+                      dataKey="Revenue"
+                      stroke="#7086FD"
+                      fill="#7086FD"
+                    />
+                  )}
                 {(selectedMetric === "all" || selectedMetric === "Users") && (
                   <Area
                     type="monotone"
@@ -698,14 +716,20 @@ export default function MonthlyStatsChartMerchant() {
         </div>
         <CustomTable
           data={tableData}
-          columns={columns.filter(
-            (col) =>
+          columns={columns.filter((col) => {
+            // Hide Revenue column for VIEW_ADMIN
+            if (col.dataIndex === "Revenue" && isViewAdmin) {
+              return false;
+            }
+
+            return (
               selectedMetric === "all" ||
               !["Revenue", "Users", "Points Redeemed"].includes(
-                col.dataIndex
+                col.dataIndex,
               ) ||
               col.dataIndex === selectedMetric
-          )}
+            );
+          })}
           isLoading={isLoading}
           isFetching={isFetching}
           pagination={{

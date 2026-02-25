@@ -4,6 +4,7 @@ import { IoEyeSharp } from "react-icons/io5";
 import { Switch } from "antd";
 import Swal from "sweetalert2";
 import ReusableTable from "../../common/CustomTable";
+import { useUser } from "../../../provider/User";
 
 const CustomerTableColumn = ({
   data,
@@ -15,6 +16,7 @@ const CustomerTableColumn = ({
   onDelete,
   onStatusChange,
 }) => {
+  const { user } = useUser();
   const baseColumns = [
     { title: "SL", dataIndex: "id", key: "id", align: "center" },
     {
@@ -109,7 +111,8 @@ const CustomerTableColumn = ({
           <Tooltip title="Delete">
             <button
               onClick={() => onDelete(record.recordId || record.id)}
-              className="text-red-500 hover:text-red-700 text-md"
+              className="text-red-500 hover:text-red-700 text-[17px] disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:text-gray-400"
+              disabled={user?.role === "VIEW_ADMIN"}
             >
               <FaTrash />
             </button>
@@ -121,6 +124,7 @@ const CustomerTableColumn = ({
             style={{
               backgroundColor: record.status === "Active" ? "#3fae6a" : "gray",
             }}
+            disabled={user?.role === "VIEW_ADMIN"}
             onChange={(checked) => {
               Swal.fire({
                 title: "Are you sure?",

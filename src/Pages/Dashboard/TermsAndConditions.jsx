@@ -7,13 +7,15 @@ import {
   useGetCustomerTermsAndConditionsQuery,
   useUpdateTermsAndConditionsMutation,
 } from "../../redux/apiSlices/termsAndConditionSlice";
+import { useUser } from "../../provider/User";
 
 const { TabPane } = Tabs;
 
 const TermsAndConditions = () => {
   const editor = useRef(null);
   const [searchParams, setSearchParams] = useSearchParams();
-  
+  const { user } = useUser();
+
   // Get active tab from URL or default to "customer"
   const activeTab = searchParams.get("tab") || "customer";
 
@@ -36,12 +38,12 @@ const TermsAndConditions = () => {
   // Initialize content state from API data or default
   const [merchantContent, setMerchantContent] = useState(
     merchantTermsData?.data?.content ||
-      "<p>Your merchant terms and conditions content goes here.</p>"
+      "<p>Your merchant terms and conditions content goes here.</p>",
   );
 
   const [customerContent, setCustomerContent] = useState(
     customerTermsData?.data?.content ||
-      "<p>Your customer terms and conditions content goes here.</p>"
+      "<p>Your customer terms and conditions content goes here.</p>",
   );
 
   // Update state when API data loads
@@ -110,6 +112,7 @@ const TermsAndConditions = () => {
         <Button
           onClick={showModal}
           className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary hover:bg-primary text-[17px] font-bold"
+          disabled={user?.role === "VIEW_ADMIN"}
         >
           Edit Terms & Conditions
         </Button>
