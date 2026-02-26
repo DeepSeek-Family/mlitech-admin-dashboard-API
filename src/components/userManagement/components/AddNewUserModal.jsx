@@ -114,9 +114,9 @@ const AddNewUserModal = ({
                   return Promise.reject(
                     new Error(
                       `Password must contain at least one ${missing.join(
-                        ", one "
-                      )}`
-                    )
+                        ", one ",
+                      )}`,
+                    ),
                   );
                 },
               },

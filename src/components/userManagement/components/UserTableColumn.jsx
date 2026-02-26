@@ -4,6 +4,13 @@ import { EditOutlined } from "@ant-design/icons";
 import Swal from "sweetalert2";
 import CustomTable from "../../common/CustomTable";
 
+const ROLE_MAPPING = {
+  SUPER_ADMIN: "Administrator",
+  ADMIN_REP: "Sales Representative",
+  ADMIN_SELL: "Admin Fin",
+  VIEW_ADMIN: "View User",
+};
+
 const UserTableColumn = ({
   data,
   isLoading,
@@ -35,7 +42,13 @@ const UserTableColumn = ({
       key: "phone",
       align: "center",
     },
-    { title: "Role", dataIndex: "role", key: "role", align: "center" },
+    {
+      title: "Role",
+      dataIndex: "role",
+      key: "role",
+      align: "center",
+      render: (role) => ROLE_MAPPING[role] || role,
+    },
     {
       title: "Created At",
       dataIndex: "createdAt",
@@ -111,7 +124,7 @@ const UserTableColumn = ({
                 if (result.isConfirmed) {
                   onStatusChange(
                     record.recordId,
-                    checked ? "Active" : "Inactive"
+                    checked ? "Active" : "Inactive",
                   );
                 }
               });

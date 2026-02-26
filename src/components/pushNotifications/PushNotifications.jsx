@@ -127,8 +127,8 @@ const PushNotifications = () => {
                 className="mli-tall-select"
               >
                 <Option value="ALL">All</Option>
-                <Option value="USER">User</Option>
-                <Option value="MERCHANT">Merchant</Option>
+                <Option value="USER">Customers</Option>
+                <Option value="MERCENT">Merchants</Option>
               </Select>
             </div>
           </Col>
