@@ -129,6 +129,7 @@ const NewCampaign = ({ onSave, onCancel, editData = null, isEdit = false }) => {
 
     onSave(campaignData);
     resetForm();
+    onCancel();
   };
 
   // Image upload validation
@@ -144,6 +145,8 @@ const NewCampaign = ({ onSave, onCancel, editData = null, isEdit = false }) => {
     // Only keep the latest file (for replacement)
     const newFileList = fileList.slice(-1);
     setUploadedImage(newFileList);
+    // Update form field value
+    form.setFieldsValue({ image: newFileList });
   };
 
   const handleCheckAllChange = (e) => {
@@ -256,17 +259,17 @@ const NewCampaign = ({ onSave, onCancel, editData = null, isEdit = false }) => {
                     const numValue = Number(value);
                     if (isNaN(numValue)) {
                       return Promise.reject(
-                        new Error("Please enter a valid number")
+                        new Error("Please enter a valid number"),
                       );
                     }
                     if (numValue < 0) {
                       return Promise.reject(
-                        new Error("Discount percentage cannot be negative")
+                        new Error("Discount percentage cannot be negative"),
                       );
                     }
                     if (numValue > 100) {
                       return Promise.reject(
-                        new Error("Discount percentage cannot exceed 100%")
+                        new Error("Discount percentage cannot exceed 100%"),
                       );
                     }
                     return Promise.resolve();
@@ -317,6 +320,7 @@ const NewCampaign = ({ onSave, onCancel, editData = null, isEdit = false }) => {
           name="image"
           label="Upload Image (JPG/PNG only)"
           className="mt-6"
+          rules={[{ required: true, message: "Please upload an image" }]}
         >
           <Upload
             listType="picture"
@@ -341,6 +345,7 @@ const NewCampaign = ({ onSave, onCancel, editData = null, isEdit = false }) => {
             onChange={handleUploadChange}
             onRemove={() => {
               setUploadedImage([]);
+              form.setFieldsValue({ image: [] });
             }}
             maxCount={1}
             accept=".jpg,.jpeg,.png" // Restrict file picker to JPG/PNG
