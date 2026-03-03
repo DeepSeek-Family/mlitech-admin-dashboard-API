@@ -15,6 +15,7 @@ import {
   Rewords,
 } from "../../components/common/Svg";
 import image4 from "../../assets/image4.png";
+import { useUser } from "../../provider/User";
 
 const Sidebar = ({ collapsed, setCollapsed }) => {
   const location = useLocation();
@@ -23,6 +24,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
   const [openKeys, setOpenKeys] = useState([]);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const navigate = useNavigate();
+  const { user } = useUser();
 
   const showLogoutConfirm = () => setIsLogoutModalOpen(true);
   const handleLogout = () => {
@@ -36,7 +38,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
     selectedKey === itemKey ||
     (itemKey === "subMenuSetting" &&
       ["/profile", "/terms-and-conditions", "/privacy-policy"].includes(
-        selectedKey
+        selectedKey,
       ));
 
   const renderIcon = (IconComponent, itemKey) => {
@@ -54,141 +56,159 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
     );
   };
 
-  const menuItems = [
-    {
-      key: "/",
-      icon: renderIcon(Dashboard, "/"),
-      label: <Link to="/">{collapsed ? "" : "Dashboard Overview"}</Link>,
-    },
-    {
-      key: "/merchant-management",
-      icon: renderIcon(Marchant, "/merchant-management"),
-      label: (
-        <Link to="/merchant-management">
-          {collapsed ? "" : "Merchant Management"}
-        </Link>
-      ),
-    },
-    {
-      key: "/customer-management",
-      icon: renderIcon(People, "/customer-management"),
-      label: (
-        <Link to="/customer-management">
-          {collapsed ? "" : "Customer Profile"}
-        </Link>
-      ),
-    },
-    {
-      key: "/tier-system",
-      icon: renderIcon(People, "/tier-system"),
-      label: (
-        <Link to="/tier-system">{collapsed ? "" : "Point & Tier System"}</Link>
-      ),
-    },
-    {
-      key: "/reporting-analytics",
-      icon: renderIcon(Rewords, "/reporting-analytics"),
-      label: (
-        <Link to="/reporting-analytics">
-          {collapsed ? "" : "Reporting & Analytics"}
-        </Link>
-      ),
-    },
-    {
-      key: "/membership-plans",
-      icon: renderIcon(SubscriptionManagement, "/membership-plans"),
-      label: (
-        <Link to="/membership-plans">
-          {collapsed ? "" : "Membership Plans"}
-        </Link>
-      ),
-    },
-    {
-      key: "/promotion-management",
-      icon: renderIcon(PromotionManagement, "/promotion-management"),
-      label: (
-        <Link to="/promotion-management">
-          {collapsed ? "" : "Promotion Management"}
-        </Link>
-      ),
-    },
-    {
-      key: "/sales-rep-portal",
-      icon: renderIcon(SalesRep, "/sales-rep-portal"),
-      label: (
-        <Link to="/sales-rep-portal">
-          {collapsed ? "" : "Sales Rep Portal"}
-        </Link>
-      ),
-    },
-    {
-      key: "/audit-logs",
-      icon: renderIcon(AuditLog, "/audit-logs"),
-      label: <Link to="/audit-logs">{collapsed ? "" : "Audit Logs"}</Link>,
-    },
-    // {
-    //   key: "/userManagement",
-    //   icon: renderIcon(loginCredentials, "/userManagement"),
-    //   label: (
-    //     <Link to="/userManagement">{collapsed ? "" : "User Management"}</Link>
-    //   ),
-    // },
-    {
-      key: "/push-notification",
-      icon: renderIcon(loginCredentials, "/push-notification"),
-      label: (
-        <Link to="/push-notification">
-          {collapsed ? "" : "Push Notifications"}
-        </Link>
-      ),
-    },
-    {
-      key: "subMenuSetting",
-      icon: renderIcon(Settings, "subMenuSetting"),
-      label: collapsed ? "" : "Settings",
-      children: [
+  // Settings submenu
+  const settingsMenu = {
+    key: "subMenuSetting",
+    icon: renderIcon(Settings, "subMenuSetting"),
+    label: collapsed ? "" : "Settings",
+    children: [
+      {
+        key: "/profile",
+        label: <Link to="/profile">{collapsed ? "" : "Update Profile"}</Link>,
+      },
+      {
+        key: "/user-management",
+        label: (
+          <Link to="/user-management">
+            {collapsed ? "" : "User Management"}
+          </Link>
+        ),
+      },
+      {
+        key: "/terms-and-conditions",
+        label: (
+          <Link to="/terms-and-conditions">
+            {collapsed ? "" : "Terms And Conditions"}
+          </Link>
+        ),
+      },
+      {
+        key: "/privacy-policy",
+        label: (
+          <Link to="/privacy-policy">{collapsed ? "" : "Privacy Policy"}</Link>
+        ),
+      },
+    ],
+  };
+
+  // Sales Rep Portal
+  const salesRepMenu = {
+    key: "/sales-rep-portal",
+    icon: renderIcon(SalesRep, "/sales-rep-portal"),
+    label: (
+      <Link to="/sales-rep-portal">{collapsed ? "" : "Sales Rep Portal"}</Link>
+    ),
+  };
+
+  // Get base menu items for all roles
+  const getMenuItems = () => {
+    const isAdminRep = user?.role === "ADMIN_REP";
+
+    if (isAdminRep) {
+      // Show only Sales Rep Portal, Settings, and Logout for ADMIN_REP
+      return [
+        salesRepMenu,
+        settingsMenu,
         {
-          key: "/profile",
-          label: <Link to="/profile">{collapsed ? "" : "Update Profile"}</Link>,
+          key: "/logout",
+          icon: <IoIosLogOut size={24} />,
+          label: <p onClick={showLogoutConfirm}>{collapsed ? "" : "Logout"}</p>,
         },
-        {
-          key: "/user-management",
-          label: (
-            <Link to="/user-management">
-              {collapsed ? "" : "User Management"}
-            </Link>
-          ),
-        },
-        {
-          key: "/terms-and-conditions",
-          label: (
-            <Link to="/terms-and-conditions">
-              {collapsed ? "" : "Terms And Conditions"}
-            </Link>
-          ),
-        },
-        {
-          key: "/privacy-policy",
-          label: (
-            <Link to="/privacy-policy">
-              {collapsed ? "" : "Privacy Policy"}
-            </Link>
-          ),
-        },
-      ],
-    },
-    {
-      key: "/logout",
-      icon: <IoIosLogOut size={24} />,
-      label: <p onClick={showLogoutConfirm}>{collapsed ? "" : "Logout"}</p>,
-    },
-  ];
+      ];
+    }
+
+    // Show all menu items for other roles with logout button
+    return [
+      {
+        key: "/",
+        icon: renderIcon(Dashboard, "/"),
+        label: <Link to="/">{collapsed ? "" : "Dashboard Overview"}</Link>,
+      },
+      {
+        key: "/merchant-management",
+        icon: renderIcon(Marchant, "/merchant-management"),
+        label: (
+          <Link to="/merchant-management">
+            {collapsed ? "" : "Merchant Management"}
+          </Link>
+        ),
+      },
+      {
+        key: "/customer-management",
+        icon: renderIcon(People, "/customer-management"),
+        label: (
+          <Link to="/customer-management">
+            {collapsed ? "" : "Customer Profile"}
+          </Link>
+        ),
+      },
+      {
+        key: "/tier-system",
+        icon: renderIcon(People, "/tier-system"),
+        label: (
+          <Link to="/tier-system">
+            {collapsed ? "" : "Point & Tier System"}
+          </Link>
+        ),
+      },
+      {
+        key: "/reporting-analytics",
+        icon: renderIcon(Rewords, "/reporting-analytics"),
+        label: (
+          <Link to="/reporting-analytics">
+            {collapsed ? "" : "Reporting & Analytics"}
+          </Link>
+        ),
+      },
+      {
+        key: "/membership-plans",
+        icon: renderIcon(SubscriptionManagement, "/membership-plans"),
+        label: (
+          <Link to="/membership-plans">
+            {collapsed ? "" : "Membership Plans"}
+          </Link>
+        ),
+      },
+      {
+        key: "/promotion-management",
+        icon: renderIcon(PromotionManagement, "/promotion-management"),
+        label: (
+          <Link to="/promotion-management">
+            {collapsed ? "" : "Promotion Management"}
+          </Link>
+        ),
+      },
+      salesRepMenu,
+      {
+        key: "/audit-logs",
+        icon: renderIcon(AuditLog, "/audit-logs"),
+        label: <Link to="/audit-logs">{collapsed ? "" : "Audit Logs"}</Link>,
+      },
+      {
+        key: "/push-notification",
+        icon: renderIcon(loginCredentials, "/push-notification"),
+        label: (
+          <Link to="/push-notification">
+            {collapsed ? "" : "Push Notifications"}
+          </Link>
+        ),
+      },
+      settingsMenu,
+      {
+        key: "/logout",
+        icon: <IoIosLogOut size={24} />,
+        label: <p onClick={showLogoutConfirm}>{collapsed ? "" : "Logout"}</p>,
+      },
+    ];
+  };
+
+  const menuItems = getMenuItems();
 
   useEffect(() => {
     const selectedItem = menuItems.find(
       (item) =>
         item.key === path ||
-        (item.children && item.children.some((sub) => sub.key === path))
+        (item.children && item.children.some((sub) => sub.key === path)),
     );
     if (selectedItem) {
       setSelectedKey(path);
@@ -196,12 +216,12 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
       else {
         const parentItem = menuItems.find(
           (item) =>
-            item.children && item.children.some((sub) => sub.key === path)
+            item.children && item.children.some((sub) => sub.key === path),
         );
         if (parentItem) setOpenKeys([parentItem.key]);
       }
     }
-  }, [path]);
+  }, [path, menuItems]);
 
   const handleOpenChange = (keys) => setOpenKeys(keys);
 

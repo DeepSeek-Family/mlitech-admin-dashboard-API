@@ -81,6 +81,7 @@ const NewCampaign = ({ onSave, onCancel, editData = null, isEdit = false }) => {
         discountPercentage: editData.discountPercentage,
         dateRange: dateRange,
         promotionDays: initialDays,
+        grossValue: editData.grossValue,
       });
     } else if (!isEdit) {
       // Reset form for new promotion
@@ -118,6 +119,7 @@ const NewCampaign = ({ onSave, onCancel, editData = null, isEdit = false }) => {
       thumbnail,
       promotionDays: values.promotionDays || [],
       imageFile: uploadedImage[0]?.originFileObj || null,
+      grossValue: values.grossValue,
     };
 
     console.log("Campaign Data:", campaignData);
@@ -246,6 +248,36 @@ const NewCampaign = ({ onSave, onCancel, editData = null, isEdit = false }) => {
           </div>
 
           <div className="w-full flex flex-col gap-4">
+            <Form.Item
+              label="Gross Value of Promotion"
+              name="grossValue"
+              rules={[
+                { required: true },
+                {
+                  validator: (_, value) => {
+                    if (!value) return Promise.resolve();
+                    const numValue = parseFloat(value);
+                    if (isNaN(numValue)) {
+                      return Promise.reject(
+                        new Error("Please enter a valid number"),
+                      );
+                    }
+                    if (numValue <= 0) {
+                      return Promise.reject(
+                        new Error("Gross value cannot be negative"),
+                      );
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+            >
+              <Input
+                className="px-3 mli-tall-input"
+                placeholder="Enter Gross Value"
+                type="number"
+              />
+            </Form.Item>
             <Form.Item
               label="Discount Percentage"
               name="discountPercentage"
