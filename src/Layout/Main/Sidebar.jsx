@@ -193,6 +193,15 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
           </Link>
         ),
       },
+      {
+        key: "/currency-conversion",
+        icon: renderIcon(loginCredentials, "/currency-conversion"),
+        label: (
+          <Link to="/currency-conversion">
+            {collapsed ? "" : "Currency Conversion"}
+          </Link>
+        ),
+      },
       settingsMenu,
       {
         key: "/logout",

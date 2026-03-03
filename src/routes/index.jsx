@@ -26,6 +26,7 @@ import PrivateRoute from "./ProtectedRoute";
 import MerchantManagement from "../components/MerchantManagement/MerchantManagement";
 import UserManagement from "../components/userManagement/UserManagement2";
 import CustomerManagement2 from "../components/customerManagement/CustomerManagement2";
+import CurrencyConversion from "../components/currencyConversion/CurrencyConversion";
 
 const router = createBrowserRouter([
   {
@@ -108,6 +109,10 @@ const router = createBrowserRouter([
       {
         path: "/notification",
         element: <Notifications />,
+      },
+      {
+        path: "/currency-conversion",
+        element: <CurrencyConversion />,
       },
     ],
   },
