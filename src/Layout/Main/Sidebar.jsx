@@ -2,6 +2,7 @@ import { Menu, Modal } from "antd";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { IoIosLogOut } from "react-icons/io";
+import { MdCurrencyExchange } from "react-icons/md";
 import {
   Dashboard,
   Marchant,
@@ -195,7 +196,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
       },
       {
         key: "/currency-conversion",
-        icon: renderIcon(loginCredentials, "/currency-conversion"),
+        icon: renderIcon(MdCurrencyExchange, "/currency-conversion"),
         label: (
           <Link to="/currency-conversion">
             {collapsed ? "" : "Currency Conversion"}
