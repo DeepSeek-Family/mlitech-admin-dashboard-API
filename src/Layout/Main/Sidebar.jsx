@@ -179,6 +179,15 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
           </Link>
         ),
       },
+      {
+        key: "/support-messages",
+        icon: renderIcon(PromotionManagement, "/support-messages"),
+        label: (
+          <Link to="/support-messages">
+            {collapsed ? "" : "Support Messages"}
+          </Link>
+        ),
+      },
       salesRepMenu,
       {
         key: "/audit-logs",

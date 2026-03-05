@@ -27,6 +27,7 @@ import MerchantManagement from "../components/MerchantManagement/MerchantManagem
 import UserManagement from "../components/userManagement/UserManagement2";
 import CustomerManagement2 from "../components/customerManagement/CustomerManagement2";
 import CurrencyConversion from "../components/currencyConversion/CurrencyConversion";
+import SupportMessage from "../components/SupportMessage/SupportMessage";
 
 const router = createBrowserRouter([
   {
@@ -113,6 +114,10 @@ const router = createBrowserRouter([
       {
         path: "/currency-conversion",
         element: <CurrencyConversion />,
+      },
+      {
+        path: "/support-messages",
+        element: <SupportMessage />,
       },
     ],
   },
