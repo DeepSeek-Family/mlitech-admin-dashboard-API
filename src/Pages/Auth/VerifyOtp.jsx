@@ -13,9 +13,11 @@ import Swal from "sweetalert2";
 const VerifyOtp = () => {
   const navigate = useNavigate();
   const [otp, setOtp] = useState("");
-  const [timeLeft, setTimeLeft] = useState(180); // 3 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(5); // 3 minutes in seconds
   const [isExpired, setIsExpired] = useState(false);
   const phone = new URLSearchParams(location.search).get("phone");
+  const identifier = new URLSearchParams(location.search).get("identifier");
+  const otpPath = new URLSearchParams(location.search).get("otpPath");
   const [otpVerify, { isLoading }] = useOtpVerifyMutation();
   const [resendOtp, { isLoading: isResending }] = useResendOtpMutation();
 
@@ -54,7 +56,7 @@ const VerifyOtp = () => {
 
     try {
       const response = await otpVerify({
-        identifier: phone,
+        identifier: identifier || phone,
         oneTimeCode: parseInt(otp, 10),
       }).unwrap();
 
@@ -75,7 +77,7 @@ const VerifyOtp = () => {
       });
 
       setTimeout(() => {
-        navigate(`/auth/set-password?phone=${phone}`);
+        navigate(`/auth/set-password?identifier=${identifier || phone}`);
       }, 1500);
     } catch (error) {
       const errorMessage =
@@ -89,19 +91,27 @@ const VerifyOtp = () => {
   };
 
   const handleResendEmail = async () => {
-    if (!phone) {
+    const useIdentifier = identifier || phone;
+
+    if (!useIdentifier) {
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "Phone number is missing",
+        text: "Identifier is missing",
       });
       return;
     }
 
     try {
-      await resendOtp({
-        phone: phone,
-      }).unwrap();
+      const resendPayload = {
+        identifier: useIdentifier,
+      };
+
+      if (otpPath) {
+        resendPayload.otpPath = otpPath;
+      }
+
+      await resendOtp(resendPayload).unwrap();
 
       // Reset timer to 3 minutes
       setTimeLeft(180);
@@ -110,7 +120,7 @@ const VerifyOtp = () => {
       Swal.fire({
         icon: "success",
         title: "OTP Resent",
-        text: "A new OTP has been sent to your phone",
+        text: "A new OTP has been sent",
       });
       setOtp("");
     } catch (error) {
@@ -130,7 +140,7 @@ const VerifyOtp = () => {
       <div className="text-center mb-8">
         <h1 className="text-[25px] font-semibold mb-6">Verify OTP</h1>
         <p className="mx-auto text-base text-[#667085]">
-          We sent a 6-digit code to {phone || "your phone"}
+          We sent a 6-digit code to {identifier || phone || "your phone"}
         </p>
         <p
           className={`text-sm mt-2 font-semibold ${
@@ -212,10 +222,10 @@ const VerifyOtp = () => {
             {isResending
               ? "Resending..."
               : timeLeft > 0
-              ? `Resend in ${Math.floor(timeLeft / 60)}:${String(
-                  timeLeft % 60
-                ).padStart(2, "0")}`
-              : "Click to resend"}
+                ? `Resend in ${Math.floor(timeLeft / 60)}:${String(
+                    timeLeft % 60,
+                  ).padStart(2, "0")}`
+                : "Click to resend"}
           </button>
         </p>
       </div>

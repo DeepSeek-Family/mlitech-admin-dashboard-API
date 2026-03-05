@@ -16,8 +16,9 @@ const ForgotPassword = () => {
       const res = await forgotPassword(payload).unwrap();
       // Optionally, check res.success or server message
       message.success(res?.message || "OTP sent to your phone");
+      const otpPath = res?.data?.otpPath || "";
       navigate(
-        `/auth/otp-verification?phone=${encodeURIComponent(values?.identifier)}`,
+        `/auth/otp-verification?identifier=${encodeURIComponent(values?.identifier)}&otpPath=${encodeURIComponent(otpPath)}`,
       );
     } catch (err) {
       const errMsg =
