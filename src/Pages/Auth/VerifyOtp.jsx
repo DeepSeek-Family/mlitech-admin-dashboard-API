@@ -13,7 +13,7 @@ import Swal from "sweetalert2";
 const VerifyOtp = () => {
   const navigate = useNavigate();
   const [otp, setOtp] = useState("");
-  const [timeLeft, setTimeLeft] = useState(5); // 3 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(180); // 3 minutes in seconds
   const [isExpired, setIsExpired] = useState(false);
   const phone = new URLSearchParams(location.search).get("phone");
   const identifier = new URLSearchParams(location.search).get("identifier");
