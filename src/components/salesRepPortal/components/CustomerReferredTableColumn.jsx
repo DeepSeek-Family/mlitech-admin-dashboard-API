@@ -122,7 +122,9 @@ const CustomerReferredTableColumn = ({
               disabled={record.status !== "active" || record.generatedToken}
               style={{
                 display:
-                  userRole === "ADMIN" || userRole === "SUPER_ADMIN"
+                  userRole === "ADMIN" ||
+                  userRole === "SUPER_ADMIN" ||
+                  userRole === "ADMIN_REP"
                     ? "block"
                     : "none",
               }}

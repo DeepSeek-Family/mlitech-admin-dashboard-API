@@ -57,41 +57,6 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
     );
   };
 
-  // Settings submenu
-  const settingsMenu = {
-    key: "subMenuSetting",
-    icon: renderIcon(Settings, "subMenuSetting"),
-    label: collapsed ? "" : "Settings",
-    children: [
-      {
-        key: "/profile",
-        label: <Link to="/profile">{collapsed ? "" : "Update Profile"}</Link>,
-      },
-      {
-        key: "/user-management",
-        label: (
-          <Link to="/user-management">
-            {collapsed ? "" : "User Management"}
-          </Link>
-        ),
-      },
-      {
-        key: "/terms-and-conditions",
-        label: (
-          <Link to="/terms-and-conditions">
-            {collapsed ? "" : "Terms And Conditions"}
-          </Link>
-        ),
-      },
-      {
-        key: "/privacy-policy",
-        label: (
-          <Link to="/privacy-policy">{collapsed ? "" : "Privacy Policy"}</Link>
-        ),
-      },
-    ],
-  };
-
   // Sales Rep Portal
   const salesRepMenu = {
     key: "/sales-rep-portal",
@@ -103,7 +68,60 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
 
   // Get base menu items for all roles
   const getMenuItems = () => {
-    const isAdminRep = user?.role === "ADMIN_REP";
+    const isAdminRep = user?.role === "ADMIN_SELL";
+    const isViewAdmin = user?.role === "VIEW_ADMIN";
+
+    // Settings submenu - with conditional children based on role
+    const settingsMenu = {
+      key: "subMenuSetting",
+      icon: renderIcon(Settings, "subMenuSetting"),
+      label: collapsed ? "" : "Settings",
+      children: isAdminRep
+        ? [
+            {
+              key: "/profile",
+              label: (
+                <Link to="/profile">{collapsed ? "" : "Update Profile"}</Link>
+              ),
+            },
+          ]
+        : [
+            {
+              key: "/profile",
+              label: (
+                <Link to="/profile">{collapsed ? "" : "Update Profile"}</Link>
+              ),
+            },
+            ...(isViewAdmin
+              ? []
+              : [
+                  {
+                    key: "/user-management",
+                    label: (
+                      <Link to="/user-management">
+                        {collapsed ? "" : "User Management"}
+                      </Link>
+                    ),
+                  },
+                ]),
+            {
+              key: "/terms-and-conditions",
+              label: (
+                <Link to="/terms-and-conditions">
+                  {collapsed ? "" : "Terms And Conditions"}
+                </Link>
+              ),
+            },
+            {
+              key: "/privacy-policy",
+              label: (
+                <Link to="/privacy-policy">
+                  {collapsed ? "" : "Privacy Policy"}
+                </Link>
+              ),
+            },
+          ],
+    };
 
     if (isAdminRep) {
       // Show only Sales Rep Portal, Settings, and Logout for ADMIN_REP
@@ -118,13 +136,19 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
       ];
     }
 
-    // Show all menu items for other roles with logout button
-    return [
-      {
+    // Base menu items
+    const baseMenuItems = [];
+
+    // Add Dashboard Overview only if not VIEW_ADMIN
+    if (!isViewAdmin) {
+      baseMenuItems.push({
         key: "/",
         icon: renderIcon(Dashboard, "/"),
         label: <Link to="/">{collapsed ? "" : "Dashboard Overview"}</Link>,
-      },
+      });
+    }
+
+    baseMenuItems.push(
       {
         key: "/merchant-management",
         icon: renderIcon(Marchant, "/merchant-management"),
@@ -194,31 +218,17 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
         icon: renderIcon(AuditLog, "/audit-logs"),
         label: <Link to="/audit-logs">{collapsed ? "" : "Audit Logs"}</Link>,
       },
-      {
-        key: "/push-notification",
-        icon: renderIcon(loginCredentials, "/push-notification"),
-        label: (
-          <Link to="/push-notification">
-            {collapsed ? "" : "Push Notifications"}
-          </Link>
-        ),
-      },
-      {
-        key: "/currency-conversion",
-        icon: renderIcon(MdCurrencyExchange, "/currency-conversion"),
-        label: (
-          <Link to="/currency-conversion">
-            {collapsed ? "" : "Currency Conversion"}
-          </Link>
-        ),
-      },
-      settingsMenu,
-      {
-        key: "/logout",
-        icon: <IoIosLogOut size={24} />,
-        label: <p onClick={showLogoutConfirm}>{collapsed ? "" : "Logout"}</p>,
-      },
-    ];
+    );
+
+    // Add settings and logout
+    baseMenuItems.push(settingsMenu);
+    baseMenuItems.push({
+      key: "/logout",
+      icon: <IoIosLogOut size={24} />,
+      label: <p onClick={showLogoutConfirm}>{collapsed ? "" : "Logout"}</p>,
+    });
+
+    return baseMenuItems;
   };
 
   const menuItems = getMenuItems();

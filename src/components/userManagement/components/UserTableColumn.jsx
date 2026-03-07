@@ -5,10 +5,10 @@ import Swal from "sweetalert2";
 import CustomTable from "../../common/CustomTable";
 
 const ROLE_MAPPING = {
-  SUPER_ADMIN: "Administrator",
-  ADMIN_REP: "Sales Representative",
-  ADMIN_SELL: "Admin Fin",
+  ADMIN: "Administrator",
+  ADMIN_SELL: "Sales Representative",
   VIEW_ADMIN: "View User",
+  ADMIN_REP: "Admin Fin",
 };
 
 const UserTableColumn = ({
