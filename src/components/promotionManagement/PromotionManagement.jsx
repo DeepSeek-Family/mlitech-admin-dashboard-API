@@ -73,6 +73,7 @@ const PromotionManagement = () => {
     isLoading,
     isFetching,
     error,
+    refetch,
   } = useGetPromoDetailsQuery(queryParams);
 
   const [togglePromoStatus] = useTogglePromoStatusMutation();
@@ -91,6 +92,7 @@ const PromotionManagement = () => {
       promotionType: item.promotionType,
       customerSegment: item.customerSegment,
       discountPercentage: item.discountPercentage,
+      grossValue: item.grossValue || 0,
       startDate: item.startDate,
       endDate: item.endDate,
       selectedDays:
@@ -135,6 +137,9 @@ const PromotionManagement = () => {
       const dataObj = {
         name: newCampaign.promotionName,
         discountPercentage: Number(newCampaign.discountPercentage),
+        grossValue: newCampaign.grossValue
+          ? Number(newCampaign.grossValue)
+          : null,
         promotionType: newCampaign.promotionType?.toLowerCase() || "seasonal",
         customerSegment:
           newCampaign.customerSegment?.toLowerCase().replace(/\s+/g, "_") ||
@@ -144,7 +149,7 @@ const PromotionManagement = () => {
           : null,
         endDate: newCampaign.endDate
           ? new Date(
-              new Date(newCampaign.endDate).setHours(23, 59, 59, 999)
+              new Date(newCampaign.endDate).setHours(23, 59, 59, 999),
             ).toISOString()
           : null,
         availableDays: isAllDays ? ["all"] : promotionDays,
@@ -152,6 +157,9 @@ const PromotionManagement = () => {
 
       // Append data as JSON string
       formData.append("data", JSON.stringify(dataObj));
+
+      // Refetch data after successful creation
+      await refetch();
 
       // Append image if exists
       if (newCampaign.imageFile) {
@@ -193,6 +201,9 @@ const PromotionManagement = () => {
       const dataObj = {
         name: updatedCampaign.promotionName,
         discountPercentage: Number(updatedCampaign.discountPercentage),
+        grossValue: updatedCampaign.grossValue
+          ? Number(updatedCampaign.grossValue)
+          : null,
         promotionType:
           updatedCampaign.promotionType?.toLowerCase() || "seasonal",
         customerSegment:
@@ -203,7 +214,7 @@ const PromotionManagement = () => {
           : null,
         endDate: updatedCampaign.endDate
           ? new Date(
-              new Date(updatedCampaign.endDate).setHours(23, 59, 59, 999)
+              new Date(updatedCampaign.endDate).setHours(23, 59, 59, 999),
             ).toISOString()
           : null,
         availableDays: isAllDays ? ["all"] : promotionDays,
@@ -218,6 +229,9 @@ const PromotionManagement = () => {
       if (updatedCampaign.imageFile) {
         formData.append("image", updatedCampaign.imageFile);
       }
+
+      // Refetch data after successful update
+      await refetch();
 
       await updatePromotion({
         id: editingCampaign.raw._id,
@@ -415,7 +429,9 @@ const PromotionManagement = () => {
               <button
                 onClick={() => handleEditClick(record)}
                 className="text-primary hover:text-green-700 text-[17px] disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:text-gray-400"
-                disabled={record.status === "Inactive" || user?.role === "VIEW_ADMIN"}
+                disabled={
+                  record.status === "Inactive" || user?.role === "VIEW_ADMIN"
+                }
               >
                 <FaEdit />
               </button>
@@ -453,7 +469,7 @@ const PromotionManagement = () => {
                 if (result.isConfirmed) {
                   try {
                     const response = await togglePromoStatus(
-                      record.raw._id
+                      record.raw._id,
                     ).unwrap();
                     Swal.fire({
                       title: "Updated!",
