@@ -146,9 +146,15 @@ const NewCampaign = ({ onSave, onCancel, editData = null, isEdit = false }) => {
   const handleUploadChange = ({ fileList }) => {
     // Only keep the latest file (for replacement)
     const newFileList = fileList.slice(-1);
-    setUploadedImage(newFileList);
-    // Update form field value
-    form.setFieldsValue({ image: newFileList });
+    const processedFileList = newFileList.map((file) => {
+      if (file.status === "done" || file.originFileObj) {
+        return file;
+      }
+      return file;
+    });
+    setUploadedImage(processedFileList);
+    // Clear form validation error by triggering validation only on submit
+    form.setFieldsValue({ image: processedFileList });
   };
 
   const handleCheckAllChange = (e) => {
@@ -352,11 +358,12 @@ const NewCampaign = ({ onSave, onCancel, editData = null, isEdit = false }) => {
           name="image"
           label="Upload Image (JPG/PNG only)"
           className="mt-6"
+          validateTrigger="onFinish"
           rules={[
             {
               validator: (_, value) => {
                 // If editing and there's already an image, it's not required
-                if (isEdit && uploadedImage.length > 0) {
+                if (isEdit && uploadedImage && uploadedImage.length > 0) {
                   return Promise.resolve();
                 }
                 // For new promotions or if image was removed, require upload
@@ -377,24 +384,33 @@ const NewCampaign = ({ onSave, onCancel, editData = null, isEdit = false }) => {
                 file.type === "image/jpeg" || file.type === "image/png";
               if (!isJpgOrPng) {
                 message.error("You can only upload JPG/PNG files!");
+                return false;
               }
 
               // Limit file size to 2MB
               const isLt2M = file.size / 1024 / 1024 < 2;
               if (!isLt2M) {
                 message.error("Image must be smaller than 2MB!");
+                return false;
               }
 
-              // Only accept file if both conditions are true
-              return isJpgOrPng && isLt2M;
+              // Return false to prevent automatic upload (manual handling)
+              return false;
             }}
             onChange={handleUploadChange}
             onRemove={() => {
               setUploadedImage([]);
               form.setFieldsValue({ image: [] });
+              return true;
             }}
             maxCount={1}
-            accept=".jpg,.jpeg,.png" // Restrict file picker to JPG/PNG
+            accept=".jpg,.jpeg,.png"
+            customRequest={({ file, onSuccess, onError }) => {
+              // Handle upload without sending to server initially
+              setTimeout(() => {
+                onSuccess();
+              }, 0);
+            }}
           >
             <Button icon={<UploadOutlined />}>
               {uploadedImage.length > 0 ? "Replace Image" : "Click to Upload"}
