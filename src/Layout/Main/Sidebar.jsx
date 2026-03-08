@@ -212,6 +212,15 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
           </Link>
         ),
       },
+      {
+        key: "/currency-conversion",
+        icon: renderIcon(PromotionManagement, "/currency-conversion"),
+        label: (
+          <Link to="/currency-conversion">
+            {collapsed ? "" : "Currency Conversion"}
+          </Link>
+        ),
+      },
       salesRepMenu,
       {
         key: "/audit-logs",
