@@ -36,7 +36,7 @@ export default function MonthlyStatsChartCustomer() {
   const { user } = useUser();
   const userRole = user?.role;
   const isViewAdmin = userRole === "VIEW_ADMIN";
-  
+
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Default dates: current year start and end
@@ -596,7 +596,8 @@ export default function MonthlyStatsChartCustomer() {
                 <Tooltip />
                 <Legend />
                 {!isViewAdmin &&
-                  (selectedMetric === "all" || selectedMetric === "Revenue") && (
+                  (selectedMetric === "all" ||
+                    selectedMetric === "Revenue") && (
                     <Bar
                       dataKey="Revenue"
                       fill="#7086FD"
@@ -642,7 +643,8 @@ export default function MonthlyStatsChartCustomer() {
                 <Tooltip />
                 <Legend />
                 {!isViewAdmin &&
-                  (selectedMetric === "all" || selectedMetric === "Revenue") && (
+                  (selectedMetric === "all" ||
+                    selectedMetric === "Revenue") && (
                     <Line type="monotone" dataKey="Revenue" stroke="#7086FD" />
                   )}
                 {(selectedMetric === "all" || selectedMetric === "Users") && (
@@ -668,7 +670,8 @@ export default function MonthlyStatsChartCustomer() {
                 <Tooltip />
                 <Legend />
                 {!isViewAdmin &&
-                  (selectedMetric === "all" || selectedMetric === "Revenue") && (
+                  (selectedMetric === "all" ||
+                    selectedMetric === "Revenue") && (
                     <Area
                       type="monotone"
                       dataKey="Revenue"

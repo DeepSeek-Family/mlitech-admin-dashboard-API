@@ -9,10 +9,10 @@ const { TabPane } = Tabs;
 
 export default function ReportingAnalyticsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   // Get active tab from URL or default to "1"
   const activeTab = searchParams.get("tab") || "1";
-  
+
   const handleTabChange = (key) => {
     setSearchParams((prev) => {
       const newParams = new URLSearchParams(prev);

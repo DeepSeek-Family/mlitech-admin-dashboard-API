@@ -14,6 +14,7 @@ const Login = () => {
     const payload = {
       identifier: values.email,
       password: values.password,
+      device: "admin",
     };
 
     try {
