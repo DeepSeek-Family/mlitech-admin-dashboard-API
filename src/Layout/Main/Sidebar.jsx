@@ -221,6 +221,15 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
           </Link>
         ),
       },
+      {
+        key: "/push-notifications",
+        icon: renderIcon(PromotionManagement, "/push-notifications"),
+        label: (
+          <Link to="/push-notifications">
+            {collapsed ? "" : "Push Notifications"}
+          </Link>
+        ),
+      },
       salesRepMenu,
       {
         key: "/audit-logs",
