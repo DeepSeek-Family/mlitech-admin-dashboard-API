@@ -14,6 +14,7 @@ import {
   AuditLog,
   loginCredentials,
   Rewords,
+  PushNotifications,
 } from "../../components/common/Svg";
 import image4 from "../../assets/image4.png";
 import { useUser } from "../../provider/User";
@@ -223,7 +224,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
       },
       {
         key: "/push-notifications",
-        icon: renderIcon(PromotionManagement, "/push-notifications"),
+        icon: renderIcon(PushNotifications, "/push-notifications"),
         label: (
           <Link to="/push-notifications">
             {collapsed ? "" : "Push Notifications"}
