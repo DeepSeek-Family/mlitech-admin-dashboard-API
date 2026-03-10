@@ -46,7 +46,11 @@ const EditTierModal = ({
           name="name"
           rules={[{ required: true, message: "Please enter tier name" }]}
         >
-          <Input type="text" className="mli-tall-input" />
+          <Input
+            type="text"
+            className="mli-tall-input"
+            placeholder="Enter tier name"
+          />
         </Form.Item>
         <Form.Item
           label="Points Threshold"
@@ -59,7 +63,7 @@ const EditTierModal = ({
                 const numValue = parseFloat(value);
                 if (isNaN(numValue)) {
                   return Promise.reject(
-                    new Error("Please enter a valid number")
+                    new Error("Please enter a valid number"),
                   );
                 }
                 if (numValue < 0) {
@@ -70,14 +74,23 @@ const EditTierModal = ({
             },
           ]}
         >
-          <Input type="number" className="mli-tall-input" min="0" />
+          <Input
+            type="number"
+            className="mli-tall-input"
+            min="0"
+            placeholder="Enter threshold"
+          />
         </Form.Item>
         <Form.Item
           label="Reward"
           name="reward"
           rules={[{ required: true, message: "Please enter reward" }]}
         >
-          <Input type="number" className="mli-tall-input" />
+          <Input
+            type="number"
+            className="mli-tall-input"
+            placeholder="Enter reward"
+          />
         </Form.Item>
         <Form.Item
           label="Point accumulation rule (%)"
@@ -90,12 +103,12 @@ const EditTierModal = ({
                 const numValue = parseFloat(value);
                 if (isNaN(numValue)) {
                   return Promise.reject(
-                    new Error("Please enter a valid number")
+                    new Error("Please enter a valid number"),
                   );
                 }
                 if (numValue < 0 || numValue > 100) {
                   return Promise.reject(
-                    new Error("Value must be between 0 and 100")
+                    new Error("Value must be between 0 and 100"),
                   );
                 }
                 return Promise.resolve();
@@ -103,7 +116,13 @@ const EditTierModal = ({
             },
           ]}
         >
-          <Input type="number" className="mli-tall-input" min="0" max="100" />
+          <Input
+            type="number"
+            className="mli-tall-input"
+            min="0"
+            max="100"
+            placeholder="Enter rule"
+          />
         </Form.Item>
         {/* <Form.Item
           label="Point redemption rule"
@@ -134,7 +153,7 @@ const EditTierModal = ({
         >
           <Input type="number" className="mli-tall-input" min="1" />
         </Form.Item> */}
-        <Form.Item
+        {/* <Form.Item
           label="Min Total Spend"
           name="minSpend"
           rules={[
@@ -145,7 +164,7 @@ const EditTierModal = ({
                 const numValue = parseFloat(value);
                 if (isNaN(numValue)) {
                   return Promise.reject(
-                    new Error("Please enter a valid number")
+                    new Error("Please enter a valid number"),
                   );
                 }
                 if (numValue < 0) {
@@ -156,8 +175,14 @@ const EditTierModal = ({
             },
           ]}
         >
-          <Input type="number" className="mli-tall-input" min="0" step="0.01" />
-        </Form.Item>
+          <Input
+            type="number"
+            className="mli-tall-input"
+            min="0"
+            step="0.01"
+            placeholder="Enter min spend"
+          />
+        </Form.Item> */}
         <div className="flex justify-end gap-2">
           <Button
             onClick={handleCancel}
@@ -176,8 +201,8 @@ const EditTierModal = ({
             {isAdding || isUpdating
               ? "Saving..."
               : isAddMode
-              ? "Add Tier"
-              : "Save Changes"}
+                ? "Add Tier"
+                : "Save Changes"}
           </Button>
         </div>
       </Form>

@@ -13,7 +13,8 @@ const PushNotifications = () => {
   const [title, setTitle] = useState("");
   const [bodyContent, setBodyContent] = useState("");
   const [sendTo, setSendTo] = useState("ALL"); // Default to ALL
-  const [location, setLocation] = useState(undefined); // Default value
+  const [country, setCountry] = useState(undefined); // For country selection
+  const [city, setCity] = useState(undefined); // For city selection
   const [tier, setTier] = useState(""); // Will be set once tiers load
   const [subscriptionType, setSubscriptionType] = useState("ACTIVE"); // Default value
   const [status, setStatus] = useState("ACTIVE"); // Default value
@@ -56,7 +57,8 @@ const PushNotifications = () => {
           sendType: sendTo,
           title: title,
           body: bodyContent,
-          location: location,
+          country: country,
+          city: city,
           tier: tier,
           subscriptionType: subscriptionType,
           status: status,
@@ -70,7 +72,8 @@ const PushNotifications = () => {
       setTitle("");
       setBodyContent("");
       setSendTo("ALL");
-      setLocation(undefined);
+      setCountry(undefined);
+      setCity(undefined);
       setTier(tiersList.length > 0 ? tiersList[0].title : "");
       setSubscriptionType("ACTIVE");
       setStatus("ACTIVE");
@@ -84,7 +87,8 @@ const PushNotifications = () => {
     setTitle("");
     setBodyContent("");
     setSendTo("ALL");
-    setLocation(undefined);
+    setCountry(undefined);
+    setCity(undefined);
     setTier(tiersList.length > 0 ? tiersList[0].title : "");
     setSubscriptionType("ACTIVE");
     setStatus("ACTIVE");
@@ -94,17 +98,38 @@ const PushNotifications = () => {
   // Check if fields should be disabled
   const isFieldsDisabled = sendTo === "ALL";
 
-  const countries = [
-    "Pakistan",
-    "United Arab Emirates",
-    "Oman",
-    "Qatar",
-    "Kuwait",
-    "Bahrain",
-    "Saudi Arabia",
-    "Bangladesh",
-    "United Kingdom",
-  ];
+  const countryCityData = {
+    Bahrain: ["Manama"],
+    Bangladesh: ["Dhaka"],
+    Kuwait: ["Kuwait City"],
+    Oman: ["Muscat"],
+    Pakistan: [
+      "Islamabad",
+      "Karachi",
+      "Lahore",
+      "Peshawar",
+      "Quetta",
+      "Rawalpindi",
+    ],
+    Qatar: ["Doha"],
+    "Saudi Arabia": ["Jeddah", "Riyadh"],
+    "United Arab Emirates": [
+      "Abu Dhabi",
+      "Ajman",
+      "Dubai",
+      "Fujairah",
+      "Ras Al Khaimah",
+      "Sharjah",
+      "Umm Al Quwain",
+    ],
+    "United Kingdom": [
+      "Birmingham",
+      "Glasgow",
+      "Liverpool",
+      "London",
+      "Manchester",
+    ],
+  };
 
   return (
     <div className="border rounded-lg px-12 py-8 bg-white">
@@ -133,23 +158,48 @@ const PushNotifications = () => {
             </div>
           </Col>
 
-          {/* Location Dropdown */}
+          {/* Country Dropdown */}
           <Col xs={24} sm={8} md={4}>
             <div className="flex flex-col">
-              <label className="font-bold text-[18px] mb-1">Location</label>
+              <label className="font-bold text-[18px] mb-1">Country</label>
               <Select
-                placeholder="Select Location"
-                value={location}
-                onChange={(value) => setLocation(value)}
+                placeholder="Select Country"
+                value={country}
+                onChange={(value) => {
+                  setCountry(value);
+                  setCity(undefined); // Reset city when country changes
+                }}
                 style={{ width: "100%" }}
                 className="mli-tall-select"
                 disabled={isFieldsDisabled}
               >
-                {countries.map((country) => (
-                  <Option key={country} value={country}>
-                    {country}
+                {Object.keys(countryCityData).map((countryName) => (
+                  <Option key={countryName} value={countryName}>
+                    {countryName}
                   </Option>
                 ))}
+              </Select>
+            </div>
+          </Col>
+
+          {/* City Dropdown */}
+          <Col xs={24} sm={8} md={4}>
+            <div className="flex flex-col">
+              <label className="font-bold text-[18px] mb-1">City</label>
+              <Select
+                placeholder="Select City"
+                value={city}
+                onChange={(value) => setCity(value)}
+                style={{ width: "100%" }}
+                className="mli-tall-select"
+                disabled={isFieldsDisabled || !country}
+              >
+                {country &&
+                  countryCityData[country]?.map((cityName) => (
+                    <Option key={cityName} value={cityName}>
+                      {cityName}
+                    </Option>
+                  ))}
               </Select>
             </div>
           </Col>
@@ -267,9 +317,14 @@ const PushNotifications = () => {
           )}
           {sendTo !== "ALL" && (
             <>
-              {location && (
+              {country && (
                 <p className="text-md font-medium mb-2">
-                  <strong>Location:</strong> {location}
+                  <strong>Country:</strong> {country}
+                </p>
+              )}
+              {city && (
+                <p className="text-md font-medium mb-2">
+                  <strong>City:</strong> {city}
                 </p>
               )}
               {tier && (

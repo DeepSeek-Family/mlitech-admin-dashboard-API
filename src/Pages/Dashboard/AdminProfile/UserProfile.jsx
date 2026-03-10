@@ -83,9 +83,9 @@ const UserProfile = () => {
       const formData = new FormData();
 
       formData.append("firstName", values.username);
-      formData.append("phone", phoneValue || "");
-      formData.append("address", values.address || "");
-      formData.append("language", values.language || "");
+      // formData.append("phone", phoneValue || "");
+      // formData.append("address", values.address || "");
+      // formData.append("language", values.language || "");
 
       if (imageFile) {
         formData.append("profile", imageFile);
