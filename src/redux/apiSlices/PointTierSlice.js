@@ -69,7 +69,7 @@ export const merchantApi = api.injectEndpoints({
           });
         }
         return {
-          url: `/audit/audit-logs?${params.toString()}`,
+          url: `/audit/audit-log/tier?${params.toString()}`,
           method: "GET",
         };
       },

@@ -29,8 +29,11 @@ export default function TierSystem() {
     { name: "page", value: auditLogPage },
     { name: "limit", value: auditLogLimit },
   ];
-  const { data: auditLogsResponse, isLoading: isLoadingLogs } =
-    useGetAllAuditLogQuery(auditLogQueryParams);
+  const {
+    data: auditLogsResponse,
+    isLoading: isLoadingLogs,
+    refetch: refetchAuditLogs,
+  } = useGetAllAuditLogQuery(auditLogQueryParams);
 
   const queryParams = [
     { name: "page", value: page },
@@ -45,6 +48,7 @@ export default function TierSystem() {
     isLoading,
     isFetching,
     error,
+    refetch: refetchTiers,
   } = useGetTierQuery(queryParams);
 
   const [addTier, { isLoading: isAdding }] = useAddTierMutation();
@@ -147,6 +151,9 @@ export default function TierSystem() {
         );
       }
       handleCancelRules();
+      // Refetch data to show updates without page refresh
+      refetchTiers();
+      refetchAuditLogs();
     } catch (error) {
       Swal.fire(
         "Error!",
@@ -176,6 +183,9 @@ export default function TierSystem() {
             `The "${tierToRemove?.name}" tier has been removed.`,
             "success",
           );
+          // Refetch data to show updates without page refresh
+          refetchTiers();
+          refetchAuditLogs();
         } catch (error) {
           Swal.fire(
             "Error!",

@@ -21,6 +21,7 @@ import {
   useCustomerReportAnalyticsQuery,
   useLazyExportCustomerChartMonthlyDataQuery,
 } from "../../../redux/apiSlices/reportAnalyticsApi";
+import { useGetCustomerProfileQuery } from "../../../redux/apiSlices/customerSlice";
 import CustomTable from "../../common/CustomTable";
 import { useUser } from "../../../provider/User";
 
@@ -31,6 +32,34 @@ const subscriptionOptions = ["All Status", "active", "inActive"];
 const paymentOptions = ["All Payments", "Paid", "Unpaid"];
 const metricOptions = ["Revenue", "Users", "Points Redeemed"];
 const pointsFilterOptions = ["All", "Points Redeemed", "Points Accumulated"];
+const locationOptions = [
+  "All Cities",
+  "Abu Dhabi",
+  "Ajman",
+  "Birmingham",
+  "Dhaka",
+  "Doha",
+  "Dubai",
+  "Fujairah",
+  "Glasgow",
+  "Islamabad",
+  "Jeddah",
+  "Karachi",
+  "Kuwait City",
+  "Lahore",
+  "Liverpool",
+  "London",
+  "Manchester",
+  "Manama",
+  "Muscat",
+  "Peshawar",
+  "Quetta",
+  "Ras Al Khaimah",
+  "Rawalpindi",
+  "Riyadh",
+  "Sharjah",
+  "Umm Al Quwain",
+];
 
 export default function MonthlyStatsChartCustomer() {
   const { user } = useUser();
@@ -47,8 +76,8 @@ export default function MonthlyStatsChartCustomer() {
   // Read values from URL params with defaults
   const fromDate = searchParams.get("c_startDate") || defaultStartDate;
   const toDate = searchParams.get("c_endDate") || defaultEndDate;
-  const customerName = searchParams.get("c_customerName") || "";
-  const location = searchParams.get("c_location") || "";
+  const customerName = searchParams.get("c_customerName") || "All Customers";
+  const location = searchParams.get("c_location") || "All Cities";
   const selectedSubscription =
     searchParams.get("c_subscription") || "All Status";
   const selectedPayment = searchParams.get("c_payment") || "All Payments";
@@ -69,6 +98,8 @@ export default function MonthlyStatsChartCustomer() {
           value !== "All Payments" &&
           value !== "all" &&
           value !== "All" &&
+          value !== "All Customers" &&
+          value !== "All Cities" &&
           value !== "Bar"
         ) {
           newParams.set(key, value);
@@ -95,10 +126,14 @@ export default function MonthlyStatsChartCustomer() {
     if (toDate) {
       params.push({ name: "endDate", value: toDate });
     }
-    if (customerName && customerName.trim() !== "") {
+    if (
+      customerName &&
+      customerName.trim() !== "" &&
+      customerName !== "All Customers"
+    ) {
       params.push({ name: "customerName", value: customerName.trim() });
     }
-    if (location && location.trim() !== "") {
+    if (location && location.trim() !== "" && location !== "All Cities") {
       params.push({ name: "location", value: location.trim() });
     }
     if (selectedSubscription && selectedSubscription !== "All Status") {
@@ -128,6 +163,10 @@ export default function MonthlyStatsChartCustomer() {
     isLoading,
     isFetching,
   } = useCustomerReportAnalyticsQuery(queryParams);
+
+  // Fetch customer list for dropdown
+  const { data: customerListResponse, isLoading: isLoadingCustomers } =
+    useGetCustomerProfileQuery([]);
 
   // Lazy query for export (only triggers on button click)
   const [triggerExport, { isLoading: isExportLoading }] =
@@ -403,31 +442,66 @@ export default function MonthlyStatsChartCustomer() {
                 label={<span className="mli-custom-label">Customer Name</span>}
                 style={{ marginBottom: "0.5rem" }}
               >
-                <Input
-                  value={customerName}
-                  onChange={(e) =>
-                    updateSearchParam("c_customerName", e.target.value)
+                <Select
+                  value={customerName || undefined}
+                  onChange={(value) =>
+                    updateSearchParam("c_customerName", value || "")
                   }
-                  style={{ width: "100%", height: "40px" }}
-                  placeholder="Enter Customer Name"
+                  style={{ width: "100%" }}
+                  placeholder="Select Customer Name"
                   allowClear
-                  className="border border-gray-300 focus:border-gray-300! focus:ring-1 focus:ring-gray-300! rounded-md"
-                />
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (option?.children ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  className="mli-tall-select"
+                  loading={isLoadingCustomers}
+                >
+                  <Option value="">All Customers</Option>
+                  {customerListResponse?.data?.map((customer) => (
+                    <Option
+                      key={customer._id}
+                      value={customer.firstName || customer._id}
+                    >
+                      {customer.firstName}
+                    </Option>
+                  ))}
+                </Select>
               </Form.Item>
             </Col>
 
             <Col flex="1 1 200px">
-              <Form.Item label="Location" style={{ marginBottom: "0.5rem" }}>
-                <Input
-                  value={location}
-                  onChange={(e) =>
-                    updateSearchParam("c_location", e.target.value)
-                  }
-                  style={{ width: "100%", height: "40px" }}
-                  placeholder="Enter Location"
+              <Form.Item label="City" style={{ marginBottom: "0.5rem" }}>
+                <Select
+                  value={location || undefined}
+                  onChange={(value) => {
+                    if (value === "All Cities" || value === "") {
+                      updateSearchParam("c_location", "");
+                    } else {
+                      updateSearchParam("c_location", value || "");
+                    }
+                  }}
+                  style={{ width: "100%" }}
+                  placeholder="Select City"
                   allowClear
-                  className="border border-gray-300 focus:border-gray-300! focus:ring-1 focus:ring-gray-300! rounded-md"
-                />
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (option?.children ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  className="mli-tall-select"
+                >
+                  {locationOptions.map((loc) => (
+                    <Option key={loc} value={loc === "All Cities" ? "" : loc}>
+                      {loc}
+                    </Option>
+                  ))}
+                </Select>
               </Form.Item>
             </Col>
 
