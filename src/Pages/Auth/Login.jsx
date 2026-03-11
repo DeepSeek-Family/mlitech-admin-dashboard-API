@@ -7,7 +7,7 @@ import { useUser } from "../../provider/User";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { refetch } = useUser();
+  const { refetch, user } = useUser();
   const [login, { isLoading }] = useLoginMutation();
 
   const onFinish = async (values) => {
@@ -35,8 +35,12 @@ const Login = () => {
         console.warn("Profile fetch delayed:", error);
       }
 
-      // Navigate to dashboard
-      navigate("/", { replace: true });
+      // Navigate based on user role
+      if (user?.role === "ADMIN_SELL") {
+        navigate("/sales-rep-portal", { replace: true });
+      } else {
+        navigate("/", { replace: true });
+      }
     } catch (err) {
       message.error(err?.data?.message || "Login failed!");
     }
