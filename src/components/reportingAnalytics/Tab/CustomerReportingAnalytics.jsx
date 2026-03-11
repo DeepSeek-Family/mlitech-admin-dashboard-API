@@ -30,7 +30,7 @@ const { Option } = Select;
 // Dropdown options for frontend filtering
 const subscriptionOptions = ["All Status", "active", "inActive"];
 const paymentOptions = ["All Payments", "Paid", "Unpaid"];
-const metricOptions = ["Revenue", "Users", "Points Redeemed"];
+const metricOptions = ["Revenue", "Visits", "Points Redeemed"];
 const pointsFilterOptions = ["All", "Points Redeemed", "Points Accumulated"];
 const locationOptions = [
   "All Cities",
@@ -186,7 +186,7 @@ export default function MonthlyStatsChartCustomer() {
       SubscriptionStatus: record.subscriptionStatus || "-",
       PaymentStatus: record.paymentStatus || "-",
       Revenue: record.revenue || "-",
-      Users: record.users || "-",
+      Visits: record.users || "-",
       "Points Redeemed": record.pointsRedeemed ?? "-",
       "Points Accumulated": record.pointsAccumulated ?? "-",
     }));
@@ -199,7 +199,7 @@ export default function MonthlyStatsChartCustomer() {
     return apiResponse.data.monthlyData.map((item) => ({
       date: `${item.monthName} ${item.year}`,
       Revenue: item.revenue || 0,
-      Users: item.users || 0,
+      Visits: item.users || 0,
       "Points Accumulated": item.pointsAccumulated || 0,
       "Points Redeemed": item.pointsRedeemed || 0,
     }));
@@ -210,14 +210,14 @@ export default function MonthlyStatsChartCustomer() {
     if (chartData.length === 0) {
       return {
         Revenue: 100,
-        Users: 100,
+        Visits: 100,
         "Points Accumulated": 100,
         "Points Redeemed": 100,
       };
     }
     return {
       Revenue: Math.max(...chartData.map((d) => d.Revenue)) || 100,
-      Users: Math.max(...chartData.map((d) => d.Users)) || 100,
+      Visits: Math.max(...chartData.map((d) => d.Visits)) || 100,
       "Points Accumulated":
         Math.max(...chartData.map((d) => d["Points Accumulated"])) || 100,
       "Points Redeemed":
@@ -363,7 +363,7 @@ export default function MonthlyStatsChartCustomer() {
       align: "center",
     },
     { title: "Revenue", dataIndex: "Revenue", key: "Revenue", align: "center" },
-    { title: "Users", dataIndex: "Users", key: "Users", align: "center" },
+    { title: "Visits", dataIndex: "Visits", key: "Visits", align: "center" },
     {
       title: "Points Redeemed",
       dataIndex: "Points Redeemed",
@@ -683,12 +683,12 @@ export default function MonthlyStatsChartCustomer() {
                       )}
                     />
                   )}
-                {(selectedMetric === "all" || selectedMetric === "Users") && (
+                {(selectedMetric === "all" || selectedMetric === "Visits") && (
                   <Bar
-                    dataKey="Users"
+                    dataKey="Visits"
                     fill="#6FD195"
                     shape={(props) => (
-                      <Custom3DBarWithWatermark {...props} dataKey="Users" />
+                      <Custom3DBarWithWatermark {...props} dataKey="Visits" />
                     )}
                   />
                 )}
@@ -721,8 +721,8 @@ export default function MonthlyStatsChartCustomer() {
                     selectedMetric === "Revenue") && (
                     <Line type="monotone" dataKey="Revenue" stroke="#7086FD" />
                   )}
-                {(selectedMetric === "all" || selectedMetric === "Users") && (
-                  <Line type="monotone" dataKey="Users" stroke="#6FD195" />
+                {(selectedMetric === "all" || selectedMetric === "Visits") && (
+                  <Line type="monotone" dataKey="Visits" stroke="#6FD195" />
                 )}
                 {(selectedMetric === "all" ||
                   selectedMetric === "Points Redeemed") && (
@@ -753,10 +753,10 @@ export default function MonthlyStatsChartCustomer() {
                       fill="#7086FD"
                     />
                   )}
-                {(selectedMetric === "all" || selectedMetric === "Users") && (
+                {(selectedMetric === "all" || selectedMetric === "Visits") && (
                   <Area
                     type="monotone"
-                    dataKey="Users"
+                    dataKey="Visits"
                     stroke="#6FD195"
                     fill="#6FD195"
                   />

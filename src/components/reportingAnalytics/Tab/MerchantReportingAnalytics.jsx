@@ -31,7 +31,7 @@ const { Option } = Select;
 // Dropdown options for frontend filtering
 const subscriptionOptions = ["All Status", "Active", "Inactive"];
 const paymentOptions = ["All Payments", "Paid", "Unpaid"];
-const metricOptions = ["Revenue", "Users", "Points Redeemed"];
+const metricOptions = ["Revenue", "Visits", "Points Redeemed"];
 const locationOptions = [
   "All Cities",
   "Abu Dhabi",
@@ -124,7 +124,11 @@ export default function MonthlyStatsChartMerchant() {
     if (toDate) {
       params.push({ name: "endDate", value: toDate });
     }
-    if (merchantName && merchantName.trim() !== "" && merchantName !== "All Merchants") {
+    if (
+      merchantName &&
+      merchantName.trim() !== "" &&
+      merchantName !== "All Merchants"
+    ) {
       params.push({ name: "merchantName", value: merchantName.trim() });
     }
     if (location && location.trim() !== "" && location !== "All Cities") {
@@ -187,7 +191,7 @@ export default function MonthlyStatsChartMerchant() {
       PaymentStatus: record.paymentStatus || "-",
       DaysToExpire: record.daysToExpire ?? "-",
       Revenue: record.totalRevenue ?? "-",
-      Users: record.usersCount ?? "-",
+      Visits: record.usersCount ?? "-",
       "Points Redeemed": record.pointsRedeemed ?? "-",
     }));
   }, [apiResponse]);
@@ -199,7 +203,7 @@ export default function MonthlyStatsChartMerchant() {
     return apiResponse.data.monthlyData.map((item) => ({
       date: `${item.monthName} ${item.year}`,
       Revenue: item.totalRevenue || 0,
-      Users: item.usersCount || 0,
+      Visits: item.usersCount || 0,
       "Points Redeemed": item.pointsRedeemed || 0,
     }));
   }, [apiResponse]);
@@ -209,13 +213,13 @@ export default function MonthlyStatsChartMerchant() {
     if (chartData.length === 0) {
       return {
         Revenue: 100,
-        Users: 100,
+        Visits: 100,
         "Points Redeemed": 100,
       };
     }
     return {
       Revenue: Math.max(...chartData.map((d) => d.Revenue)) || 100,
-      Users: Math.max(...chartData.map((d) => d.Users)) || 100,
+      Visits: Math.max(...chartData.map((d) => d.Visits)) || 100,
       "Points Redeemed":
         Math.max(...chartData.map((d) => d["Points Redeemed"])) || 100,
     };
@@ -389,7 +393,7 @@ export default function MonthlyStatsChartMerchant() {
       align: "center",
     },
     { title: "Revenue", dataIndex: "Revenue", key: "Revenue", align: "center" },
-    { title: "Users", dataIndex: "Users", key: "Users", align: "center" },
+    { title: "Visits", dataIndex: "Visits", key: "Visits", align: "center" },
     {
       title: "Points Redeemed",
       dataIndex: "Points Redeemed",
@@ -678,12 +682,12 @@ export default function MonthlyStatsChartMerchant() {
                       )}
                     />
                   )}
-                {(selectedMetric === "all" || selectedMetric === "Users") && (
+                {(selectedMetric === "all" || selectedMetric === "Visits") && (
                   <Bar
-                    dataKey="Users"
+                    dataKey="Visits"
                     fill="#6FD195"
                     shape={(props) => (
-                      <Custom3DBarWithWatermark {...props} dataKey="Users" />
+                      <Custom3DBarWithWatermark {...props} dataKey="Visits" />
                     )}
                   />
                 )}
@@ -716,8 +720,8 @@ export default function MonthlyStatsChartMerchant() {
                     selectedMetric === "Revenue") && (
                     <Line type="monotone" dataKey="Revenue" stroke="#7086FD" />
                   )}
-                {(selectedMetric === "all" || selectedMetric === "Users") && (
-                  <Line type="monotone" dataKey="Users" stroke="#6FD195" />
+                {(selectedMetric === "all" || selectedMetric === "Visits") && (
+                  <Line type="monotone" dataKey="Visits" stroke="#6FD195" />
                 )}
                 {(selectedMetric === "all" ||
                   selectedMetric === "Points Redeemed") && (
@@ -748,10 +752,10 @@ export default function MonthlyStatsChartMerchant() {
                       fill="#7086FD"
                     />
                   )}
-                {(selectedMetric === "all" || selectedMetric === "Users") && (
+                {(selectedMetric === "all" || selectedMetric === "Visits") && (
                   <Area
                     type="monotone"
-                    dataKey="Users"
+                    dataKey="Visits"
                     stroke="#6FD195"
                     fill="#6FD195"
                   />
@@ -794,7 +798,7 @@ export default function MonthlyStatsChartMerchant() {
 
             return (
               selectedMetric === "all" ||
-              !["Revenue", "Users", "Points Redeemed"].includes(
+              !["Revenue", "Visits", "Points Redeemed"].includes(
                 col.dataIndex,
               ) ||
               col.dataIndex === selectedMetric
