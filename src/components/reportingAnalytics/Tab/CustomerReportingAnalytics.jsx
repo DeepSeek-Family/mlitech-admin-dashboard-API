@@ -82,7 +82,8 @@ export default function MonthlyStatsChartCustomer() {
     searchParams.get("c_subscription") || "All Status";
   const selectedPayment = searchParams.get("c_payment") || "All Payments";
   const selectedMetric = searchParams.get("c_metric") || "all";
-  const selectedPointsFilter = searchParams.get("c_pointsFilter") || "All";
+  const selectedPointsFilter =
+    searchParams.get("c_pointsFilter") || "Points Accumulated";
   const chartType = searchParams.get("c_chartType") || "Bar";
   const currentPage = parseInt(searchParams.get("c_page") || "1", 10);
 

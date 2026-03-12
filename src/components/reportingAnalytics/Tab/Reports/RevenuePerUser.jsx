@@ -36,12 +36,12 @@ const columns = [
     align: "center",
     render: (value) => `${value.toFixed(2)}`,
   },
-  {
-    title: "Date",
-    dataIndex: "date",
-    key: "date",
-    align: "center",
-  },
+  // {
+  //   title: "Date",
+  //   dataIndex: "date",
+  //   key: "date",
+  //   align: "center",
+  // },
 ];
 
 export default function RevenuePerUser() {
