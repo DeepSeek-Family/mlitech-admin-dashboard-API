@@ -403,8 +403,14 @@ export default function MonthlyStatsChartCustomer() {
   };
 
   const handlePageSizeChange = (newPageSize) => {
-    updateSearchParam("c_limit", newPageSize.toString());
-    updateSearchParam("c_page", "");
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev);
+      // Always set the limit (even if it's 10, to ensure persistence)
+      newParams.set("c_limit", newPageSize.toString());
+      // Reset page to 1 when changing page size
+      newParams.delete("c_page");
+      return newParams;
+    });
   };
 
   return (

@@ -184,8 +184,8 @@ export default function MonthlyStatsChartMerchant() {
     return apiResponse.data.records.map((record, index) => ({
       key: index,
       sl: index + 1,
-      date: record.joiningDate
-        ? dayjs(record.joiningDate).format("YYYY-MM-DD")
+      date: record.date
+        ? dayjs(record.date).format("YYYY-MM-DD")
         : "-",
       merchantId: record.customUserId || "-",
       MerchantName: record.customerName || "-",
@@ -425,8 +425,14 @@ export default function MonthlyStatsChartMerchant() {
   };
 
   const handlePageSizeChange = (newPageSize) => {
-    updateSearchParam("m_limit", newPageSize.toString());
-    updateSearchParam("m_page", "");
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev);
+      // Always set the limit (even if it's 10, to ensure persistence)
+      newParams.set("m_limit", newPageSize.toString());
+      // Reset page to 1 when changing page size
+      newParams.delete("m_page");
+      return newParams;
+    });
   };
 
   return (
