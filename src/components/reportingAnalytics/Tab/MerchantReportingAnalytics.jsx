@@ -1,4 +1,4 @@
-import { Button, Col, DatePicker, Form, Input, Row, Select, Spin } from "antd";
+import { Button, Col, DatePicker, Form, Row, Select, Spin } from "antd";
 import "antd/dist/reset.css";
 import dayjs from "dayjs";
 import { useMemo, useCallback } from "react";
@@ -84,6 +84,7 @@ export default function MonthlyStatsChartMerchant() {
   const selectedMetric = searchParams.get("m_metric") || "all";
   const chartType = searchParams.get("m_chartType") || "Bar";
   const currentPage = parseInt(searchParams.get("m_page") || "1", 10);
+  const pageSize = parseInt(searchParams.get("m_limit") || "10", 10);
 
   // Helper function to update URL params
   const updateSearchParam = useCallback(
@@ -143,6 +144,7 @@ export default function MonthlyStatsChartMerchant() {
     if (currentPage > 1) {
       params.push({ name: "page", value: currentPage });
     }
+    params.push({ name: "limit", value: pageSize });
 
     return params;
   }, [
@@ -153,6 +155,7 @@ export default function MonthlyStatsChartMerchant() {
     selectedSubscription,
     selectedPayment,
     currentPage,
+    pageSize,
   ]);
 
   // Fetch data from API
@@ -184,14 +187,14 @@ export default function MonthlyStatsChartMerchant() {
       date: record.joiningDate
         ? dayjs(record.joiningDate).format("YYYY-MM-DD")
         : "-",
-      merchantId: record.merchantId || "-",
-      MerchantName: record.merchantName || "-",
+      merchantId: record.customUserId || "-",
+      MerchantName: record.customerName || "-",
       Location: record.location || "-",
       SubscriptionStatus: record.subscriptionStatus || "-",
       PaymentStatus: record.paymentStatus || "-",
       DaysToExpire: record.daysToExpire ?? "-",
-      Revenue: record.totalRevenue ?? "-",
-      Visits: record.usersCount ?? "-",
+      Revenue: record.revenue ?? "-",
+      Visits: record.users ?? "-",
       "Points Redeemed": record.pointsRedeemed ?? "-",
     }));
   }, [apiResponse]);
@@ -202,8 +205,8 @@ export default function MonthlyStatsChartMerchant() {
 
     return apiResponse.data.monthlyData.map((item) => ({
       date: `${item.monthName} ${item.year}`,
-      Revenue: item.totalRevenue || 0,
-      Visits: item.usersCount || 0,
+      Revenue: item.revenue || 0,
+      Visits: item.users || 0,
       "Points Redeemed": item.pointsRedeemed || 0,
     }));
   }, [apiResponse]);
@@ -416,8 +419,14 @@ export default function MonthlyStatsChartMerchant() {
       newParams.delete("m_metric");
       newParams.delete("m_chartType");
       newParams.delete("m_page");
+      newParams.delete("m_limit");
       return newParams;
     });
+  };
+
+  const handlePageSizeChange = (newPageSize) => {
+    updateSearchParam("m_limit", newPageSize.toString());
+    updateSearchParam("m_page", "");
   };
 
   return (
@@ -808,12 +817,13 @@ export default function MonthlyStatsChartMerchant() {
           isFetching={isFetching}
           pagination={{
             current: currentPage,
-            pageSize: 6,
+            pageSize: pageSize,
             total: apiResponse?.pagination?.total || 0,
           }}
           onPaginationChange={(page) =>
             updateSearchParam("m_page", page > 1 ? page.toString() : "")
           }
+          onPageSizeChange={handlePageSizeChange}
           rowKey="key"
         />
       </div>

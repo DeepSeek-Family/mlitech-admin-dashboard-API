@@ -37,8 +37,18 @@ const ReusableTable = ({
   isFetching = false,
   pagination = null,
   onPaginationChange = null,
+  onPageSizeChange = null,
   rowKey = "id",
 }) => {
+  const handlePaginationChange = (page, pageSize) => {
+    if (onPaginationChange) {
+      onPaginationChange(page);
+    }
+    if (pageSize !== pagination?.pageSize && onPageSizeChange) {
+      onPageSizeChange(pageSize);
+    }
+  };
+
   return (
     <div className="overflow-x-auto">
       <Table
@@ -50,7 +60,8 @@ const ReusableTable = ({
                 pageSize: pagination?.pageSize || 10,
                 total: pagination?.total || 0,
                 current: pagination?.current || 1,
-                onChange: onPaginationChange,
+                onChange: handlePaginationChange,
+                onShowSizeChange: handlePaginationChange,
                 showSizeChanger: true,
                 showTotal: (total) => `Total ${total} items`,
                 style: { marginRight: "8px" },

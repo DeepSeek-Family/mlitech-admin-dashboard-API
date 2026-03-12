@@ -86,6 +86,7 @@ export default function MonthlyStatsChartCustomer() {
     searchParams.get("c_pointsFilter") || "Points Accumulated";
   const chartType = searchParams.get("c_chartType") || "Bar";
   const currentPage = parseInt(searchParams.get("c_page") || "1", 10);
+  const pageSize = parseInt(searchParams.get("c_limit") || "10", 10);
 
   // Helper function to update URL params
   const updateSearchParam = useCallback(
@@ -146,6 +147,7 @@ export default function MonthlyStatsChartCustomer() {
     if (currentPage > 1) {
       params.push({ name: "page", value: currentPage });
     }
+    params.push({ name: "limit", value: pageSize });
 
     return params;
   }, [
@@ -156,6 +158,7 @@ export default function MonthlyStatsChartCustomer() {
     selectedSubscription,
     selectedPayment,
     currentPage,
+    pageSize,
   ]);
 
   // Fetch data from API
@@ -394,8 +397,14 @@ export default function MonthlyStatsChartCustomer() {
       newParams.delete("c_pointsFilter");
       newParams.delete("c_chartType");
       newParams.delete("c_page");
+      newParams.delete("c_limit");
       return newParams;
     });
+  };
+
+  const handlePageSizeChange = (newPageSize) => {
+    updateSearchParam("c_limit", newPageSize.toString());
+    updateSearchParam("c_page", "");
   };
 
   return (
@@ -835,12 +844,13 @@ export default function MonthlyStatsChartCustomer() {
           isFetching={isFetching}
           pagination={{
             current: currentPage,
-            pageSize: 6,
+            pageSize: pageSize,
             total: apiResponse?.pagination?.total || 0,
           }}
           onPaginationChange={(page) =>
             updateSearchParam("c_page", page > 1 ? page.toString() : "")
           }
+          onPageSizeChange={handlePageSizeChange}
           rowKey="key"
         />
       </div>
