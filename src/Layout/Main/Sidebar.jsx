@@ -82,6 +82,8 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
     const isAdminRep = user?.role === "ADMIN_SELL";
     const isAdminRep2 = user?.role === "ADMIN_REP";
     const isViewAdmin = user?.role === "VIEW_ADMIN";
+    const isSuperAdmin = user?.role === "SUPER_ADMIN";
+    const isAdmin = user?.role === "ADMIN";
 
     // Settings submenu - with conditional children based on role
     const settingsMenu = {
@@ -239,24 +241,28 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
           </Link>
         ),
       },
-      {
-        key: "/currency-conversion",
-        icon: renderIcon(PromotionManagement, "/currency-conversion"),
-        label: (
-          <Link to="/currency-conversion">
-            {collapsed ? "" : "Currency Conversion"}
-          </Link>
-        ),
-      },
-      {
-        key: "/push-notifications",
-        icon: renderIcon(PushNotifications, "/push-notifications"),
-        label: (
-          <Link to="/push-notifications">
-            {collapsed ? "" : "Push Notifications"}
-          </Link>
-        ),
-      },
+      ...(isViewAdmin
+        ? []
+        : [
+            {
+              key: "/currency-conversion",
+              icon: renderIcon(PromotionManagement, "/currency-conversion"),
+              label: (
+                <Link to="/currency-conversion">
+                  {collapsed ? "" : "Currency Conversion"}
+                </Link>
+              ),
+            },
+            {
+              key: "/push-notifications",
+              icon: renderIcon(PushNotifications, "/push-notifications"),
+              label: (
+                <Link to="/push-notifications">
+                  {collapsed ? "" : "Push Notifications"}
+                </Link>
+              ),
+            },
+          ]),
       salesRepMenu,
       {
         key: "/audit-logs",
