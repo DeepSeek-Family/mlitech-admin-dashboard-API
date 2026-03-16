@@ -2,7 +2,6 @@ import { Menu, Modal } from "antd";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { IoIosLogOut } from "react-icons/io";
-import { MdCurrencyExchange } from "react-icons/md";
 import {
   Dashboard,
   Marchant,
@@ -67,9 +66,21 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
     ),
   };
 
+  // Sales Rep Portal
+  const ReportMenu = {
+    key: "/reporting-analytics",
+    icon: renderIcon(Rewords, "/reporting-analytics"),
+    label: (
+      <Link to="/reporting-analytics">
+        {collapsed ? "" : "Reporting & Analytics"}
+      </Link>
+    ),
+  };
+
   // Get base menu items for all roles
   const getMenuItems = () => {
     const isAdminRep = user?.role === "ADMIN_SELL";
+    const isAdminRep2 = user?.role === "ADMIN_REP";
     const isViewAdmin = user?.role === "VIEW_ADMIN";
 
     // Settings submenu - with conditional children based on role
@@ -77,57 +88,72 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
       key: "subMenuSetting",
       icon: renderIcon(Settings, "subMenuSetting"),
       label: collapsed ? "" : "Settings",
-      children: isAdminRep
-        ? [
-            {
-              key: "/profile",
-              label: (
-                <Link to="/profile">{collapsed ? "" : "Update Profile"}</Link>
-              ),
-            },
-          ]
-        : [
-            {
-              key: "/profile",
-              label: (
-                <Link to="/profile">{collapsed ? "" : "Update Profile"}</Link>
-              ),
-            },
-            ...(isViewAdmin
-              ? []
-              : [
-                  {
-                    key: "/user-management",
-                    label: (
-                      <Link to="/user-management">
-                        {collapsed ? "" : "User Management"}
-                      </Link>
-                    ),
-                  },
-                ]),
-            {
-              key: "/terms-and-conditions",
-              label: (
-                <Link to="/terms-and-conditions">
-                  {collapsed ? "" : "Terms And Conditions"}
-                </Link>
-              ),
-            },
-            {
-              key: "/privacy-policy",
-              label: (
-                <Link to="/privacy-policy">
-                  {collapsed ? "" : "Privacy Policy"}
-                </Link>
-              ),
-            },
-          ],
+      children:
+        isAdminRep || isAdminRep2
+          ? [
+              {
+                key: "/profile",
+                label: (
+                  <Link to="/profile">{collapsed ? "" : "Update Profile"}</Link>
+                ),
+              },
+            ]
+          : [
+              {
+                key: "/profile",
+                label: (
+                  <Link to="/profile">{collapsed ? "" : "Update Profile"}</Link>
+                ),
+              },
+              ...(isViewAdmin
+                ? []
+                : [
+                    {
+                      key: "/user-management",
+                      label: (
+                        <Link to="/user-management">
+                          {collapsed ? "" : "User Management"}
+                        </Link>
+                      ),
+                    },
+                  ]),
+              {
+                key: "/terms-and-conditions",
+                label: (
+                  <Link to="/terms-and-conditions">
+                    {collapsed ? "" : "Terms And Conditions"}
+                  </Link>
+                ),
+              },
+              {
+                key: "/privacy-policy",
+                label: (
+                  <Link to="/privacy-policy">
+                    {collapsed ? "" : "Privacy Policy"}
+                  </Link>
+                ),
+              },
+            ],
     };
 
     if (isAdminRep) {
       // Show only Sales Rep Portal, Settings, and Logout for ADMIN_REP
       return [
         salesRepMenu,
+        settingsMenu,
+        {
+          key: "/logout",
+          icon: <IoIosLogOut size={24} />,
+          label: <p onClick={showLogoutConfirm}>{collapsed ? "" : "Logout"}</p>,
+        },
+      ];
+    }
+
+    if (isAdminRep2) {
+      // Show only Sales Rep Portal, Settings, and Logout for ADMIN_REP
+      return [
+        salesRepMenu,
+        ReportMenu,
         settingsMenu,
         {
           key: "/logout",

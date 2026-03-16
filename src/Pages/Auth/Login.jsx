@@ -36,7 +36,7 @@ const Login = () => {
       }
 
       // Navigate based on user role
-      if (user?.role === "ADMIN_SELL") {
+      if (user?.role === "ADMIN_SELL" || user?.role === "ADMIN_REP") {
         navigate("/sales-rep-portal", { replace: true });
       } else {
         navigate("/", { replace: true });
