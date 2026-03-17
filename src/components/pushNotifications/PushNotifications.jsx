@@ -16,8 +16,8 @@ const PushNotifications = () => {
   const [country, setCountry] = useState(undefined); // For country selection
   const [city, setCity] = useState(undefined); // For city selection
   const [tier, setTier] = useState(""); // Will be set once tiers load
-  const [subscriptionType, setSubscriptionType] = useState("ACTIVE"); // Default value
-  const [status, setStatus] = useState("ACTIVE"); // Default value
+  const [subscriptionType, setSubscriptionType] = useState("active"); // Default value
+  const [status, setStatus] = useState("active"); // Default value
   const [tiersList, setTiersList] = useState([]);
 
   const [createPushNotification, { isLoading }] =
@@ -75,8 +75,8 @@ const PushNotifications = () => {
       setCountry(undefined);
       setCity(undefined);
       setTier(tiersList.length > 0 ? tiersList[0].title : "");
-      setSubscriptionType("ACTIVE");
-      setStatus("ACTIVE");
+      setSubscriptionType("active");
+      setStatus("active");
     } catch (error) {
       message.error("Failed to send push notification. Please try again.");
       console.error("Error sending notification:", error);
@@ -90,8 +90,8 @@ const PushNotifications = () => {
     setCountry(undefined);
     setCity(undefined);
     setTier(tiersList.length > 0 ? tiersList[0].title : "");
-    setSubscriptionType("ACTIVE");
-    setStatus("ACTIVE");
+    setSubscriptionType("active");
+    setStatus("active");
     message.info("Notification draft cleared.");
   };
 
@@ -239,8 +239,8 @@ const PushNotifications = () => {
                 className="mli-tall-select"
                 disabled={isFieldsDisabled}
               >
-                <Option value="ACTIVE">Active</Option>
-                <Option value="INACTIVE">Inactive</Option>
+                <Option value="active">Active</Option>
+                <Option value="inActive">Inactive</Option>
               </Select>
             </div>
           </Col>
@@ -257,8 +257,8 @@ const PushNotifications = () => {
                 className="mli-tall-select"
                 disabled={isFieldsDisabled}
               >
-                <Option value="ACTIVE">Active</Option>
-                <Option value="INACTIVE">Inactive</Option>
+                <Option value="active">Active</Option>
+                <Option value="inActive">Inactive</Option>
               </Select>
             </div>
           </Col>
@@ -334,12 +334,14 @@ const PushNotifications = () => {
               )}
               {subscriptionType && (
                 <p className="text-md font-medium mb-2">
-                  <strong>Membership Type:</strong> {subscriptionType}
+                  <strong>Membership Type:</strong>{" "}
+                  {subscriptionType === "active" ? "ACTIVE" : "INACTIVE"}
                 </p>
               )}
               {status && (
                 <p className="text-md font-medium mb-2">
-                  <strong>Status:</strong> {status}
+                  <strong>Status:</strong>{" "}
+                  {status === "active" ? "ACTIVE" : "INACTIVE"}
                 </p>
               )}
             </>
