@@ -1,58 +1,68 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
-import { Button, Form, Input } from "antd";
+import { Button, Input } from "antd";
 
 const FeaturedInput = ({ value = [], onChange }) => {
+  const [features, setFeatures] = useState(
+    value && value.length > 0 ? value : ["", ""],
+  );
+
+  useEffect(() => {
+    if (value && Array.isArray(value)) {
+      setFeatures(value);
+    }
+  }, [value]);
+
+  const handleAddFeature = () => {
+    const newFeatures = [...features, ""];
+    setFeatures(newFeatures);
+    onChange(newFeatures);
+  };
+
+  const handleRemoveFeature = (index) => {
+    const newFeatures = features.filter((_, i) => i !== index);
+    setFeatures(newFeatures);
+    onChange(newFeatures);
+  };
+
+  const handleFeatureChange = (index, newValue) => {
+    const newFeatures = [...features];
+    newFeatures[index] = newValue;
+    setFeatures(newFeatures);
+    onChange(newFeatures);
+  };
+
   return (
-    <Form.List name="features" initialValue={["", ""]}>
-      {(fields, { add, remove }) => (
-        <>
-          {fields.map((field, index) => (
-            <div key={field.key} className="flex items-start gap-2 w-full ">
-              <Form.Item
-                {...field}
-                className="w-full"
-                validateTrigger={["onChange", "onBlur"]}
-                rules={[{ required: true, message: "Feature is required" }]}
-              >
-                <Input
-                  placeholder="Feature name"
-                  className="w-full mli-tall-input mb-4"
-                  value={value[index] || ""}
-                  onChange={(e) => {
-                    const newValues = [...value];
-                    newValues[index] = e.target.value;
-                    onChange(newValues);
-                  }}
-                />
-              </Form.Item>
+    <div>
+      {features.map((feature, index) => (
+        <div key={index} className="flex items-start gap-2 w-full mb-4">
+          <Input
+            placeholder="Feature name"
+            className="w-full mli-tall-input"
+            value={feature || ""}
+            onChange={(e) => handleFeatureChange(index, e.target.value)}
+          />
 
-              {fields.length > 2 && (
-                <MinusCircleOutlined
-                  className="text-red-500 text-lg cursor-pointer mt-3"
-                  onClick={() => {
-                    const newValues = value.filter((_, i) => i !== index);
-                    onChange(newValues);
-                    remove(field.name);
-                  }}
-                />
-              )}
-            </div>
-          ))}
+          {features.length > 2 && (
+            <MinusCircleOutlined
+              className="text-red-500 text-lg cursor-pointer mt-3"
+              onClick={() => handleRemoveFeature(index)}
+            />
+          )}
+        </div>
+      ))}
 
-          <Form.Item className="w-full flex justify-center">
-            <Button
-              type="dashed"
-              onClick={() => add()}
-              icon={<PlusOutlined />}
-              className="w-full"
-            >
-              Add Feature
-            </Button>
-          </Form.Item>
-        </>
-      )}
-    </Form.List>
+      <div className="w-full flex justify-center">
+        <Button
+          type="dashed"
+          onClick={handleAddFeature}
+          icon={<PlusOutlined />}
+          className="w-full"
+        >
+          Add Feature
+        </Button>
+      </div>
+    </div>
   );
 };
 
