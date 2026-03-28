@@ -1,7 +1,11 @@
 import { Modal, Table } from "antd";
 import MarchantIcon from "../../../assets/marchant.png";
+import moment from "moment/moment";
 
 const ViewModal = ({ visible, onCancel, selectedRecord, columns2, data }) => {
+  const subscriptionData =
+    selectedRecord?.subscriptionData ?? selectedRecord?.raw?.subscriptionData;
+
   return (
     <Modal
       visible={visible}
@@ -52,11 +56,15 @@ const ViewModal = ({ visible, onCancel, selectedRecord, columns2, data }) => {
               </p>
               <p>
                 <strong>Last Payment Date:</strong>{" "}
-                {selectedRecord.lastPaymentDate || "00-00-0000"}
+                {subscriptionData?.currentPeriodStart
+                  ? moment(subscriptionData.currentPeriodStart).format("l")
+                  : "N/A"}
               </p>
               <p>
                 <strong>Expiry Date:</strong>{" "}
-                {selectedRecord.expiryDate || "00-00-0000"}
+                {subscriptionData?.currentPeriodEnd
+                  ? moment(subscriptionData.currentPeriodEnd).format("l")
+                  : "N/A"}
               </p>
             </div>
           </div>

@@ -93,6 +93,7 @@ const CustomerManagement2 = () => {
       refdRep: item?.referredInfo?.referredBy || "-",
       totalSales: item.totalSales || 0,
       status: item.status === "active" ? "Active" : "Inactive",
+      subscriptionData: item.subscriptionData,
       raw: item,
     }));
   }, [response, page, limit]);
