@@ -205,7 +205,7 @@ const PushNotifications = () => {
           </Col>
 
           {/* Tier Dropdown */}
-          <Col xs={24} sm={8} md={4}>
+          {/* <Col xs={24} sm={8} md={4}>
             <div className="flex flex-col">
               <label className="font-bold text-[18px] mb-1">Tier</label>
               <Select
@@ -223,7 +223,7 @@ const PushNotifications = () => {
                 ))}
               </Select>
             </div>
-          </Col>
+          </Col> */}
 
           {/* Subscription Type Dropdown */}
           <Col xs={24} sm={8} md={4}>
