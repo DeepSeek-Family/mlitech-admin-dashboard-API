@@ -16,8 +16,8 @@ const PushNotifications = () => {
   const [country, setCountry] = useState(undefined); // For country selection
   const [city, setCity] = useState(undefined); // For city selection
   const [tier, setTier] = useState(""); // Will be set once tiers load
-  const [subscriptionType, setSubscriptionType] = useState("active"); // Default value
-  const [status, setStatus] = useState("active"); // Default value
+  const [subscriptionType, setSubscriptionType] = useState("all"); // Default value
+  const [status, setStatus] = useState("all"); // Default value
   const [tiersList, setTiersList] = useState([]);
 
   const [createPushNotification, { isLoading }] =
@@ -60,9 +60,17 @@ const PushNotifications = () => {
           country: country,
           city: city,
           tier: tier,
-          subscriptionType: subscriptionType,
-          status: status,
         };
+
+        // Only include subscriptionType if it's not "all"
+        if (subscriptionType !== "all") {
+          payload.subscriptionType = subscriptionType;
+        }
+
+        // Only include status if it's not "all"
+        if (status !== "all") {
+          payload.status = status;
+        }
       }
 
       await createPushNotification(payload).unwrap();
@@ -75,8 +83,8 @@ const PushNotifications = () => {
       setCountry(undefined);
       setCity(undefined);
       setTier(tiersList.length > 0 ? tiersList[0].title : "");
-      setSubscriptionType("active");
-      setStatus("active");
+      setSubscriptionType("all");
+      setStatus("all");
     } catch (error) {
       message.error("Failed to send push notification. Please try again.");
       console.error("Error sending notification:", error);
@@ -90,8 +98,8 @@ const PushNotifications = () => {
     setCountry(undefined);
     setCity(undefined);
     setTier(tiersList.length > 0 ? tiersList[0].title : "");
-    setSubscriptionType("active");
-    setStatus("active");
+    setSubscriptionType("all");
+    setStatus("all");
     message.info("Notification draft cleared.");
   };
 
@@ -239,6 +247,7 @@ const PushNotifications = () => {
                 className="mli-tall-select"
                 disabled={isFieldsDisabled}
               >
+                <Option value="all">All</Option>
                 <Option value="active">Active</Option>
                 <Option value="inActive">Inactive</Option>
               </Select>
@@ -257,6 +266,7 @@ const PushNotifications = () => {
                 className="mli-tall-select"
                 disabled={isFieldsDisabled}
               >
+                <Option value="all">All</Option>
                 <Option value="active">Active</Option>
                 <Option value="inActive">Inactive</Option>
               </Select>
@@ -332,13 +342,13 @@ const PushNotifications = () => {
                   <strong>Tier:</strong> {tier}
                 </p>
               )}
-              {subscriptionType && (
+              {subscriptionType && subscriptionType !== "all" && (
                 <p className="text-md font-medium mb-2">
                   <strong>Membership Type:</strong>{" "}
                   {subscriptionType === "active" ? "ACTIVE" : "INACTIVE"}
                 </p>
               )}
-              {status && (
+              {status && status !== "all" && (
                 <p className="text-md font-medium mb-2">
                   <strong>Status:</strong>{" "}
                   {status === "active" ? "ACTIVE" : "INACTIVE"}

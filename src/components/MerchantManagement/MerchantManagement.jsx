@@ -41,8 +41,13 @@ const MerchantManagement = () => {
       } else {
         newParams.delete(key);
       }
-      // Always ensure page and limit are in URL
-      newParams.set("page", page.toString());
+      // Reset to page 1 when filter changes
+      if (key === "searchTerm" || key === "status") {
+        newParams.set("page", "1");
+      } else {
+        newParams.set("page", page.toString());
+      }
+      // Always ensure limit is in URL
       newParams.set("limit", limit.toString());
       return newParams;
     });
@@ -129,10 +134,11 @@ const MerchantManagement = () => {
       totalVisits: item.totalVisits || 0,
       website: item.website || "N/A",
       status: item.status === "active" ? "Active" : "Inactive",
-      ratings: item.ratings || 0,
+      ratings: item.rating || 0,
       service: item.service || "N/A",
       approveStatus: item.approveStatus || "pending",
       address: item.address || "N/A",
+      totalRevenue: item.totalRevenue || 0,
       raw: item,
     }));
   }, [response, page, limit]);

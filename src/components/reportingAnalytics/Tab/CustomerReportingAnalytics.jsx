@@ -30,7 +30,12 @@ const { Option } = Select;
 // Dropdown options for frontend filtering
 const subscriptionOptions = ["All Status", "active", "inActive"];
 const paymentOptions = ["All Payments", "Paid", "Unpaid"];
-const metricOptions = ["Revenue", "Visits", "Points Redeemed"];
+const metricOptions = [
+  "Revenue",
+  "Visits",
+  "Points Redeemed",
+  "Points Accumulated",
+];
 const pointsFilterOptions = ["All", "Points Redeemed", "Points Accumulated"];
 const locationOptions = [
   "All Cities",
@@ -609,7 +614,7 @@ export default function MonthlyStatsChartCustomer() {
               </Form.Item>
             </Col>
 
-            <Col flex="1 1 220px">
+            {/* <Col flex="1 1 220px">
               <Form.Item
                 label="Points Filter"
                 style={{ marginBottom: "0.5rem" }}
@@ -629,7 +634,7 @@ export default function MonthlyStatsChartCustomer() {
                   ))}
                 </Select>
               </Form.Item>
-            </Col>
+            </Col> */}
 
             <Col flex="1 1 220px">
               <Form.Item label="Actions" style={{ marginBottom: "0.5rem" }}>

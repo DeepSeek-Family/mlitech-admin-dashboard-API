@@ -42,7 +42,7 @@ const ReusableTable = ({
 }) => {
   const handlePaginationChange = (page, pageSize) => {
     if (onPaginationChange) {
-      onPaginationChange(page);
+      onPaginationChange(page, pageSize);
     }
     if (pageSize !== pagination?.pageSize && onPageSizeChange) {
       onPageSizeChange(pageSize);
