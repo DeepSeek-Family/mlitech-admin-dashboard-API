@@ -194,8 +194,8 @@ export default function MonthlyStatsChartCustomer() {
       Location: record.location || "-",
       SubscriptionStatus: record.subscriptionStatus || "-",
       PaymentStatus: record.paymentStatus || "-",
-      Revenue: record.revenue || "-",
-      Visits: record.users || "-",
+      Revenue: record.totalRevenue || 0,
+      Visits: record.users || 0,
       "Points Redeemed": record.pointsRedeemed ?? "-",
       "Points Accumulated": record.pointsAccumulated ?? "-",
     }));
