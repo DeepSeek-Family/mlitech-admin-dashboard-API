@@ -36,24 +36,31 @@ const CustomerTableColumn = ({
       dataIndex: "subscription",
       key: "subscription",
       align: "center",
-      render: (subscription) => (
-        <span
-          className={
-            subscription === "Active" || subscription
-              ? "text-green-600 font-semibold"
-              : "text-red-600 font-semibold"
-          }
-        >
-          {subscription === "Active" || subscription ? "Active" : "Inactive"}
-        </span>
-      ),
+      render: (subscription) => {
+        const isActive =
+          subscription === "Active" ||
+          subscription === true ||
+          subscription === 1 ||
+          subscription?.toLowerCase?.() === "active";
+        return (
+          <span
+            className={
+              isActive
+                ? "text-green-600 font-semibold"
+                : "text-red-600 font-semibold"
+            }
+          >
+            {isActive ? "Active" : "Inactive"}
+          </span>
+        );
+      },
     },
-    {
-      title: "Tier",
-      dataIndex: "tier",
-      key: "tier",
-      align: "center",
-    },
+    // {
+    //   title: "Tier",
+    //   dataIndex: "tier",
+    //   key: "tier",
+    //   align: "center",
+    // },
     {
       title: "Phone Number",
       dataIndex: "phone",

@@ -79,9 +79,9 @@ const ViewModal = ({ visible, record, onCancel }) => {
             <p>
               <strong>Location:</strong> {record.location}
             </p>
-            <p>
+            {/* <p>
               <strong>Total Sales:</strong> {record.totalSales}
-            </p>
+            </p> */}
             <p>
               <strong>Status:</strong> {record.status}
             </p>
@@ -114,22 +114,22 @@ const ViewModal = ({ visible, record, onCancel }) => {
             <p>
               <strong>Services Offered:</strong> {record.service}
             </p>
-            <p>
+            {/* <p>
               <strong>Tier:</strong> {record.tier || "N/A"}
-            </p>
-            <p>
+            </p> */}
+            {/* <p>
               <strong>Membership Type:</strong>{" "}
               {record.subscriptionType || "N/A"}
-            </p>
-            <p>
+            </p> */}
+            {/* <p>
               <strong>Last Payment Date:</strong>{" "}
               {record.lastPaymentDate || "00-00-0000"}
             </p>
             <p>
               <strong>Expiry Date:</strong> {record.expiryDate || "00-00-0000"}
-            </p>
+            </p> */}
             <p>
-              <strong>Total Revenue:</strong> {record.totalSales}
+              <strong>Total Revenue:</strong> {record.totalRevenue}
             </p>
           </div>
         </div>

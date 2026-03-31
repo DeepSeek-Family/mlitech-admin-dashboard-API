@@ -46,13 +46,26 @@ const ViewModal = ({ visible, onCancel, selectedRecord, columns2, data }) => {
                 Loyalty Points
               </p>
               <p>
-                <strong>Points Balance:</strong> {selectedRecord.totalSales}
+                <strong>Points Balance:</strong> {selectedRecord.pointsBalance}
               </p>
-              <p>
+              {/* <p>
                 <strong>Tier:</strong> {selectedRecord.tier || "N/A"}
-              </p>
+              </p> */}
               <p>
-                <strong>Membership:</strong> {selectedRecord.subscription}
+                <strong>Membership:</strong>{" "}
+                <span
+                  style={{
+                    color:
+                      selectedRecord.subscription === "active"
+                        ? "#52c41a"
+                        : "#ff4d4f",
+                    fontWeight: "bold",
+                  }}
+                >
+                  {selectedRecord.subscription === "active"
+                    ? "Active"
+                    : "Inactive"}
+                </span>
               </p>
               <p>
                 <strong>Last Payment Date:</strong>{" "}

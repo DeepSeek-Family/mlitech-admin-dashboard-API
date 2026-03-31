@@ -54,8 +54,8 @@ const MerchantTableColumn = ({
     },
     {
       title: "Total Sales",
-      dataIndex: "totalRevenue",
-      key: "totalRevenue",
+      dataIndex: "totalSales",
+      key: "totalSales",
       align: "center",
     },
     // {

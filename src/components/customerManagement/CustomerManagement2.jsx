@@ -91,9 +91,10 @@ const CustomerManagement2 = () => {
       email: item.email || "-",
       location: item.address || "-",
       refdRep: item?.referredInfo?.referredBy || "-",
-      totalSales: item.totalSales || 0,
+      totalSales: item.totalSellAmount || 0,
       status: item.status === "active" ? "Active" : "Inactive",
       subscriptionData: item.subscriptionData,
+      pointsBalance: item.totalPoints || 0,
       raw: item,
     }));
   }, [response, page, limit]);
