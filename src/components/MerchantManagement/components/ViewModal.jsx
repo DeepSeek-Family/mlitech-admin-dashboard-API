@@ -5,52 +5,55 @@ import CustomTable from "../../common/CustomTable";
 const detailsColumns = [
   {
     title: "SL",
-    dataIndex: "id",
-    key: "id",
+    dataIndex: "sl",
+    key: "sl",
   },
   {
-    title: "Membership Type",
-    dataIndex: "subscriptionType",
-    key: "subscriptionType",
+    title: "Customer Name",
+    dataIndex: "name",
+    key: "name",
+  },
+  // {
+  //   title: "Email",
+  //   dataIndex: "email",
+  //   key: "email",
+  // },
+  {
+    title: "Customer ID",
+    dataIndex: "customUserId",
+    key: "customUserId",
   },
   {
-    title: "Date",
-    dataIndex: "lastPaymentDate",
-    key: "lastPaymentDate",
+    title: "Total Transactions",
+    dataIndex: "totalTransactions",
+    key: "totalTransactions",
   },
   {
-    title: "Expire Date",
-    dataIndex: "expiryDate",
-    key: "expiryDate",
+    title: "Total Sell Amount",
+    dataIndex: "totalSellAmount",
+    key: "totalSellAmount",
   },
   {
-    title: "Total Revenue",
-    dataIndex: "totalRevenue",
-    key: "totalRevenue",
+    title: "Total Earned Points",
+    dataIndex: "totalEarnedPoints",
+    key: "totalEarnedPoints",
+    render: (value) => Number(value || 0).toFixed(2),
   },
   {
-    title: "Total Points Earned",
-    dataIndex: "totalPointsEarned",
-    key: "totalPointsEarned",
-  },
-  {
-    title: "Total Points Redeemed",
-    dataIndex: "totalPointsRedeemed",
-    key: "totalPointsRedeemed",
-  },
-  {
-    title: "Total Points Pending",
-    dataIndex: "totalPointsPending",
-    key: "totalPointsPending",
-  },
-  {
-    title: "Total Visits",
-    dataIndex: "totalVisits",
-    key: "totalVisits",
+    title: "Total Redeemed Points",
+    dataIndex: "totalRedeemedPoints",
+    key: "totalRedeemedPoints",
   },
 ];
 
 const ViewModal = ({ visible, record, onCancel }) => {
+  const customers = record?.raw?.customers || record?.customers || [];
+  const customerTableData = customers.map((item, index) => ({
+    ...item,
+    sl: index + 1,
+    key: item?.userId || item?._id?.userId || `${index}`,
+  }));
+
   return (
     <Modal visible={visible} onCancel={onCancel} width={1000} footer={[]}>
       <div className="flex flex-col">
@@ -135,9 +138,9 @@ const ViewModal = ({ visible, record, onCancel }) => {
         </div>
         <CustomTable
           columns={detailsColumns}
-          data={[]}
+          data={customerTableData}
           pagination={false}
-          rowKey="id"
+          rowKey={(row) => row?.userId || row?._id?.userId || row?.key}
         />
       </div>
     </Modal>

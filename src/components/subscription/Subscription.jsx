@@ -37,16 +37,16 @@ const PackagesPlans = () => {
   const packages = useMemo(() => {
     const items = response?.data || [];
     return items.map((item) => ({
-      id: item._id,
-      title: item.title,
-      description: item.description,
-      price: item.price,
-      duration: item.duration,
-      features: item.features,
-      popular: item.isFreeTrial || false,
-      active: item.status === "Active",
-      paymentType: item.paymentType,
-      loginLimit: item.loginLimit,
+      id: item?._id,
+      title: item?.title,
+      description: item?.description,
+      price: item?.price,
+      duration: item?.duration,
+      features: item?.features,
+      popular: item?.isFreeTrial || false,
+      active: item?.status === "Active",
+      paymentType: item?.paymentType,
+      loginLimit: item?.loginLimit,
     }));
   }, [response]);
 
@@ -114,14 +114,14 @@ const PackagesPlans = () => {
       }
 
       const packageData = {
-        title: values.title,
-        description: values.description,
-        price: Number(values.price),
-        duration: values.duration,
-        credit: values.credit ? Number(values.credit) : 0,
+        title: values?.title,
+        description: values?.description,
+        price: Number(values?.price),
+        duration: values?.duration,
+        credit: values?.credit ? Number(values?.credit) : 0,
         paymentType: paymentType,
-        loginLimit: values.loginLimit ? Number(values.loginLimit) : 1,
-        features: values.features.filter((f) => f && f.trim() !== ""),
+        loginLimit: values?.loginLimit ? Number(values?.loginLimit) : 1,
+        features: values?.features.filter((f) => f && f.trim() !== ""),
       };
 
       if (isEditing) {
