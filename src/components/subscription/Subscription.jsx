@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Card, Button, List, message, Spin } from "antd";
+import { Card, Button, List, message } from "antd";
 import {
   EditOutlined,
   PlusOutlined,
@@ -198,9 +198,21 @@ const PackagesPlans = () => {
     );
   }
 
-  return (
-    <Spin spinning={isLoading || isFetching} tip="Loading membership plans...">
+  if (isLoading || isFetching) {
+    return (
       <div className="pt-1 px-4">
+        <div className="flex justify-center items-center py-20">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading membership plans...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="pt-1 px-4">
         <div className="flex flex-col justify-center items-center mb-8">
           {/* <p className="bg-primary px-[12px] py-[2px] text-white rounded-3xl mb-2">
           Pricing Plan
@@ -315,8 +327,7 @@ const PackagesPlans = () => {
           onSubmit={handleSubmit}
           isLoading={isEditing ? isUpdating : isCreating}
         />
-      </div>
-    </Spin>
+    </div>
   );
 };
 
