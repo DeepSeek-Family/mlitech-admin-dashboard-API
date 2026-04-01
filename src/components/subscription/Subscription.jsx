@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Card, Button, List, message } from "antd";
+import { Card, Button, List, message, Spin } from "antd";
 import {
   EditOutlined,
   PlusOutlined,
@@ -181,20 +181,6 @@ const PackagesPlans = () => {
     ],
   };
 
-  // Loading and error states
-  if (isLoading || isFetching) {
-    return (
-      <div className="pt-1 px-4">
-        <div className="flex justify-center items-center py-20">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading membership plans...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="pt-1 px-4">
@@ -213,122 +199,124 @@ const PackagesPlans = () => {
   }
 
   return (
-    <div className="pt-1 px-4">
-      <div className="flex flex-col justify-center items-center mb-8">
-        {/* <p className="bg-primary px-[12px] py-[2px] text-white rounded-3xl mb-2">
+    <Spin spinning={isLoading || isFetching} tip="Loading membership plans...">
+      <div className="pt-1 px-4">
+        <div className="flex flex-col justify-center items-center mb-8">
+          {/* <p className="bg-primary px-[12px] py-[2px] text-white rounded-3xl mb-2">
           Pricing Plan
         </p> */}
-        <h2 className="text-[28px] font-semibold text-secondary">
-          Plans for all sizes
-        </h2>
-        <p className="text-[15px] font-normal mb-[10px]">
-          Simple, transparent pricing that grows with you. Try any plan free for
-          30 days.
-        </p>
-        <Button
-          icon={<PlusOutlined />}
-          className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary text-[17px] font-bold"
-          onClick={() => showModal()}
-          disabled={user?.role === "VIEW_ADMIN"}
-        >
-          Add Membership Plan
-        </Button>
-      </div>
-      <div className="flex justify-center">
-        <div className="w-4/5 mb-6">
-          {packages.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
-              <p className="text-lg">No membership plans available.</p>
-              <p>
-                Click the "Add Membership Plan" button to create your first
-                membership plan.
-              </p>
-            </div>
-          ) : (
-            <Slider {...settings}>
-              {packages.map((pkg) => (
-                <div key={pkg.id} className="px-4">
-                  <Card
-                    title={null}
-                    bordered={false}
-                    className={`${getCardStyle(
-                      pkg,
-                    )} transition-transform duration-300`}
-                  >
-                    <div className="flex justify-end mb-2">
-                      <div className="flex gap-2">
-                        <Button
-                          icon={<EditOutlined />}
-                          onClick={() => showModal(pkg)}
-                          className="text-gray-800 border-gray-800 hover:text-primary hover:border-primary"
-                          disabled={user?.role === "VIEW_ADMIN"}
+          <h2 className="text-[28px] font-semibold text-secondary">
+            Plans for all sizes
+          </h2>
+          <p className="text-[15px] font-normal mb-[10px]">
+            Simple, transparent pricing that grows with you. Try any plan free
+            for 30 days.
+          </p>
+          <Button
+            icon={<PlusOutlined />}
+            className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary text-[17px] font-bold"
+            onClick={() => showModal()}
+            disabled={user?.role === "VIEW_ADMIN"}
+          >
+            Add Membership Plan
+          </Button>
+        </div>
+        <div className="flex justify-center">
+          <div className="w-4/5 mb-6">
+            {packages.length === 0 ? (
+              <div className="text-center py-12 text-gray-500">
+                <p className="text-lg">No membership plans available.</p>
+                <p>
+                  Click the "Add Membership Plan" button to create your first
+                  membership plan.
+                </p>
+              </div>
+            ) : (
+              <Slider {...settings}>
+                {packages.map((pkg) => (
+                  <div key={pkg.id} className="px-4">
+                    <Card
+                      title={null}
+                      bordered={false}
+                      className={`${getCardStyle(
+                        pkg,
+                      )} transition-transform duration-300`}
+                    >
+                      <div className="flex justify-end mb-2">
+                        <div className="flex gap-2">
+                          <Button
+                            icon={<EditOutlined />}
+                            onClick={() => showModal(pkg)}
+                            className="text-gray-800 border-gray-800 hover:text-primary hover:border-primary"
+                            disabled={user?.role === "VIEW_ADMIN"}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col justify-center items-center mb-2">
+                        <img
+                          src={SubscriptionHeadingIcon}
+                          alt="Subscription Icon"
+                          className="w-[40px] h-[40px] mb-4"
+                        />
+                        <h3 className="text-[20px] font-semibold text-primary ">
+                          {pkg.title}
+                        </h3>
+                        <div className="">
+                          <span className="text-secondary font-semibold text-[38px]">
+                            {pkg.price}
+                          </span>{" "}
+                          / {pkg.duration}
+                        </div>
+                        <p className="text-[16px] font-normal text-center text-[#667085]">
+                          {pkg.description}
+                        </p>
+                      </div>
+
+                      <div className="bg-gray-50 p-4 rounded-lg ">
+                        <List
+                          size="small"
+                          dataSource={pkg.features}
+                          renderItem={(feature) => (
+                            <List.Item className="text-gray-700 border-none py-1">
+                              <div className="flex items-start">
+                                <CheckCircleFilled className="text-green-500 mr-2 mt-1" />
+                                <span>{feature}</span>
+                              </div>
+                            </List.Item>
+                          )}
                         />
                       </div>
-                    </div>
 
-                    <div className="flex flex-col justify-center items-center mb-2">
-                      <img
-                        src={SubscriptionHeadingIcon}
-                        alt="Subscription Icon"
-                        className="w-[40px] h-[40px] mb-4"
-                      />
-                      <h3 className="text-[20px] font-semibold text-primary ">
-                        {pkg.title}
-                      </h3>
-                      <div className="">
-                        <span className="text-secondary font-semibold text-[38px]">
-                          {pkg.price}
-                        </span>{" "}
-                        / {pkg.duration}
-                      </div>
-                      <p className="text-[16px] font-normal text-center text-[#667085]">
-                        {pkg.description}
-                      </p>
-                    </div>
-
-                    <div className="bg-gray-50 p-4 rounded-lg ">
-                      <List
-                        size="small"
-                        dataSource={pkg.features}
-                        renderItem={(feature) => (
-                          <List.Item className="text-gray-700 border-none py-1">
-                            <div className="flex items-start">
-                              <CheckCircleFilled className="text-green-500 mr-2 mt-1" />
-                              <span>{feature}</span>
-                            </div>
-                          </List.Item>
-                        )}
-                      />
-                    </div>
-
-                    <Button
-                      className={`w-full mt-12 border h-10 ${
-                        pkg.active
-                          ? "bg-primary text-white hover:!bg-primary hover:!text-white"
-                          : "bg-red-500 text-white hover:!bg-gray-400 hover:!text-white"
-                      }`}
-                      onClick={() => togglePackageStatus(pkg.id)}
-                      disabled={isToggling || user?.role === "VIEW_ADMIN"}
-                    >
-                      {pkg.active ? "Turn Off" : "Turn On"}
-                    </Button>
-                  </Card>
-                </div>
-              ))}
-            </Slider>
-          )}
+                      <Button
+                        className={`w-full mt-12 border h-10 ${
+                          pkg.active
+                            ? "bg-primary text-white hover:!bg-primary hover:!text-white"
+                            : "bg-red-500 text-white hover:!bg-gray-400 hover:!text-white"
+                        }`}
+                        onClick={() => togglePackageStatus(pkg.id)}
+                        disabled={isToggling || user?.role === "VIEW_ADMIN"}
+                      >
+                        {pkg.active ? "Turn Off" : "Turn On"}
+                      </Button>
+                    </Card>
+                  </div>
+                ))}
+              </Slider>
+            )}
+          </div>
         </div>
-      </div>
 
-      <EditModal
-        isOpen={isModalOpen}
-        isEditing={isEditing}
-        currentPackage={currentPackage}
-        onCancel={handleCancel}
-        onSubmit={handleSubmit}
-        isLoading={isEditing ? isUpdating : isCreating}
-      />
-    </div>
+        <EditModal
+          isOpen={isModalOpen}
+          isEditing={isEditing}
+          currentPackage={currentPackage}
+          onCancel={handleCancel}
+          onSubmit={handleSubmit}
+          isLoading={isEditing ? isUpdating : isCreating}
+        />
+      </div>
+    </Spin>
   );
 };
 
