@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { Card, Button, List, message } from "antd";
 import {
   EditOutlined,
@@ -14,9 +14,6 @@ import {
   useTogglePackageStatusMutation,
 } from "../../redux/apiSlices/packageSlice";
 import SubscriptionHeadingIcon from "../../assets/subscription-heading.png";
-import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
 import { useUser } from "../../provider/User";
 
 const PackagesPlans = () => {
@@ -88,7 +85,6 @@ const PackagesPlans = () => {
       confirmButtonText: "Yes, delete it!",
     }).then((result) => {
       if (result.isConfirmed) {
-        setPackages(packages.filter((pkg) => pkg.id !== id));
         Swal.fire({
           title: "Deleted!",
           text: "The package has been deleted.",
@@ -150,35 +146,6 @@ const PackagesPlans = () => {
       return "shadow-sm rounded-xl  bg-gradient-to-b from-blue-50 to-white hover:shadow-md transition-all transform hover:-translate-y-1";
     }
     return "shadow-sm rounded-xl border border-gray-200 bg-white hover:shadow-md transition-all transform hover:-translate-y-1";
-  };
-
-  // react-slick settings
-  const settings = {
-    infinite: true,
-    speed: 500,
-    slidesToShow: 3,
-    centerMode: true,
-    centerPadding: "0px",
-    slidesToScroll: 1,
-    focusOnSelect: true,
-    arrows: true,
-    dots: true,
-    customPaging: (i) => (
-      <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
-    ),
-    appendDots: (dots) => (
-      <div style={{ bottom: "-30px" }}>
-        <ul className="flex justify-center gap-2">{dots}</ul>
-      </div>
-    ),
-    responsive: [
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 1,
-        },
-      },
-    ],
   };
 
   if (error) {
@@ -244,15 +211,15 @@ const PackagesPlans = () => {
                 </p>
               </div>
             ) : (
-              <Slider {...settings}>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {packages.map((pkg) => (
-                  <div key={pkg.id} className="px-4">
+                  <div key={pkg.id} className="px-1">
                     <Card
                       title={null}
                       bordered={false}
                       className={`${getCardStyle(
                         pkg,
-                      )} transition-transform duration-300`}
+                      )} transition-transform duration-300 h-full`}
                     >
                       <div className="flex justify-end mb-2">
                         <div className="flex gap-2">
@@ -274,7 +241,7 @@ const PackagesPlans = () => {
                         <h3 className="text-[20px] font-semibold text-primary ">
                           {pkg.title}
                         </h3>
-                        <div className="">
+                        <div>
                           <span className="text-secondary font-semibold text-[38px]">
                             {pkg.price}
                           </span>{" "}
@@ -314,7 +281,7 @@ const PackagesPlans = () => {
                     </Card>
                   </div>
                 ))}
-              </Slider>
+              </div>
             )}
           </div>
         </div>
