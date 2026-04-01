@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card, Button, List, message } from "antd";
 import {
   EditOutlined,
@@ -50,6 +50,32 @@ const PackagesPlans = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentPackage, setCurrentPackage] = useState(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [cardsPerView, setCardsPerView] = useState(3);
+
+  useEffect(() => {
+    const updateCardsPerView = () => {
+      if (window.innerWidth < 768) {
+        setCardsPerView(1);
+      } else if (window.innerWidth < 1280) {
+        setCardsPerView(2);
+      } else {
+        setCardsPerView(3);
+      }
+    };
+
+    updateCardsPerView();
+    window.addEventListener("resize", updateCardsPerView);
+
+    return () => window.removeEventListener("resize", updateCardsPerView);
+  }, []);
+
+  useEffect(() => {
+    const maxSlide = Math.max(0, packages.length - cardsPerView);
+    if (currentSlide > maxSlide) {
+      setCurrentSlide(maxSlide);
+    }
+  }, [packages.length, cardsPerView, currentSlide]);
 
   const togglePackageStatus = async (id) => {
     try {
@@ -148,6 +174,20 @@ const PackagesPlans = () => {
     return "shadow-sm rounded-xl border border-gray-200 bg-white hover:shadow-md transition-all transform hover:-translate-y-1";
   };
 
+  const maxSlide = Math.max(0, packages.length - cardsPerView);
+  const visiblePackages = packages.slice(
+    currentSlide,
+    currentSlide + cardsPerView,
+  );
+
+  const handlePrev = () => {
+    setCurrentSlide((prev) => (prev <= 0 ? maxSlide : prev - 1));
+  };
+
+  const handleNext = () => {
+    setCurrentSlide((prev) => (prev >= maxSlide ? 0 : prev + 1));
+  };
+
   if (error) {
     return (
       <div className="pt-1 px-4">
@@ -211,77 +251,113 @@ const PackagesPlans = () => {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {packages.map((pkg) => (
-                  <div key={pkg.id} className="px-1">
-                    <Card
-                      title={null}
-                      bordered={false}
-                      className={`${getCardStyle(
-                        pkg,
-                      )} transition-transform duration-300 h-full`}
-                    >
-                      <div className="flex justify-end mb-2">
-                        <div className="flex gap-2">
+              <>
+                <div className="flex items-center gap-3 mb-2">
+                  <Button
+                    onClick={handlePrev}
+                    disabled={packages.length <= cardsPerView}
+                    className="h-10 w-10 p-0 flex items-center justify-center"
+                  >
+                    {"<"}
+                  </Button>
+
+                  <div className="flex-1 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {visiblePackages.map((pkg) => (
+                      <div key={pkg.id} className="px-1">
+                        <Card
+                          title={null}
+                          bordered={false}
+                          className={`${getCardStyle(
+                            pkg,
+                          )} transition-transform duration-300 h-full`}
+                        >
+                          <div className="flex justify-end mb-2">
+                            <div className="flex gap-2">
+                              <Button
+                                icon={<EditOutlined />}
+                                onClick={() => showModal(pkg)}
+                                className="text-gray-800 border-gray-800 hover:text-primary hover:border-primary"
+                                disabled={user?.role === "VIEW_ADMIN"}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col justify-center items-center mb-2">
+                            <img
+                              src={SubscriptionHeadingIcon}
+                              alt="Subscription Icon"
+                              className="w-[40px] h-[40px] mb-4"
+                            />
+                            <h3 className="text-[20px] font-semibold text-primary ">
+                              {pkg.title}
+                            </h3>
+                            <div>
+                              <span className="text-secondary font-semibold text-[38px]">
+                                {pkg.price}
+                              </span>{" "}
+                              / {pkg.duration}
+                            </div>
+                            <p className="text-[16px] font-normal text-center text-[#667085]">
+                              {pkg.description}
+                            </p>
+                          </div>
+
+                          <div className="bg-gray-50 p-4 rounded-lg ">
+                            <List
+                              size="small"
+                              dataSource={pkg.features}
+                              renderItem={(feature) => (
+                                <List.Item className="text-gray-700 border-none py-1">
+                                  <div className="flex items-start">
+                                    <CheckCircleFilled className="text-green-500 mr-2 mt-1" />
+                                    <span>{feature}</span>
+                                  </div>
+                                </List.Item>
+                              )}
+                            />
+                          </div>
+
                           <Button
-                            icon={<EditOutlined />}
-                            onClick={() => showModal(pkg)}
-                            className="text-gray-800 border-gray-800 hover:text-primary hover:border-primary"
-                            disabled={user?.role === "VIEW_ADMIN"}
-                          />
-                        </div>
+                            className={`w-full mt-12 border h-10 ${
+                              pkg.active
+                                ? "bg-primary text-white hover:!bg-primary hover:!text-white"
+                                : "bg-red-500 text-white hover:!bg-gray-400 hover:!text-white"
+                            }`}
+                            onClick={() => togglePackageStatus(pkg.id)}
+                            disabled={isToggling || user?.role === "VIEW_ADMIN"}
+                          >
+                            {pkg.active ? "Turn Off" : "Turn On"}
+                          </Button>
+                        </Card>
                       </div>
-
-                      <div className="flex flex-col justify-center items-center mb-2">
-                        <img
-                          src={SubscriptionHeadingIcon}
-                          alt="Subscription Icon"
-                          className="w-[40px] h-[40px] mb-4"
-                        />
-                        <h3 className="text-[20px] font-semibold text-primary ">
-                          {pkg.title}
-                        </h3>
-                        <div>
-                          <span className="text-secondary font-semibold text-[38px]">
-                            {pkg.price}
-                          </span>{" "}
-                          / {pkg.duration}
-                        </div>
-                        <p className="text-[16px] font-normal text-center text-[#667085]">
-                          {pkg.description}
-                        </p>
-                      </div>
-
-                      <div className="bg-gray-50 p-4 rounded-lg ">
-                        <List
-                          size="small"
-                          dataSource={pkg.features}
-                          renderItem={(feature) => (
-                            <List.Item className="text-gray-700 border-none py-1">
-                              <div className="flex items-start">
-                                <CheckCircleFilled className="text-green-500 mr-2 mt-1" />
-                                <span>{feature}</span>
-                              </div>
-                            </List.Item>
-                          )}
-                        />
-                      </div>
-
-                      <Button
-                        className={`w-full mt-12 border h-10 ${
-                          pkg.active
-                            ? "bg-primary text-white hover:!bg-primary hover:!text-white"
-                            : "bg-red-500 text-white hover:!bg-gray-400 hover:!text-white"
-                        }`}
-                        onClick={() => togglePackageStatus(pkg.id)}
-                        disabled={isToggling || user?.role === "VIEW_ADMIN"}
-                      >
-                        {pkg.active ? "Turn Off" : "Turn On"}
-                      </Button>
-                    </Card>
+                    ))}
                   </div>
-                ))}
-              </div>
+
+                  <Button
+                    onClick={handleNext}
+                    disabled={packages.length <= cardsPerView}
+                    className="h-10 w-10 p-0 flex items-center justify-center"
+                  >
+                    {">"}
+                  </Button>
+                </div>
+
+                {maxSlide > 0 && (
+                  <div className="flex justify-center mt-4 gap-2">
+                    {Array.from({ length: maxSlide + 1 }).map((_, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => setCurrentSlide(index)}
+                        className={`w-2.5 h-2.5 rounded-full ${
+                          currentSlide === index ? "bg-primary" : "bg-gray-300"
+                        }`}
+                        aria-label={`Go to slide ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
