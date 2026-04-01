@@ -5,12 +5,79 @@ import moment from "moment/moment";
 const ViewModal = ({ visible, onCancel, selectedRecord, columns2, data }) => {
   const subscriptionData =
     selectedRecord?.subscriptionData ?? selectedRecord?.raw?.subscriptionData;
+  const sellsData = selectedRecord?.raw?.sells || selectedRecord?.sells || [];
+
+  const sellsColumns = [
+    {
+      title: "SL",
+      dataIndex: "sl",
+      key: "sl",
+      align: "center",
+    },
+    {
+      title: "Date",
+      dataIndex: "date",
+      key: "date",
+      align: "center",
+      render: (value) => (value ? moment(value).format("lll") : "N/A"),
+    },
+    {
+      title: "Merchant",
+      dataIndex: ["merchant", "businessName"],
+      key: "merchantName",
+      align: "center",
+      render: (_, record) => record?.merchant?.businessName || "N/A",
+    },
+    {
+      title: "Total Bill",
+      dataIndex: "totalBill",
+      key: "totalBill",
+      align: "center",
+    },
+    {
+      title: "Discounted Bill",
+      dataIndex: "discountedBill",
+      key: "discountedBill",
+      align: "center",
+    },
+    {
+      title: "Points Earned",
+      dataIndex: "pointsEarned",
+      key: "pointsEarned",
+      align: "center",
+    },
+    {
+      title: "Points Redeemed",
+      dataIndex: "pointRedeemed",
+      key: "pointRedeemed",
+      align: "center",
+    },
+    {
+      title: "Final Points",
+      dataIndex: "finalPoints",
+      key: "finalPoints",
+      align: "center",
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      align: "center",
+      render: (value) =>
+        value ? value.charAt(0).toUpperCase() + value.slice(1) : "N/A",
+    },
+  ];
+
+  const sellsTableData = sellsData.map((sell, index) => ({
+    ...sell,
+    sl: index + 1,
+  }));
 
   return (
     <Modal
       visible={visible}
       onCancel={onCancel}
-      width={800}
+      width={1200}
       footer={false}
       title="Customer Details"
     >
@@ -82,9 +149,9 @@ const ViewModal = ({ visible, onCancel, selectedRecord, columns2, data }) => {
             </div>
           </div>
           <Table
-            columns={columns2}
-            dataSource={[]}
-            rowKey="orderId"
+            columns={sellsColumns}
+            dataSource={sellsTableData}
+            rowKey={(record) => record.sellId}
             pagination={{ pageSize: 5 }}
             className="mt-6"
           />
