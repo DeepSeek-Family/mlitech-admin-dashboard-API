@@ -51,6 +51,7 @@ export default function RevenuePerUser() {
   const fromDate = searchParams.get("fromDate") || "";
   const toDate = searchParams.get("toDate") || "";
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
+  const pageSize = parseInt(searchParams.get("limit") || "10", 10);
 
   // Build query params for API
   const queryParams = useMemo(() => {
@@ -62,9 +63,9 @@ export default function RevenuePerUser() {
       params.push({ name: "endDate", value: toDate });
     }
     params.push({ name: "page", value: currentPage });
-    params.push({ name: "limit", value: 6 });
+    params.push({ name: "limit", value: pageSize });
     return params;
-  }, [fromDate, toDate, currentPage]);
+  }, [fromDate, toDate, currentPage, pageSize]);
 
   // Fetch data from API
   const {
@@ -127,6 +128,15 @@ export default function RevenuePerUser() {
     [setSearchParams]
   );
 
+  const handlePageSizeChange = (newPageSize) => {
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev);
+      newParams.set("limit", newPageSize.toString());
+      newParams.delete("page");
+      return newParams;
+    });
+  };
+
   // Transform API data for table
   const filteredData = useMemo(() => {
     // API response has nested data structure: apiResponse.data.data
@@ -138,14 +148,14 @@ export default function RevenuePerUser() {
 
     return dataArray.map((item, index) => ({
       key: index,
-      sl: index + 1 + (currentPage - 1) * 6,
+      sl: index + 1 + (currentPage - 1) * pageSize,
       customerId: item.customUserId || item.customerId || item._id || "-",
       customers: item.customerName || "-",
       transactions: item.totalTransactions || 0,
       totalRevenue: item.totalRevenue || 0,
       date: item.date ? dayjs(item.date).format("YYYY-MM-DD") : "-",
     }));
-  }, [apiResponse, currentPage]);
+  }, [apiResponse, currentPage, pageSize]);
 
   return (
     <div style={{ width: "100%" }}>
@@ -195,12 +205,13 @@ export default function RevenuePerUser() {
         isFetching={isFetching}
         pagination={{
           current: currentPage,
-          pageSize: 6,
+          pageSize: pageSize,
           total: apiResponse?.pagination?.total || 0,
         }}
         onPaginationChange={(page) =>
           updateSearchParam("page", page > 1 ? page.toString() : "")
         }
+        onPageSizeChange={handlePageSizeChange}
         rowKey="key"
       />
     </div>

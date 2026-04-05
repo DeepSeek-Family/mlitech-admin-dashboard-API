@@ -15,8 +15,15 @@ export default function ReportingAnalyticsPage() {
 
   const handleTabChange = (key) => {
     setSearchParams((prev) => {
-      const newParams = new URLSearchParams(prev);
+      const newParams = new URLSearchParams(); // Fresh empty params
       newParams.set("tab", key);
+      // Clear all pagination params from all report types
+      newParams.delete("page");
+      newParams.delete("limit");
+      newParams.delete("c_page");
+      newParams.delete("c_limit");
+      newParams.delete("m_page");
+      newParams.delete("m_limit");
       return newParams;
     });
   };

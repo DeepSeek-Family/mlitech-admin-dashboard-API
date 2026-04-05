@@ -29,9 +29,14 @@ import { useUser } from "../../../provider/User";
 const { Option } = Select;
 
 // Dropdown options for frontend filtering
-const subscriptionOptions = ["All Status", "Active", "Inactive"];
-const paymentOptions = ["All Payments", "Paid", "Unpaid"];
-const metricOptions = ["Revenue", "Visits", "Points Redeemed"];
+const subscriptionOptions = ["All Status", "active", "inActive"];
+const paymentOptions = ["All Payments", "paid", "unpaid", "expired"];
+const metricOptions = [
+  "Revenue",
+  "Visits",
+  "Points Redeemed",
+  "Points Accumulated",
+];
 const locationOptions = [
   "All Cities",
   "Abu Dhabi",
@@ -79,8 +84,19 @@ export default function MonthlyStatsChartMerchant() {
   const merchantName = searchParams.get("m_merchantName") || "All Merchants";
   const location = searchParams.get("m_location") || "All Cities";
   const selectedSubscription =
-    searchParams.get("m_subscription") || "All Status";
-  const selectedPayment = searchParams.get("m_payment") || "All Payments";
+    searchParams.get("m_subscription") === "Active"
+      ? "active"
+      : searchParams.get("m_subscription") === "Inactive"
+        ? "inActive"
+        : searchParams.get("m_subscription") || "All Status";
+  const selectedPayment =
+    searchParams.get("m_payment") === "Paid"
+      ? "paid"
+      : searchParams.get("m_payment") === "Unpaid"
+        ? "unpaid"
+        : searchParams.get("m_payment") === "Expired"
+          ? "expired"
+          : searchParams.get("m_payment") || "All Payments";
   const selectedMetric = searchParams.get("m_metric") || "all";
   const chartType = searchParams.get("m_chartType") || "Bar";
   const currentPage = parseInt(searchParams.get("m_page") || "1", 10);
@@ -184,18 +200,29 @@ export default function MonthlyStatsChartMerchant() {
     return apiResponse.data.records.map((record, index) => ({
       key: index,
       sl: index + 1,
-      date: record.date
-        ? dayjs(record.date).format("YYYY-MM-DD")
-        : "-",
+      date: record.date ? dayjs(record.date).format("YYYY-MM-DD") : "-",
       merchantId: record.customUserId || "-",
-      MerchantName: record.customerName || "-",
+      MerchantName: record.merchantName || "-",
       Location: record.location || "-",
-      SubscriptionStatus: record.subscriptionStatus || "-",
-      PaymentStatus: record.paymentStatus || "-",
+      SubscriptionStatus:
+        record.subscriptionStatus === "active"
+          ? "Active"
+          : record.subscriptionStatus === "inActive"
+            ? "Inactive"
+            : "-",
+      PaymentStatus:
+        record.paymentStatus === "paid"
+          ? "Paid"
+          : record.paymentStatus === "unpaid"
+            ? "Unpaid"
+            : record.paymentStatus === "expired"
+              ? "Expired"
+              : "-",
       DaysToExpire: record.daysToExpire ?? "-",
-      Revenue: record.revenue ?? "-",
-      Visits: record.users ?? "-",
+      Revenue: record.totalRevenue ?? "-",
+      Visits: record.visit ?? "-",
       "Points Redeemed": record.pointsRedeemed ?? "-",
+      "Points Accumulated": record.pointsEarned ?? "-",
     }));
   }, [apiResponse]);
 
@@ -205,9 +232,10 @@ export default function MonthlyStatsChartMerchant() {
 
     return apiResponse.data.monthlyData.map((item) => ({
       date: `${item.monthName} ${item.year}`,
-      Revenue: item.revenue || 0,
+      Revenue: item.totalRevenue || 0,
       Visits: item.users || 0,
       "Points Redeemed": item.pointsRedeemed || 0,
+      "Points Accumulated": item.pointsEarned || 0,
     }));
   }, [apiResponse]);
 
@@ -356,7 +384,7 @@ export default function MonthlyStatsChartMerchant() {
       dataIndex: "sl",
       key: "sl",
       align: "center",
-      render: (_, __, index) => index + 1,
+      render: (_, __, index) => (currentPage - 1) * pageSize + index + 1,
     },
     { title: "Date", dataIndex: "date", key: "date", align: "center" },
     {
@@ -382,18 +410,38 @@ export default function MonthlyStatsChartMerchant() {
       dataIndex: "SubscriptionStatus",
       key: "SubscriptionStatus",
       align: "center",
+      render: (status) => (
+        <span
+          className={
+            status?.toLowerCase() === "active"
+              ? "text-green-600"
+              : status?.toLowerCase() === "inactive"
+                ? "text-red-600"
+                : "text-yellow-500"
+          }
+        >
+          {status}
+        </span>
+      ),
     },
     {
       title: "Payment Status",
       dataIndex: "PaymentStatus",
       key: "PaymentStatus",
       align: "center",
-    },
-    {
-      title: "Days to Expire",
-      dataIndex: "DaysToExpire",
-      key: "DaysToExpire",
-      align: "center",
+      render: (status) => (
+        <span
+          className={
+            status?.toLowerCase() === "paid"
+              ? "text-green-600"
+              : status?.toLowerCase() === "expired"
+                ? "text-red-600"
+                : "text-yellow-500"
+          }
+        >
+          {status}
+        </span>
+      ),
     },
     { title: "Revenue", dataIndex: "Revenue", key: "Revenue", align: "center" },
     { title: "Visits", dataIndex: "Visits", key: "Visits", align: "center" },
@@ -401,6 +449,12 @@ export default function MonthlyStatsChartMerchant() {
       title: "Points Redeemed",
       dataIndex: "Points Redeemed",
       key: "Points Redeemed",
+      align: "center",
+    },
+    {
+      title: "Points Accumulated",
+      dataIndex: "Points Accumulated",
+      key: "Points Accumulated",
       align: "center",
     },
   ];
@@ -558,7 +612,11 @@ export default function MonthlyStatsChartMerchant() {
                 >
                   {subscriptionOptions.map((option) => (
                     <Option key={option} value={option}>
-                      {option}
+                      {option === "All Status"
+                        ? option
+                        : option.toLowerCase() === "inactive"
+                          ? "Inactive"
+                          : option.charAt(0).toUpperCase() + option.slice(1)}
                     </Option>
                   ))}
                 </Select>
@@ -581,7 +639,9 @@ export default function MonthlyStatsChartMerchant() {
                 >
                   {paymentOptions.map((option) => (
                     <Option key={option} value={option}>
-                      {option}
+                      {option === "All Payments"
+                        ? option
+                        : option.charAt(0).toUpperCase() + option.slice(1)}
                     </Option>
                   ))}
                 </Select>
@@ -719,6 +779,19 @@ export default function MonthlyStatsChartMerchant() {
                     )}
                   />
                 )}
+                {(selectedMetric === "all" ||
+                  selectedMetric === "Points Accumulated") && (
+                  <Bar
+                    dataKey="Points Accumulated"
+                    fill="#ae00ff"
+                    shape={(props) => (
+                      <Custom3DBarWithWatermark
+                        {...props}
+                        dataKey="Points Accumulated"
+                      />
+                    )}
+                  />
+                )}
               </BarChart>
             ) : chartType === "Line" ? (
               <LineChart
@@ -744,6 +817,14 @@ export default function MonthlyStatsChartMerchant() {
                     type="monotone"
                     dataKey="Points Redeemed"
                     stroke="#FFAE4C"
+                  />
+                )}
+                {(selectedMetric === "all" ||
+                  selectedMetric === "Points Accumulated") && (
+                  <Line
+                    type="monotone"
+                    dataKey="Points Accumulated"
+                    stroke="#ae00ff"
                   />
                 )}
               </LineChart>
@@ -782,6 +863,15 @@ export default function MonthlyStatsChartMerchant() {
                     dataKey="Points Redeemed"
                     stroke="#FFAE4C"
                     fill="#FFAE4C"
+                  />
+                )}
+                {(selectedMetric === "all" ||
+                  selectedMetric === "Points Accumulated") && (
+                  <Area
+                    type="monotone"
+                    dataKey="Points Accumulated"
+                    stroke="#ae00ff"
+                    fill="#ae00ff"
                   />
                 )}
               </AreaChart>

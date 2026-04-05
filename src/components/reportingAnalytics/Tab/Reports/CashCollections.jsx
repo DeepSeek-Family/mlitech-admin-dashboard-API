@@ -52,6 +52,7 @@ export default function CashCollections() {
   const fromDate = searchParams.get("fromDate") || "";
   const toDate = searchParams.get("toDate") || "";
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
+  const pageSize = parseInt(searchParams.get("limit") || "10", 10);
 
   // Build query params for API
   const queryParams = useMemo(() => {
@@ -63,9 +64,9 @@ export default function CashCollections() {
       params.push({ name: "toDate", value: toDate });
     }
     params.push({ name: "page", value: currentPage });
-    params.push({ name: "limit", value: 6 });
+    params.push({ name: "limit", value: pageSize });
     return params;
-  }, [fromDate, toDate, currentPage]);
+  }, [fromDate, toDate, currentPage, pageSize]);
 
   // Fetch data from API
   const {
@@ -125,8 +126,17 @@ export default function CashCollections() {
         return newParams;
       });
     },
-    [setSearchParams]
+    [setSearchParams],
   );
+
+  const handlePageSizeChange = (newPageSize) => {
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev);
+      newParams.set("limit", newPageSize.toString());
+      newParams.delete("page");
+      return newParams;
+    });
+  };
 
   // Transform API data for table
   const filteredData = useMemo(() => {
@@ -139,14 +149,14 @@ export default function CashCollections() {
 
     return dataArray.map((item, index) => ({
       key: index,
-      sl: index + 1 + (currentPage - 1) * 6,
+      sl: index + 1 + (currentPage - 1) * pageSize,
       merchantId: item.customerId || "-",
       salesRep: item.salesRep || "-",
       pendingTransactions: item.totalTransactions || 0,
       totalReceivable: item.totalReceived || 0,
       date: item.date ? dayjs(item.date).format("YYYY-MM-DD") : "-",
     }));
-  }, [apiResponse, currentPage]);
+  }, [apiResponse, currentPage, pageSize]);
 
   return (
     <div style={{ width: "100%" }}>
@@ -159,7 +169,7 @@ export default function CashCollections() {
               onChange={(date) =>
                 updateSearchParam(
                   "fromDate",
-                  date ? dayjs(date).format("YYYY-MM-DD") : ""
+                  date ? dayjs(date).format("YYYY-MM-DD") : "",
                 )
               }
               style={{ marginLeft: "auto", marginRight: "20px" }}
@@ -171,7 +181,7 @@ export default function CashCollections() {
               onChange={(date) =>
                 updateSearchParam(
                   "toDate",
-                  date ? dayjs(date).format("YYYY-MM-DD") : ""
+                  date ? dayjs(date).format("YYYY-MM-DD") : "",
                 )
               }
               style={{ marginRight: "20px" }}
@@ -196,12 +206,13 @@ export default function CashCollections() {
         isFetching={isFetching}
         pagination={{
           current: currentPage,
-          pageSize: 6,
+          pageSize: pageSize,
           total: apiResponse?.pagination?.total || 0,
         }}
         onPaginationChange={(page) =>
           updateSearchParam("page", page > 1 ? page.toString() : "")
         }
+        onPageSizeChange={handlePageSizeChange}
         rowKey="key"
       />
     </div>
