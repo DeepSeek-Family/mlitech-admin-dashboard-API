@@ -110,7 +110,7 @@ const reportAnalyticsApi = api.injectEndpoints({
           });
         }
         return {
-          url: `/report-analytics/customer/monthly/export`,
+          url: `/report-analytics/customer/export`,
           method: "GET",
           params,
           responseHandler: (response) => response.blob(),

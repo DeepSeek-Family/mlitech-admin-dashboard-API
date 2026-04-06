@@ -49,24 +49,24 @@ export default function CashCollections() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Read values from URL params
-  const fromDate = searchParams.get("fromDate") || "";
-  const toDate = searchParams.get("toDate") || "";
+  const startDate = searchParams.get("startDate") || "";
+  const endDate = searchParams.get("endDate") || "";
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
   const pageSize = parseInt(searchParams.get("limit") || "10", 10);
 
   // Build query params for API
   const queryParams = useMemo(() => {
     const params = [];
-    if (fromDate) {
-      params.push({ name: "fromDate", value: fromDate });
+    if (startDate) {
+      params.push({ name: "startDate", value: startDate });
     }
-    if (toDate) {
-      params.push({ name: "toDate", value: toDate });
+    if (endDate) {
+      params.push({ name: "endDate", value: endDate });
     }
     params.push({ name: "page", value: currentPage });
     params.push({ name: "limit", value: pageSize });
     return params;
-  }, [fromDate, toDate, currentPage, pageSize]);
+  }, [startDate, endDate, currentPage, pageSize]);
 
   // Fetch data from API
   const {
@@ -82,8 +82,8 @@ export default function CashCollections() {
   const handleExportCashCollection = async () => {
     try {
       const result = await triggerExport([
-        { name: "fromDate", value: fromDate },
-        { name: "toDate", value: toDate },
+        { name: "startDate", value: startDate },
+        { name: "endDate", value: endDate },
       ]);
 
       if (result.data) {
@@ -165,10 +165,10 @@ export default function CashCollections() {
         <div className="flex justify-between">
           <div>
             <DatePicker
-              value={fromDate ? dayjs(fromDate) : null}
+              value={startDate ? dayjs(startDate) : null}
               onChange={(date) =>
                 updateSearchParam(
-                  "fromDate",
+                  "startDate",
                   date ? dayjs(date).format("YYYY-MM-DD") : "",
                 )
               }
@@ -177,10 +177,10 @@ export default function CashCollections() {
               format="YYYY-MM-DD"
             />
             <DatePicker
-              value={toDate ? dayjs(toDate) : null}
+              value={endDate ? dayjs(endDate) : null}
               onChange={(date) =>
                 updateSearchParam(
-                  "toDate",
+                  "endDate",
                   date ? dayjs(date).format("YYYY-MM-DD") : "",
                 )
               }

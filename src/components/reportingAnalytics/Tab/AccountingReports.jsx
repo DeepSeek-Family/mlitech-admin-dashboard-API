@@ -16,10 +16,28 @@ export default function AccountingReports() {
   // Get active accounting tab from URL or default to "1"
   const activeAccountingTab = searchParams.get("accountingTab") || "1";
 
+  // const handleAccountingTabChange = (key) => {
+  //   setSearchParams((prev) => {
+  //     const newParams = new URLSearchParams(prev);
+  //     newParams.set("accountingTab", key);
+  //     return newParams;
+  //   });
+  // };
+
   const handleAccountingTabChange = (key) => {
     setSearchParams((prev) => {
       const newParams = new URLSearchParams(prev);
+
+      // remove unwanted params
+      newParams.delete("page");
+      newParams.delete("filter");
+      newParams.delete("searchTerm");
+      newParams.delete("startDate");
+      newParams.delete("endDate");
+
+      // update tab
       newParams.set("accountingTab", key);
+
       return newParams;
     });
   };

@@ -48,31 +48,35 @@ export default function CashReceivable() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Read values from URL params
-  const fromDate = searchParams.get("fromDate") || "";
-  const toDate = searchParams.get("toDate") || "";
+  const startDate = searchParams.get("startDate") || "";
+  const endDate = searchParams.get("endDate") || "";
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
   const pageSize = parseInt(searchParams.get("limit") || "10", 10);
 
   // Build query params for API
   const queryParams = useMemo(() => {
     const params = [];
-    if (fromDate) {
-      params.push({ name: "startDate", value: fromDate });
+    if (startDate) {
+      params.push({ name: "startDate", value: startDate });
     }
-    if (toDate) {
-      params.push({ name: "endDate", value: toDate });
+    if (endDate) {
+      params.push({ name: "endDate", value: endDate });
     }
     params.push({ name: "page", value: currentPage });
     params.push({ name: "limit", value: pageSize });
     return params;
-  }, [fromDate, toDate, currentPage, pageSize]);
+  }, [startDate, endDate, currentPage, pageSize]);
+
+  const shouldSkipCashReceivableQuery = Boolean(startDate) && !Boolean(endDate);
 
   // Fetch data from API
   const {
     data: apiResponse,
     isLoading,
     isFetching,
-  } = useGetCashReceivableQuery(queryParams);
+  } = useGetCashReceivableQuery(queryParams, {
+    skip: shouldSkipCashReceivableQuery,
+  });
 
   // Lazy query for export
   const [triggerExport, { isLoading: isExportLoading }] =
@@ -81,8 +85,8 @@ export default function CashReceivable() {
   const handleExportCashReceivable = async () => {
     try {
       const result = await triggerExport([
-        { name: "startDate", value: fromDate },
-        { name: "endDate", value: toDate },
+        { name: "startDate", value: startDate },
+        { name: "endDate", value: endDate },
       ]);
 
       if (result.data) {
@@ -125,7 +129,7 @@ export default function CashReceivable() {
         return newParams;
       });
     },
-    [setSearchParams]
+    [setSearchParams],
   );
   const handlePageSizeChange = (newPageSize) => {
     setSearchParams((prev) => {
@@ -162,11 +166,11 @@ export default function CashReceivable() {
         <div className="flex justify-between">
           <div>
             <DatePicker
-              value={fromDate ? dayjs(fromDate) : null}
+              value={startDate ? dayjs(startDate) : null}
               onChange={(date) =>
                 updateSearchParam(
-                  "fromDate",
-                  date ? dayjs(date).format("YYYY-MM-DD") : ""
+                  "startDate",
+                  date ? dayjs(date).format("YYYY-MM-DD") : "",
                 )
               }
               style={{ marginLeft: "auto", marginRight: "20px" }}
@@ -174,11 +178,11 @@ export default function CashReceivable() {
               format="YYYY-MM-DD"
             />
             <DatePicker
-              value={toDate ? dayjs(toDate) : null}
+              value={endDate ? dayjs(endDate) : null}
               onChange={(date) =>
                 updateSearchParam(
-                  "toDate",
-                  date ? dayjs(date).format("YYYY-MM-DD") : ""
+                  "endDate",
+                  date ? dayjs(date).format("YYYY-MM-DD") : "",
                 )
               }
               style={{ marginRight: "20px" }}
