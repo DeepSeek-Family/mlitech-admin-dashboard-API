@@ -21,6 +21,14 @@ export const merchantApi = api.injectEndpoints({
       transformResponse: (response) => response,
       providesTags: ["Merchant"],
     }),
+    getMerchantDetails: builder.query({
+      query: ({ id, page = 1, limit = 5 }) => ({
+        url: `/admin/merchants?customerPage=${page}&customerLimit=${limit}`,
+        method: "GET",
+      }),
+      transformResponse: (response) => response,
+      providesTags: ["Merchant"],
+    }),
     createMerchant: builder.mutation({
       query: (data) => ({
         url: "/usermanagement/merchant",
@@ -107,6 +115,8 @@ export const merchantApi = api.injectEndpoints({
 
 export const {
   useGetMerchantProfileQuery,
+  useGetMerchantDetailsQuery,
+  useLazyGetMerchantDetailsQuery,
   useCreateMerchantMutation,
   useUpdateMerchantMutation,
   useDeleteMerchantMutation,

@@ -1,6 +1,8 @@
+import { useEffect, useMemo, useState } from "react";
 import { Modal } from "antd";
 import MarchantIcon from "../../../assets/marchant.png";
 import CustomTable from "../../common/CustomTable";
+import { useLazyGetMerchantDetailsQuery } from "../../../redux/apiSlices/merchantSlice";
 
 const detailsColumns = [
   {
@@ -47,12 +49,73 @@ const detailsColumns = [
 ];
 
 const ViewModal = ({ visible, record, onCancel }) => {
-  const customers = record?.raw?.customers || record?.customers || [];
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+  const [merchantDetails, setMerchantDetails] = useState(record?.raw || record || {});
+  const [fetchMerchantDetails, { isFetching }] = useLazyGetMerchantDetailsQuery();
+
+  const customersPagination =
+    merchantDetails?.customersPagination ||
+    record?.raw?.customersPagination ||
+    record?.customersPagination ||
+    {};
+
+  const customers =
+    merchantDetails?.customers || record?.raw?.customers || record?.customers || [];
+
+  useEffect(() => {
+    if (!visible || !record?.recordId) return;
+
+    const initialPage = customersPagination?.page || 1;
+    const initialLimit = customersPagination?.limit || 5;
+
+    setCurrentPage(initialPage);
+    setPageSize(initialLimit);
+
+    fetchMerchantDetails({
+      id: record.recordId,
+      page: initialPage,
+      limit: initialLimit,
+    })
+      .unwrap()
+      .then((response) => {
+        setMerchantDetails(response?.data || response || {});
+      })
+      .catch((error) => {
+        console.error("Failed to load merchant details:", error);
+      });
+  }, [visible, record?.recordId]);
+
+  useEffect(() => {
+    if (!visible || !record?.recordId) return;
+
+    fetchMerchantDetails({
+      id: record.recordId,
+      page: currentPage,
+      limit: pageSize,
+    })
+      .unwrap()
+      .then((response) => {
+        setMerchantDetails(response?.data || response || {});
+      })
+      .catch((error) => {
+        console.error("Failed to load merchant details:", error);
+      });
+  }, [currentPage, pageSize, visible, record?.recordId, fetchMerchantDetails]);
   const customerTableData = customers.map((item, index) => ({
     ...item,
-    sl: index + 1,
+    sl: (currentPage - 1) * pageSize + index + 1,
     key: item?.userId || item?._id?.userId || `${index}`,
   }));
+
+  const paginationData = useMemo(
+    () => ({
+      pageSize,
+      total: customersPagination?.total ?? customerTableData.length,
+      current: currentPage,
+    }),
+    [customersPagination?.total, customerTableData.length, currentPage, pageSize],
+  );
 
   return (
     <Modal visible={visible} onCancel={onCancel} width={1000} footer={[]}>
@@ -139,7 +202,12 @@ const ViewModal = ({ visible, record, onCancel }) => {
         <CustomTable
           columns={detailsColumns}
           data={customerTableData}
-          pagination={false}
+          pagination={paginationData}
+          onPaginationChange={(nextPage, nextPageSize) => {
+            setCurrentPage(nextPage);
+            setPageSize(nextPageSize);
+          }}
+          isFetching={isFetching}
           rowKey={(row) => row?.userId || row?._id?.userId || row?.key}
         />
       </div>

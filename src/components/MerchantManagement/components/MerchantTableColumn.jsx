@@ -54,8 +54,8 @@ const MerchantTableColumn = ({
     },
     {
       title: "Total Sales",
-      dataIndex: "totalSales",
-      key: "totalSales",
+      dataIndex: "totalRevenue",
+      key: "totalRevenue",
       align: "center",
     },
     // {
@@ -78,8 +78,8 @@ const MerchantTableColumn = ({
     // },
     {
       title: "Total Visits",
-      dataIndex: "totalVisits",
-      key: "totalVisits",
+      dataIndex: "totalSales",
+      key: "totalSales",
       align: "center",
     },
     { title: "Status", dataIndex: "status", key: "status", align: "center" },
@@ -88,11 +88,20 @@ const MerchantTableColumn = ({
       dataIndex: "ratings",
       key: "ratings",
       align: "center",
-      render: (_, record) => (
-        <Tooltip title="Customer Ratings">
-          <Rate disabled value={record.ratings} style={{ fontSize: 16 }} />
-        </Tooltip>
-      ),
+      render: (_, record) => {
+        const rating = Number(record.ratings) || 0;
+
+        return (
+          <Tooltip title={rating.toFixed(1)}>
+            <Rate
+              allowHalf
+              disabled
+              value={rating}
+              style={{ fontSize: 16, color: "#FFD700" }}
+            />
+          </Tooltip>
+        );
+      },
     },
     {
       title: "Action",
