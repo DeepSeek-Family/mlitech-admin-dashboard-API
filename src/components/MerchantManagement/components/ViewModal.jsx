@@ -5,11 +5,11 @@ import CustomTable from "../../common/CustomTable";
 import { useLazyGetMerchantDetailsQuery } from "../../../redux/apiSlices/merchantSlice";
 
 const detailsColumns = [
-  {
-    title: "SL",
-    dataIndex: "sl",
-    key: "sl",
-  },
+  // {
+  //   title: "SL",
+  //   dataIndex: "sl",
+  //   key: "sl",
+  // },
   {
     title: "Customer Name",
     dataIndex: "name",
@@ -67,7 +67,7 @@ const ViewModal = ({ visible, record, onCancel }) => {
     if (!visible || !record?.recordId) return;
 
     const initialPage = customersPagination?.page || 1;
-    const initialLimit = customersPagination?.limit || 5;
+    const initialLimit = 5;
 
     setCurrentPage(initialPage);
     setPageSize(initialLimit);

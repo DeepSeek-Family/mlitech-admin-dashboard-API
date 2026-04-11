@@ -22,10 +22,22 @@ export const merchantApi = api.injectEndpoints({
       providesTags: ["Merchant"],
     }),
     getMerchantDetails: builder.query({
-      query: ({ id, page = 1, limit = 5 }) => ({
-        url: `/admin/merchants?customerPage=${page}&customerLimit=${limit}`,
-        method: "GET",
-      }),
+      query: ({ page = 1, limit = 5 }) => {
+        const searchParams = new URLSearchParams(window.location.search);
+        const prePage = searchParams.get("page") || 1;
+        const preLimit = searchParams.get("limit") || 5;
+
+        return {
+          url: `/admin/merchants`,
+          method: "GET",
+          params: {
+            page: prePage,
+            limit: preLimit,
+            customerPage: page,
+            customerLimit: limit,
+          },
+        };
+      },
       transformResponse: (response) => response,
       providesTags: ["Merchant"],
     }),

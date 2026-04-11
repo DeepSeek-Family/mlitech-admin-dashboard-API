@@ -8,12 +8,12 @@ const ViewModal = ({ visible, onCancel, selectedRecord, columns2, data }) => {
   const sellsData = selectedRecord?.raw?.sells || selectedRecord?.sells || [];
 
   const sellsColumns = [
-    {
-      title: "SL",
-      dataIndex: "sl",
-      key: "sl",
-      align: "center",
-    },
+    // {
+    //   title: "SL",
+    //   dataIndex: "sl",
+    //   key: "sl",
+    //   align: "center",
+    // },
     {
       title: "Date",
       dataIndex: "date",
