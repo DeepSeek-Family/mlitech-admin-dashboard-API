@@ -244,15 +244,15 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
       ...(isViewAdmin
         ? []
         : [
-            {
-              key: "/currency-conversion",
-              icon: renderIcon(PromotionManagement, "/currency-conversion"),
-              label: (
-                <Link to="/currency-conversion">
-                  {collapsed ? "" : "Currency Conversion"}
-                </Link>
-              ),
-            },
+            // {
+            //   key: "/currency-conversion",
+            //   icon: renderIcon(PromotionManagement, "/currency-conversion"),
+            //   label: (
+            //     <Link to="/currency-conversion">
+            //       {collapsed ? "" : "Currency Conversion"}
+            //     </Link>
+            //   ),
+            // },
             {
               key: "/push-notifications",
               icon: renderIcon(PushNotifications, "/push-notifications"),

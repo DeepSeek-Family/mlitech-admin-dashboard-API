@@ -218,11 +218,11 @@ export default function MonthlyStatsChartMerchant() {
             : record.paymentStatus === "expired"
               ? "Expired"
               : "-",
-      DaysToExpire: record.daysToExpire ?? "-",
-      Revenue: record.totalRevenue ?? "-",
-      Visits: record.visit ?? "-",
-      "Points Redeemed": record.pointsRedeemed ?? "-",
-      "Points Accumulated": record.pointsEarned ?? "-",
+      DaysToExpire: record.daysToExpire ?? 0,
+      Revenue: record.totalRevenue ?? 0,
+      Visits: record.visit ?? 0,
+      "Points Redeemed": record.pointsRedeemed ?? 0,
+      "Points Accumulated": record.pointsEarned ?? 0,
     }));
   }, [apiResponse]);
 

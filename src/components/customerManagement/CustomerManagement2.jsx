@@ -86,6 +86,7 @@ const CustomerManagement2 = () => {
       customerId: item.customUserId || "-",
       customerName: item.firstName || "-",
       subscription: item.subscription || "-",
+      image: item.profile || "",
       tier: item.tier,
       phone: item.phone || "-",
       email: item.email || "-",

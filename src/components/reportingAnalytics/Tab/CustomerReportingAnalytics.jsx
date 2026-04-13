@@ -228,7 +228,7 @@ export default function MonthlyStatsChartCustomer() {
     return apiResponse.data.monthlyData.map((item) => ({
       date: `${item.monthName} ${item.year}`,
       Revenue: item.totalRevenue || 0,
-      Visits: item.visit || 0,
+      Visits: item.users || 0,
       "Points Accumulated": item.pointsEarned || 0,
       "Points Redeemed": item.pointsRedeemed || 0,
     }));

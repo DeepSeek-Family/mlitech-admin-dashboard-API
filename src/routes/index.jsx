@@ -111,10 +111,10 @@ const router = createBrowserRouter([
         path: "/notification",
         element: <Notifications />,
       },
-      {
-        path: "/currency-conversion",
-        element: <CurrencyConversion />,
-      },
+      // {
+      //   path: "/currency-conversion",
+      //   element: <CurrencyConversion />,
+      // },
       {
         path: "/push-notifications",
         element: <PushNotifications />,

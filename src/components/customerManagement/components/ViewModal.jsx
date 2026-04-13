@@ -1,6 +1,7 @@
 import { Modal, Table } from "antd";
-import MarchantIcon from "../../../assets/marchant.png";
+import MarchantIcon from "../../../assets/image-fallback.jpg";
 import moment from "moment/moment";
+import { getImageUrl } from "../../common/imageUrl";
 
 const ViewModal = ({ visible, onCancel, selectedRecord, columns2, data }) => {
   const subscriptionData =
@@ -85,7 +86,7 @@ const ViewModal = ({ visible, onCancel, selectedRecord, columns2, data }) => {
         <div>
           <div className="flex flex-row justify-between items-start gap-3 mt-8">
             <img
-              src={MarchantIcon}
+              src={getImageUrl(selectedRecord?.image) || MarchantIcon}
               alt={selectedRecord.name}
               className="w-214 h-214 rounded-full"
             />
