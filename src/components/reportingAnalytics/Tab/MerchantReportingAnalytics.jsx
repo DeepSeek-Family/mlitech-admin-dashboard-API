@@ -146,7 +146,7 @@ export default function MonthlyStatsChartMerchant() {
       merchantName.trim() !== "" &&
       merchantName !== "All Merchants"
     ) {
-      params.push({ name: "merchantName", value: merchantName.trim() });
+      params.push({ name: "customerName", value: merchantName.trim() });
     }
     if (location && location.trim() !== "" && location !== "All Cities") {
       params.push({ name: "location", value: location.trim() });
@@ -701,7 +701,7 @@ export default function MonthlyStatsChartMerchant() {
                   <Button
                     onClick={handleExportChartMonthlyData}
                     loading={isMonthlyExportLoading}
-                    disabled={isMonthlyExportLoading}
+                    disabled={isMonthlyExportLoading || isViewAdmin}
                     className="bg-primary px-6 py-[19px] rounded-md text-white hover:text-secondary text-[14px] font-bold"
                   >
                     Export Report Monthly
@@ -888,7 +888,7 @@ export default function MonthlyStatsChartMerchant() {
             className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary text-[17px] font-bold"
             onClick={handleExportChartData}
             loading={isExportLoading}
-            disabled={isExportLoading}
+            disabled={isExportLoading || isViewAdmin}
           >
             Export Report
           </Button>

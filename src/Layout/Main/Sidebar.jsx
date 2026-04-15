@@ -15,6 +15,7 @@ import {
   Rewords,
   PushNotifications,
 } from "../../components/common/Svg";
+import { getImageUrl } from "../../components/common/imageUrl";
 import image4 from "../../assets/image4.png";
 import { useUser } from "../../provider/User";
 
@@ -328,7 +329,16 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
           to={"/"}
           className="logo-container flex items-center justify-center py-4"
         >
-          <img src={image4} alt="logo" className="w-40 h-40" />
+          <img
+            src={getImageUrl(user?.profile) || image4}
+            alt="profile"
+            style={{
+              clipPath: "circle()",
+              width: 120,
+              height: 120,
+              objectFit: "cover",
+            }}
+          />
         </Link>
       )}
 

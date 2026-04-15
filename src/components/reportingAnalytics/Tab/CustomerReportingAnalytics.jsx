@@ -20,6 +20,7 @@ import {
 import {
   useCustomerReportAnalyticsQuery,
   useLazyExportCustomerChartMonthlyDataQuery,
+  useLazyExportChartDataCustomerQuery,
 } from "../../../redux/apiSlices/reportAnalyticsApi";
 import { useGetCustomerProfileQuery } from "../../../redux/apiSlices/customerSlice";
 import CustomTable from "../../common/CustomTable";
@@ -188,6 +189,10 @@ export default function MonthlyStatsChartCustomer() {
   const [triggerExport, { isLoading: isExportLoading }] =
     useLazyExportCustomerChartMonthlyDataQuery();
 
+  // Lazy query for export chart data (only triggers on button click)
+  const [triggerExportChartData, { isLoading: isExportChartDataLoading }] =
+    useLazyExportChartDataCustomerQuery();
+
   // Transform API data for table
   const tableData = useMemo(() => {
     if (!apiResponse?.data?.records) return [];
@@ -330,6 +335,31 @@ export default function MonthlyStatsChartCustomer() {
   const handleExportChartData = async () => {
     try {
       const result = await triggerExport(queryParams);
+
+      if (result.data) {
+        // Create a blob URL and trigger download
+        const blob = result.data;
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+
+        // Generate filename with current date
+        const dateStr = new Date().toISOString().split("T")[0];
+        link.download = `customer-report-${dateStr}.xlsx`;
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error("Export failed:", error);
+    }
+  };
+
+  const handleExportTableData = async () => {
+    try {
+      const result = await triggerExportChartData(queryParams);
 
       if (result.data) {
         // Create a blob URL and trigger download
@@ -704,7 +734,7 @@ export default function MonthlyStatsChartCustomer() {
                   <Button
                     onClick={handleExportChartData}
                     loading={isExportLoading}
-                    disabled={isExportLoading}
+                    disabled={isExportLoading || isViewAdmin}
                     className="bg-primary px-6 py-[19px] rounded-md text-white hover:text-secondary text-[14px] font-bold"
                   >
                     Export Report Monthly
@@ -889,9 +919,9 @@ export default function MonthlyStatsChartCustomer() {
           <h1 className="text-[22px] font-bold">Data Table</h1>
           <Button
             className="bg-primary px-8 py-5 rounded-full text-white hover:text-secondary text-[17px] font-bold"
-            onClick={handleExportChartData}
-            loading={isExportLoading}
-            disabled={isExportLoading}
+            onClick={handleExportTableData}
+            loading={isExportChartDataLoading}
+            disabled={isExportChartDataLoading || isViewAdmin}
           >
             Export Report
           </Button>

@@ -8,6 +8,7 @@ import {
   useLazyExportRevenuePerUserQuery,
 } from "../../../../redux/apiSlices/accountingSlice";
 import CustomTable from "../../../common/CustomTable";
+import { useUser } from "../../../../provider/User";
 
 // Table columns
 const columns = [
@@ -45,6 +46,8 @@ const columns = [
 ];
 
 export default function RevenuePerUser() {
+  const { user } = useUser();
+  const isViewAdmin = user?.role === "VIEW_ADMIN";
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Read values from URL params
@@ -125,7 +128,7 @@ export default function RevenuePerUser() {
         return newParams;
       });
     },
-    [setSearchParams]
+    [setSearchParams],
   );
 
   const handlePageSizeChange = (newPageSize) => {
@@ -168,7 +171,7 @@ export default function RevenuePerUser() {
               onChange={(date) =>
                 updateSearchParam(
                   "fromDate",
-                  date ? dayjs(date).format("YYYY-MM-DD") : ""
+                  date ? dayjs(date).format("YYYY-MM-DD") : "",
                 )
               }
               style={{ marginLeft: "auto", marginRight: "20px" }}
@@ -180,7 +183,7 @@ export default function RevenuePerUser() {
               onChange={(date) =>
                 updateSearchParam(
                   "toDate",
-                  date ? dayjs(date).format("YYYY-MM-DD") : ""
+                  date ? dayjs(date).format("YYYY-MM-DD") : "",
                 )
               }
               style={{ marginRight: "20px" }}
@@ -192,7 +195,7 @@ export default function RevenuePerUser() {
             className="bg-primary text-white font-semibold px-[20px] hover:!text-black"
             onClick={handleExportRevenuePerUser}
             loading={isExportLoading}
-            disabled={isExportLoading}
+            disabled={isExportLoading || isViewAdmin}
           >
             Export Report
           </Button>

@@ -8,6 +8,7 @@ import {
   useLazyExportCashCollectionQuery,
 } from "../../../../redux/apiSlices/accountingSlice";
 import CustomTable from "../../../common/CustomTable";
+import { useUser } from "../../../../provider/User";
 
 // Table columns
 const columns = [
@@ -46,6 +47,8 @@ const columns = [
 ];
 
 export default function CashCollections() {
+  const { user } = useUser();
+  const isViewAdmin = user?.role === "VIEW_ADMIN";
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Read values from URL params
@@ -193,7 +196,7 @@ export default function CashCollections() {
             className="bg-primary text-white font-semibold px-[20px] hover:!text-black"
             onClick={handleExportCashCollection}
             loading={isExportLoading}
-            disabled={isExportLoading}
+            disabled={isExportLoading || isViewAdmin}
           >
             Export Report
           </Button>
