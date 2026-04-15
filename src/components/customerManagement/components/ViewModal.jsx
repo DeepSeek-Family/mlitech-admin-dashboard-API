@@ -86,9 +86,16 @@ const ViewModal = ({ visible, onCancel, selectedRecord, columns2, data }) => {
         <div>
           <div className="flex flex-row justify-between items-start gap-3 mt-8">
             <img
-              src={getImageUrl(selectedRecord?.image) || MarchantIcon}
+              src={getImageUrl(selectedRecord?.image)}
               alt={selectedRecord.name}
-              className="w-214 h-214 rounded-full"
+              style={{
+                width: "168px",
+                height: "168px",
+                borderRadius: "50%",
+                objectFit: "cover",
+                flexShrink: 0,
+                display: "block",
+              }}
             />
             <div className="flex flex-col gap-2 border border-primary rounded-md p-4 w-full">
               <p className="text-[22px] font-bold text-primary">

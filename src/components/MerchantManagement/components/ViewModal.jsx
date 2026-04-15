@@ -3,6 +3,7 @@ import { Modal } from "antd";
 import MarchantIcon from "../../../assets/marchant.png";
 import CustomTable from "../../common/CustomTable";
 import { useLazyGetMerchantDetailsQuery } from "../../../redux/apiSlices/merchantSlice";
+import { getImageUrl } from "../../common/imageUrl";
 
 const detailsColumns = [
   // {
@@ -51,8 +52,11 @@ const detailsColumns = [
 const ViewModal = ({ visible, record, onCancel }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
-  const [merchantDetails, setMerchantDetails] = useState(record?.raw || record || {});
-  const [fetchMerchantDetails, { isFetching }] = useLazyGetMerchantDetailsQuery();
+  const [merchantDetails, setMerchantDetails] = useState(
+    record?.raw || record || {},
+  );
+  const [fetchMerchantDetails, { isFetching }] =
+    useLazyGetMerchantDetailsQuery();
 
   const customersPagination =
     merchantDetails?.customersPagination ||
@@ -61,7 +65,10 @@ const ViewModal = ({ visible, record, onCancel }) => {
     {};
 
   const customers =
-    merchantDetails?.customers || record?.raw?.customers || record?.customers || [];
+    merchantDetails?.customers ||
+    record?.raw?.customers ||
+    record?.customers ||
+    [];
 
   useEffect(() => {
     if (!visible || !record?.recordId) return;
@@ -114,17 +121,29 @@ const ViewModal = ({ visible, record, onCancel }) => {
       total: customersPagination?.total ?? customerTableData.length,
       current: currentPage,
     }),
-    [customersPagination?.total, customerTableData.length, currentPage, pageSize],
+    [
+      customersPagination?.total,
+      customerTableData.length,
+      currentPage,
+      pageSize,
+    ],
   );
 
   return (
     <Modal visible={visible} onCancel={onCancel} width={1000} footer={[]}>
       <div className="flex flex-col">
-        <div className="flex flex-row items-center justify-between gap-3 mt-8 mb-8">
+        <div className="flex flex-row items-start justify-between gap-3 mt-8 mb-8">
           <img
-            src={MarchantIcon}
+            src={getImageUrl(record?.profile)}
             alt={record.name}
-            className="w-214 h-214 rounded-full"
+            style={{
+              width: "168px",
+              height: "168px",
+              borderRadius: "50%",
+              objectFit: "cover",
+              flexShrink: 0,
+              display: "block",
+            }}
           />
           <div className="flex flex-col gap-2 w-full border border-primary rounded-md p-4">
             <p className="text-[22px] font-bold text-primary">

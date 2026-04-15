@@ -123,6 +123,7 @@ const MerchantManagement = () => {
       firstName: item.firstName || item.name || "-",
       merchantCardId: item.customUserId || "-",
       businessName: item.businessName || "-",
+      profile: item.profile || null,
       phone: item.phone || "-",
       email: item.email || "-",
       location: item.country + ", " + item.city || "-",
