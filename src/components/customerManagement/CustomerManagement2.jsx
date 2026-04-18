@@ -95,7 +95,7 @@ const CustomerManagement2 = () => {
       totalSales: item.totalSellAmount || 0,
       status: item.status === "active" ? "Active" : "Inactive",
       subscriptionData: item.subscriptionData,
-      pointsBalance: item.totalPoints || 0,
+      pointsBalance: (item.totalPoints || 0).toFixed(2),
       raw: item,
     }));
   }, [response, page, limit]);
