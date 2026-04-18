@@ -70,12 +70,12 @@ export default function AccountingReports() {
             <RevenuePerUser />
           </TabPane>
         )}
-        <TabPane
+        {/* <TabPane
           tab={<span className="custom-tab-text">Points Redeemed</span>}
           key="4"
         >
           <PointsRedeemed />
-        </TabPane>
+        </TabPane> */}
       </Tabs>
     </div>
   );
