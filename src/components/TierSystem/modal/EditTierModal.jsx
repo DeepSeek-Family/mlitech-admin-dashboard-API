@@ -81,7 +81,7 @@ const EditTierModal = ({
             placeholder="Enter threshold"
           />
         </Form.Item>
-        <Form.Item
+        {/* <Form.Item
           label="Reward"
           name="reward"
           rules={[{ required: true, message: "Please enter reward" }]}
@@ -91,7 +91,7 @@ const EditTierModal = ({
             className="mli-tall-input"
             placeholder="Enter reward"
           />
-        </Form.Item>
+        </Form.Item> */}
         <Form.Item
           label="Point accumulation rule (%)"
           name="lockoutDuration"

@@ -125,7 +125,7 @@ export default function TierSystem() {
       const payload = {
         name: values.name,
         pointsThreshold: Number(values.threshold) || 0,
-        reward: String(values.reward || ""),
+        reward: String(values.reward || 0),
         accumulationRule: Number(values.lockoutDuration) || 0,
         redemptionRule: 0,
         minTotalSpend: Number(values.minSpend) || 0,
@@ -204,7 +204,7 @@ export default function TierSystem() {
         <div>
           <h1 className="text-[24px] font-bold">Point & Tier System</h1>
           <p className="text-[16px] font-normal mt-2">
-            Configure your tiers, rewards, and point accumulation rules.
+            Configure your tiers and point accumulation rules.
           </p>
         </div>
         <Button
@@ -239,9 +239,9 @@ export default function TierSystem() {
                     <span className="font-semibold">Points Threshold:</span>{" "}
                     {tier.threshold}
                   </p>
-                  <p>
+                  {/* <p>
                     <span className="font-semibold">Reward:</span> {tier.reward}
-                  </p>
+                  </p> */}
                   <p>
                     <span className="font-semibold">Accumulation Rule:</span>{" "}
                     {tier.lockoutDuration}
