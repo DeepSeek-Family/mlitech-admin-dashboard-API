@@ -383,8 +383,8 @@ const MerchantManagement = () => {
           </p>
         </div>
 
-        <div className="flex md:flex-row flex-col items-end gap-4">
-          <div className="flex flex-col lg:flex-row gap-4">
+        <div className="flex flex-col 2xl:flex-row items-end gap-4">
+          <div className="flex flex-col 2xl:flex-row items-end gap-4">
             <Input
               placeholder="Search by Merchant ID, Business Name, Phone, Email or Location"
               value={searchText}

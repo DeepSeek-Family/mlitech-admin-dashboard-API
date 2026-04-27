@@ -22,7 +22,7 @@ ChartJS.register(
   BarElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
 );
 
 const Home = () => {
@@ -129,7 +129,7 @@ const Home = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-white border border-primary rounded-lg flex items-center justify-start p-6">
+            <div className="bg-white border border-primary rounded-lg flex items-center justify-start py-2 px-4 2xl:py-4 2xl:px-6">
               <div className="flex flex-col items-baseline">
                 <h2 className="text-[16px] font-semibold mb-1">
                   Total Merchants
@@ -141,7 +141,7 @@ const Home = () => {
               </div>
             </div>
 
-            <div className="bg-white border border-primary rounded-lg flex items-center justify-start p-6">
+            <div className="bg-white border border-primary rounded-lg flex items-center justify-start py-2 px-4 2xl:py-4 2xl:px-6">
               <div className="flex flex-col items-baseline">
                 <h2 className="text-[16px] font-semibold mb-1">
                   Total Customers
@@ -153,7 +153,7 @@ const Home = () => {
               </div>
             </div>
 
-            <div className="bg-white border border-primary rounded-lg flex items-center justify-start p-6">
+            <div className="bg-white border border-primary rounded-lg flex items-center justify-start py-2 px-4 2xl:py-4 2xl:px-6">
               <div className="flex flex-col items-baseline">
                 <h2 className="text-[16px] font-semibold mb-1">
                   Pending Approvals
@@ -165,7 +165,7 @@ const Home = () => {
               </div>
             </div>
 
-            <div className="bg-white border border-primary rounded-lg flex items-center justify-start p-6">
+            <div className="bg-white border border-primary rounded-lg flex items-center justify-start py-2 px-4 2xl:py-4 2xl:px-6">
               <div className="flex flex-col items-baseline">
                 <h2 className="text-[16px] font-semibold mb-1">
                   Membership Revenue
