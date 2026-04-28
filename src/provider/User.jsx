@@ -49,7 +49,12 @@ export const UserProvider = ({ children }) => {
     } else if (isError) {
       setUser(null);
     }
-  }, [profile, isLoading, isError]);
+    
+    // Clear user when token is removed (logout)
+    if (!token && user) {
+      setUser(null);
+    }
+  }, [profile, isLoading, isError, token, user]);
 
   return (
     <UserContext.Provider value={{ user, setUser, isLoading, refetch }}>

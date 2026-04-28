@@ -11,6 +11,7 @@ import {
   notificationApi,
 } from "../../redux/apiSlices/notificationSlice";
 import socketService from "../../components/common/socketService";
+import { api } from "../../redux/api/baseApi";
 
 const Header = ({ toggleSidebar, isMobile }) => {
   const { user } = useUser();
@@ -62,9 +63,16 @@ const Header = ({ toggleSidebar, isMobile }) => {
   };
 
   const handleLogout = () => {
+    // Clear token from localStorage
     localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
+    
+    // Clear all cached data from Redux store
+    dispatch(api.util.resetApiState());
+    
+    // Close modal and navigate
     setIsLogoutModalOpen(false);
-    navigate("/auth/login");
+    navigate("/auth/login", { replace: true });
   };
 
   const handleCancelLogout = () => {

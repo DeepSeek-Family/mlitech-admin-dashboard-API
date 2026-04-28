@@ -1,6 +1,7 @@
 import { Menu, Modal } from "antd";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { IoIosLogOut } from "react-icons/io";
 import {
   Dashboard,
@@ -18,6 +19,7 @@ import {
 import { getImageUrl } from "../../components/common/imageUrl";
 import image4 from "../../assets/image4.png";
 import { useUser } from "../../provider/User";
+import { api } from "../../redux/api/baseApi";
 
 const Sidebar = ({ collapsed, setCollapsed }) => {
   const location = useLocation();
@@ -26,13 +28,21 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
   const [openKeys, setOpenKeys] = useState([]);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { user } = useUser();
 
   const showLogoutConfirm = () => setIsLogoutModalOpen(true);
   const handleLogout = () => {
+    // Clear token from localStorage
     localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
+
+    // Clear all cached data from Redux store
+    dispatch(api.util.resetApiState());
+
+    // Close modal and navigate
     setIsLogoutModalOpen(false);
-    navigate("/auth/login");
+    navigate("/auth/login", { replace: true });
   };
   const handleCancel = () => setIsLogoutModalOpen(false);
 
