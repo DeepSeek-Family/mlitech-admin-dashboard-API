@@ -22,7 +22,7 @@ import {
   useLazyExportCustomerChartMonthlyDataQuery,
   useLazyExportChartDataCustomerQuery,
 } from "../../../redux/apiSlices/reportAnalyticsApi";
-import { useGetCustomerProfileQuery } from "../../../redux/apiSlices/customerSlice";
+import { useGetCustomerProfileQuery, useGetAllCustomersForDropdownQuery } from "../../../redux/apiSlices/customerSlice";
 import CustomTable from "../../common/CustomTable";
 import { useUser } from "../../../provider/User";
 
@@ -183,7 +183,7 @@ export default function MonthlyStatsChartCustomer() {
 
   // Fetch customer list for dropdown
   const { data: customerListResponse, isLoading: isLoadingCustomers } =
-    useGetCustomerProfileQuery([]);
+    useGetAllCustomersForDropdownQuery();
 
   // Lazy query for export (only triggers on button click)
   const [triggerExport, { isLoading: isExportLoading }] =
