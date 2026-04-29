@@ -43,6 +43,19 @@ export const customerApi = api.injectEndpoints({
       invalidatesTags: ["Customer"],
     }),
     // ----------------------------------------
+    // GET ALL customers FOR DROPDOWN
+    // ----------------------------------------
+    getAllCustomersForDropdown: builder.query({
+      query: () => {
+        return {
+          url: `/admin/customers?limit=10000`,
+          method: "GET",
+        };
+      },
+      transformResponse: (response) => response,
+      providesTags: ["Customer"],
+    }),
+    // ----------------------------------------
     // EXPORT customers
     // ----------------------------------------
     exportCustomers: builder.query({
@@ -73,6 +86,7 @@ export const customerApi = api.injectEndpoints({
 
 export const {
   useGetCustomerProfileQuery,
+  useGetAllCustomersForDropdownQuery,
   useDeleteCustomerMutation,
   useUpdateCustomerStatusMutation,
   useExportCustomersQuery,
